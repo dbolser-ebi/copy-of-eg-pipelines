@@ -43,6 +43,7 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 use File::Basename qw(fileparse);
 
 sub param_defaults {
+  return {
     'blast_type'    => 'ncbi',
     'blast_db'      => undef,
     'blast_db_type' => 'prot',

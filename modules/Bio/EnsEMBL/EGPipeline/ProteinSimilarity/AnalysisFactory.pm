@@ -29,16 +29,16 @@ sub param_defaults {
 sub run {
   my ($self) = @_;
   my $analyses = $self->param_required('analyses');
-  my $db = $self->param_required('db');
+  my $lc_db = $self->param_required('lc_db');
   my $blastp = $self->param_required('blastp');
   my $blastx = $self->param_required('blastx');
   
   my %logic_names;
   if ($self->param_required('blastp')) {
-    $logic_names{lc($db.'_blastp')} = 1;
+    $logic_names{$lc_db.'_blastp'} = 1;
   }
   if ($self->param_required('blastx')) {
-    $logic_names{lc($db.'_blastx')} = 1;
+    $logic_names{$lc_db.'_blastx'} = 1;
   }
   
   my $filtered_analyses = [];
