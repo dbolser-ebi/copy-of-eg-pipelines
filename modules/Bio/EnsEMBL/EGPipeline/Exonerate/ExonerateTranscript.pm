@@ -28,6 +28,17 @@ use File::Path qw(make_path remove_tree);
 
 use base ('Bio::EnsEMBL::EGPipeline::Exonerate::Exonerate');
 
+sub param_defaults {
+  my $self = shift @_;
+  
+  return {
+    %{$self->SUPER::param_defaults},
+    'coverage'       => 90,
+    'percent_id'     => 97,
+    'best_in_genome' => 1,
+  };
+}
+
 sub fetch_runnable {
   my $self = shift @_;
   
@@ -93,9 +104,9 @@ sub filter_output {
   
   my $filter = Bio::EnsEMBL::Analysis::Tools::ExonerateTranscriptFilter->new
     (
-      -coverage                 => 90,
-      -percent_id               => 97,
-      -best_in_genome           => 1,
+      -coverage                 => $self->param('coverage'),
+      -percent_id               => $self->param('percent_id'),
+      -best_in_genome           => $self->param('best_in_genome'),
       -reject_processed_pseudos => 1,
     );
   

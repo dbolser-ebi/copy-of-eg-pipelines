@@ -80,7 +80,11 @@ sub fetch_runnable {
     system($command) == 0 or $self->throw("Failed to run ".$command);
   }
   
-  $self->param('save_object_type', 'DnaAlignFeature');
+  if ($self->param('seq_type') eq 'dna') {
+    $self->param('save_object_type', 'DnaAlignFeature');
+  } else {
+    $self->param('save_object_type', 'ProteinAlignFeature');
+  }
   
   return ($runnable);
 }

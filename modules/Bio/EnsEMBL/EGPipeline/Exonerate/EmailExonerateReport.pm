@@ -47,16 +47,21 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    'db_type' => 'otherfeatures',
+    'db_type'  => 'otherfeatures',
+    'seq_type' => 'dna',
   };
 }
 
 sub fetch_input {
   my ($self) = @_;
   
-  my $species = $self->param_required('species');
-  my $seq_file = $self->param('seq_file');
-  my $seq_files = $self->param('seq_files');
+  my $species    = $self->param_required('species');
+  my $logic_name = $self->param_required('logic_name');
+  my $seq_file   = $self->param('seq_file');
+  my $seq_files  = $self->param('seq_files');
+  my $seq_type   = $self->param('seq_type');
+  my $coverage   = $self->param('coverage');
+  my $percent_id = $self->param('percent_id');
   
   my $fasta_file;
   if (exists $$seq_files{$species}) {
@@ -65,7 +70,7 @@ sub fetch_input {
     if (defined $seq_file) {
       $fasta_file = $seq_file;
     } else {
-      $self->throw("No seq_file for $species.");
+      $self->throw("No seq_file for $species");
     }
   }
   
@@ -81,17 +86,40 @@ sub fetch_input {
   my $dba = $self->get_DBAdaptor($self->param('db_type'));
   my $dbh = $dba->dbc->db_handle();
   
-  my $sql = 'select count(distinct hit_name) from dna_align_feature;';
+  my $sql =
+    'SELECT COUNT(distinct hit_name) FROM '.
+    $seq_type.'_align_feature INNER JOIN analysis USING (analysis_id) '.
+    'WHERE logic_name = "'.$logic_name.'";';
   my ($unique_hits) = $dbh->selectrow_array($sql);
   
   my $seq_hit_pcage = sprintf("%.0f", ($unique_hits/$seq_count)*100);
   
   my $text = 
     "The exonerate pipeline has completed for $species, ".
-    "using the sequence file $fasta_file.\n".
+    "using the sequence file $fasta_file. ".
     "That file has $seq_count sequences and a total length of $mb_length Mb, ".
     "giving an average sequence length of $mean_length Kb. ".
-    "Of that total, $unique_hits ($seq_hit_pcage%) were mapped to the genome.\n\n".
+    "Of that total, $unique_hits ($seq_hit_pcage%) were mapped to the genome.\n\n";
+  
+  if (! $self->param('no_genes')) {
+    $sql =
+    'SELECT '.
+    'COUNT(distinct gene_id) AS genes, '.
+    'COUNT(distinct transcript_id) AS transcripts, '.
+    'COUNT(exon_id) AS exons FROM '.
+    'transcript INNER JOIN '.
+    'exon_transcript USING (transcript_id) INNER JOIN '.
+    'analysis USING (analysis_id) '.
+    'WHERE logic_name = "'.$logic_name.'";';
+    my ($genes, $transcripts, $exons) = $dbh->selectrow_array($sql);
+    
+    $text .=
+      "With thresholds of $coverage% coverage and $percent_id% sequence ".
+      "identity, the pipeline generated $genes genes, ".
+      "$transcripts transcripts, and $exons exons.\n\n";
+  }
+  
+  $text .=
     "Fond regards,\nThe Exonerate Pipeline\n";
   
   $self->param('text', $text);
