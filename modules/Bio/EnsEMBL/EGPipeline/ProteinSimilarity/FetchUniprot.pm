@@ -152,6 +152,8 @@ sub convert_to_fasta {
   );
   
   foreach my $file (@$files) {
+    my $counter = 0;
+    
     # Don't forget these are gzipped files...
     open(F, "gunzip -c $file |");
     my $seq_in = Bio::SeqIO->new(
@@ -160,6 +162,11 @@ sub convert_to_fasta {
     );
   
     while (my $inseq = $seq_in->next_seq) {
+      $counter++;
+      if ($counter >= 100000) {
+        $self->warning("Processed $counter sequences.");
+        $counter = 0;
+      }
       $seq_out->write_seq($inseq);
     }
   }
