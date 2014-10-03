@@ -103,7 +103,10 @@ sub run {
         $self->throw("Error when executing $cmd:\n$out");
       }
     } else {
-      if (!(-e "$blast_db.phr" && -e "$blast_db.pin" && -e "$blast_db.psq")) {
+      my $results = (-e "$blast_db.phr" && -e "$blast_db.pin" && -e "$blast_db.psq");
+      my $results_large_file = (-e "$blast_db.00.phr" && -e "$blast_db.00.pin" && -e "$blast_db.00.psq" && -e "$blast_db.pal");
+      
+      if (!$results && !$results_large_file) {
         $self->throw("Error when executing $cmd:\n$out");
       }
     }
