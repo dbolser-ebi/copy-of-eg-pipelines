@@ -77,39 +77,42 @@ print STDERR "Processing " . @$genes_aref. " rRNA genes\n";
 
 foreach my $gene (@$genes_aref) {
     
-    # Get the gene name
-    
-    my $display_name = $gene->external_name();
-
-    # Skip 28S
-    # 'PK-G12rRNA' from RFAM, so already there
-    
-    if ($display_name eq "28S_rRNA" || $display_name eq "PK-G12rRNA") {
-	next;
+    if (defined $gene->external_name()) {
+	
+	# Get the gene name if there is one
+	
+	my $display_name = $gene->external_name();
+	
+	# Skip 28S
+	# 'PK-G12rRNA' from RFAM, so already there
+	
+	if ($display_name eq "28S_rRNA" || $display_name eq "PK-G12rRNA") {
+	    next;
+	}
+	
+	# Map to Rfam
+	
+	if (!defined $mapping_href->{$display_name}) {
+	    die "can't get rfam_acc mapping for gene, '" . $gene->stable_id() . "' with display_name, '$display_name'!\n";
+	}
+	my $rfam_acc = $mapping_href->{$display_name};
+	my $rfam_entry_href = $rfams_href->{$rfam_acc};
+	
+	# Create a DBEntry and store it, attach to the current gene object
+	
+	my $db_entry = Bio::EnsEMBL::DBEntry->new (
+	    -primary_id => $rfam_acc,
+	    -version => 1,
+	    -dbname  => 'RFAM',
+	    -display_id => $rfam_entry_href->{'name'},
+	    -description => $rfam_entry_href->{'desc'},
+	    -info_type => 'DIRECT',
+	    );
+	
+	# print STDERR "Attaching dbEntry, '$rfam_acc', to gene with internal_id, " . $gene->dbID() . "\n";
+	$gene->add_DBEntry($db_entry);
+	
+	$dbentry_adaptor->store($db_entry,$gene->dbID(),'Gene',1);
     }
-
-    # Map to Rfam
-
-    if (!defined $mapping_href->{$display_name}) {
-	die "can't get rfam_acc mapping for gene, '" . $gene->stable_id() . "' with display_name, '$display_name'!\n";
-    }
-    my $rfam_acc = $mapping_href->{$display_name};
-    my $rfam_entry_href = $rfams_href->{$rfam_acc};
-    
-    # Create a DBEntry and store it, attach to the current gene object
-    
-    my $db_entry = Bio::EnsEMBL::DBEntry->new (
-	            -primary_id => $rfam_acc,
-                    -version => 1,
-                    -dbname  => 'RFAM',
-                    -display_id => $rfam_entry_href->{'name'},
-                    -description => $rfam_entry_href->{'desc'},
-                    -info_type => 'DIRECT',
-	);
-    
-    # print STDERR "Attaching dbEntry, '$rfam_acc', to gene with internal_id, " . $gene->dbID() . "\n";
-    $gene->add_DBEntry($db_entry);
-    
-    $dbentry_adaptor->store($db_entry,$gene->dbID(),'Gene',1);
 }
 

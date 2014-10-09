@@ -98,7 +98,7 @@ NCGENES_SCRIPTS_PATH=${CODE_ROOT_DIR}/eg-pipelines/scripts/ncrna_pipeline
 NCGENES_SQL_PATH=${CODE_ROOT_DIR}/eg-pipelines/sql
 #ENSEMBL_PATH=/nfs/panda/ensemblgenomes/apis/ensembl/69/ensembl
 ENSEMBL_PATH=${CODE_ROOT_DIR}/ensembl-head
-ENSEMBL_ANALYSIS_PATH=/nfs/panda/ensemblgenomes/apis/ensembl/analysis/head
+ENSEMBL_ANALYSIS_PATH=/nfs/panda/ensemblgenomes/apis/ensembl/master/ensembl-analysis/
 PERL_PATH=/nfs/panda/ensemblgenomes/perl/
 BIOPERL_PATH=/nfs/panda/ensemblgenomes/apis/bioperl/stable/
 
