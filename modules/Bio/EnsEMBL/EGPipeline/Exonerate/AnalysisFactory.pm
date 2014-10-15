@@ -30,12 +30,14 @@ sub run {
   my ($self) = @_;
   my $species = $self->param_required('species');
   my $analyses = $self->param_required('exonerate_analyses');
+  my $analysis_name = $self->param_required('analysis_name');
   my $logic_name = $self->param_required('logic_name');
   my $db_backup_file = $self->param('db_backup_file');
   
   my $filtered_analyses = [];
   foreach my $analysis (@{$analyses}) {
-    next unless $logic_name eq $$analysis{'logic_name'};
+    next unless $analysis_name eq $$analysis{'logic_name'};
+    $$analysis{'logic_name'} = $logic_name;
     $$analysis{'species'} = $species;
     $$analysis{'db_backup_file'} = $db_backup_file if defined $db_backup_file;
     push @$filtered_analyses, $analysis;
