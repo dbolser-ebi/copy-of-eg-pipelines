@@ -69,6 +69,7 @@ sub fetch_runnable {
   );
   
   $self->param('parse_filehandle', 1);
+  $self->param('output_not_set', 1);
   
   # Add a run_analysis sub, since the module lacks one and the generic
   # one from Runnable.pm doesn't quite work.
