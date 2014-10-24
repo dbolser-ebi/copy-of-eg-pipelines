@@ -84,9 +84,12 @@ sub start_server {
 
 sub stop_server {
   my $self = shift @_;
+  my $log_file   = $self->param_required('log_file');
   
   my $pid = $self->param('server_pid');
   kill('KILL', $pid) or $self->throw("Failed to kill server process $pid: $!");
+  
+  unlink $log_file;
 }
 
 sub results_by_index {

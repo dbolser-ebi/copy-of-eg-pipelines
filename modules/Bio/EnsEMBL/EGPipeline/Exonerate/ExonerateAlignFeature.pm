@@ -55,6 +55,7 @@ sub fetch_runnable {
   );
   
   $self->param('parse_filehandle', 1);
+  $self->param('output_not_set', 1);
   
   # Add a run_analysis sub, since the module lacks one and the generic
   # one from Runnable.pm doesn't quite work.
@@ -66,7 +67,7 @@ sub fetch_runnable {
     }
     $self->throw($program." is not executable.") unless($program && -x $program);
     
-    $self->resultsfile($self->query_file.'out');
+    $self->resultsfile($self->query_file.'.out');
     
     my $command = $program." ";
     $command .= $self->options." " if($self->options);
