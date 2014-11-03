@@ -16,7 +16,7 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::BackupTables;
+Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::DumpTables;
 
 =head1 DESCRIPTION
 
@@ -25,12 +25,11 @@ Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::BackupTables;
 ckong 
 
 =cut
-package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::BackupTables; 
+package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::DumpTables; 
 
 use strict;
 use Data::Dumper;
 use Bio::EnsEMBL::Registry;
-use Bio::EnsEMBL::Utils::SqlHelper;
 use base ('Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::Base');
 
 my ($core_dbh, $output_dir);
@@ -79,9 +78,9 @@ sub run {
     my $pass         = $dbc->password();
     my $dbname       = $dbc->dbname();
     my $mysql_binary = 'mysql';
-    my @tables       = qw/gene transcript xref object_xref ontology_xref external_synonym/;
+    my $tables       = $self->param_required('dump_tables');
 
-    foreach my $table (@tables) {
+    foreach my $table (@$tables) {
       unless (system("$mysql_binary -h$host -P$port -u$user -p$pass -N -e 'select * from $table' $dbname | gzip -c -6 > $output_dir/$dbname.$table.backup.gz") == 0) {
         print STDERR "Can't dump the original $table table from $dbname for backup\n";
         exit 1;
