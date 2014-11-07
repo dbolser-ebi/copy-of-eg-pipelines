@@ -39,7 +39,6 @@ sub start_server {
   
   my $server_exe = $self->param_required('server_exe');
   my $index_file = $self->param_required('index_file');
-  my $log_file   = $self->param_required('log_file');
   
   # Start at default port; if something is already running, do a limited
   # number of increments to see if we can find an available port.
@@ -52,6 +51,8 @@ sub start_server {
   if ($used) {
     $self->throw("Failed to find an available port for exonerate-server");
   }
+  my $log_file = $self->param_required('log_file').".$port";
+  $self->param('log_file', $log_file);
   
   my $command = "$server_exe $index_file --maxconnections 1 --port $port &> $log_file";
   
@@ -84,7 +85,7 @@ sub start_server {
 
 sub stop_server {
   my $self = shift @_;
-  my $log_file   = $self->param_required('log_file');
+  my $log_file = $self->param_required('log_file');
   
   my $pid = $self->param('server_pid');
   kill('KILL', $pid) or $self->throw("Failed to kill server process $pid: $!");
