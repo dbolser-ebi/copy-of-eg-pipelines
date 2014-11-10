@@ -36,11 +36,17 @@ sub write_output {
   
   my $species = $self->param_required('species');
   my $repeatmasker_library = $self->param_required('repeatmasker_library');
+  my $logic_names = $self->param_required('logic_name');
+  
   my $logic_name = 'repeatmask';
   if (exists $$repeatmasker_library{$species}) {
-    $logic_name = 'repeatmask_customlib';
+    if (exists $$logic_names{$species}) {
+      $logic_name = $$logic_names{$species};
+    } else {
+      $logic_name = 'repeatmask_customlib';
+    }
   }
-    
+  
   my $queryfile = $self->param_required('queryfile');
   if (!-e $queryfile) {
     $self->throw("Query file '$queryfile' does not exist");

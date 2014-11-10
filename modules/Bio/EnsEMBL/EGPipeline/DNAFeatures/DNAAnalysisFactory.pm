@@ -36,6 +36,8 @@ sub run {
   my $species = $self->param_required('species');
   my $dna_analyses = $self->param_required('dna_analyses');
   my $repeatmasker_library = $self->param_required('repeatmasker_library');
+  my $logic_names = $self->param_required('logic_name');
+  my $always_use_repbase = $self->param_required('always_use_repbase');
   my $pipeline_dir = $self->param_required('pipeline_dir');
   my $db_backup_file = $self->param('db_backup_file');
   
@@ -51,7 +53,7 @@ sub run {
       
     } elsif ($logic_name eq 'repeatmask') {
       unless ($self->param('no_repeatmasker')) {
-        if (! exists $$repeatmasker_library{$species}) {
+        if ($always_use_repbase || ! exists $$repeatmasker_library{$species}) {
           if ($self->check_repeatmasker($analysis, $species_rm, $pipeline_dir)) {
             $$analysis{'parameters'} .= " -species \"$species_rm\"";
           }
@@ -62,6 +64,9 @@ sub run {
     } elsif ($logic_name eq 'repeatmask_customlib') {
       unless ($self->param('no_repeatmasker')) {
         if (exists $$repeatmasker_library{$species}) {
+          if (exists $$logic_names{$species}) {
+            $$analysis{'logic_name'} = $$logic_names{$species};
+          }
           $$analysis{'db_file'} = $$repeatmasker_library{$species};
           $$analysis{'parameters'} .= ' -lib "'.$$repeatmasker_library{$species}.'"';
           push @$filtered_analyses, $analysis;
