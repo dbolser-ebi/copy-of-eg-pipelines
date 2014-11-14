@@ -58,7 +58,7 @@ sub deduplicate_exon {
   my ($self) = @_;
   
   my @sql = (
-  'create table tmp_singleton_exon as
+  'create temporary table tmp_singleton_exon as
     select
       min(e.exon_id) as exon_id,
       e.seq_region_id,
@@ -76,7 +76,7 @@ sub deduplicate_exon {
   'create unique index exon_id_idx on tmp_singleton_exon (exon_id);',
   'create index seq_region_idx on tmp_singleton_exon (seq_region_id, seq_region_start);',
   
-  'create table tmp_duplicate_exon as
+  'create temporary table tmp_duplicate_exon as
     select
       e.exon_id,
       e.seq_region_id,
@@ -90,7 +90,7 @@ sub deduplicate_exon {
   
   'create index seq_region_idx on tmp_duplicate_exon (seq_region_id, seq_region_start);',
   
-  'create table tmp_exon_map as
+  'create temporary table tmp_exon_map as
     select
       tmp_singleton_exon.exon_id,
       tmp_duplicate_exon.exon_id as duplicate_exon_id
@@ -105,7 +105,7 @@ sub deduplicate_exon {
     tmp_exon_map em on et.exon_id = em.duplicate_exon_id
   set et.exon_id = em.exon_id;',
   
-  'create table tmp_supporting_feature as
+  'create temporary table tmp_supporting_feature as
   select exon_id, feature_type, feature_id from supporting_feature;',
   
   'update
@@ -122,10 +122,10 @@ sub deduplicate_exon {
     exon e inner join
     tmp_duplicate_exon using (exon_id);',
   
-  'drop table tmp_singleton_exon;',
-  'drop table tmp_duplicate_exon;',
-  'drop table tmp_exon_map;',
-  'drop table tmp_supporting_feature;',
+  'drop temporary table tmp_singleton_exon;',
+  'drop temporary table tmp_duplicate_exon;',
+  'drop temporary table tmp_exon_map;',
+  'drop temporary table tmp_supporting_feature;',
   );
   
   return @sql;
@@ -137,7 +137,7 @@ sub deduplicate_transcript {
   my @sql = (
   'SET @@group_concat_max_len=100000;',
   
-  'create table tmp_transcript as
+  'create temporary table tmp_transcript as
     select
       t.transcript_id,
       t.seq_region_id,
@@ -155,7 +155,7 @@ sub deduplicate_transcript {
       t.seq_region_end,
       t.seq_region_strand;',
   
-  'create table tmp_singleton_transcript as
+  'create temporary table tmp_singleton_transcript as
     select
       min(t.transcript_id) as transcript_id,
       t.seq_region_id,
@@ -175,7 +175,7 @@ sub deduplicate_transcript {
   'create unique index transcript_id_idx on tmp_singleton_transcript (transcript_id);',
   'create index seq_region_idx on tmp_singleton_transcript (seq_region_id, seq_region_start);',
   
-  'create table tmp_duplicate_transcript as
+  'create temporary table tmp_duplicate_transcript as
     select
       t.transcript_id,
       t.seq_region_id,
@@ -191,7 +191,7 @@ sub deduplicate_transcript {
   
   'create index seq_region_idx on tmp_duplicate_transcript (seq_region_id, seq_region_start);',
   
-  'create table tmp_transcript_map as
+  'create temporary table tmp_transcript_map as
     select
       tmp_singleton_transcript.transcript_id,
       tmp_duplicate_transcript.transcript_id as duplicate_transcript_id
@@ -201,7 +201,7 @@ sub deduplicate_transcript {
   
   'create unique index duplicate_transcript_id_idx on tmp_transcript_map (duplicate_transcript_id);',
   
-  'create table tmp_transcript_supporting_feature as
+  'create temporary table tmp_transcript_supporting_feature as
   select transcript_id, feature_type, feature_id from transcript_supporting_feature;',
   
   'update
@@ -224,11 +224,11 @@ sub deduplicate_transcript {
     transcript t using (gene_id)
   where t.gene_id is null;',
   
-  'drop table tmp_transcript;',
-  'drop table tmp_singleton_transcript;',
-  'drop table tmp_duplicate_transcript;',
-  'drop table tmp_transcript_map;',
-  'drop table tmp_transcript_supporting_feature;',
+  'drop temporary table tmp_transcript;',
+  'drop temporary table tmp_singleton_transcript;',
+  'drop temporary table tmp_duplicate_transcript;',
+  'drop temporary table tmp_transcript_map;',
+  'drop temporary table tmp_transcript_supporting_feature;',
   );
   
   return @sql;
@@ -238,7 +238,7 @@ sub deduplicate_gene {
   my ($self) = @_;
   
   my @sql = (
-  'create table tmp_singleton_gene as
+  'create temporary table tmp_singleton_gene as
     select
       min(g.gene_id) as gene_id,
       g.biotype,
@@ -260,7 +260,7 @@ sub deduplicate_gene {
   'create unique index gene_id_idx on tmp_singleton_gene (gene_id);',
   'create index seq_region_idx on tmp_singleton_gene (seq_region_id, seq_region_start);',
 
-  'create table tmp_duplicate_gene as
+  'create temporary table tmp_duplicate_gene as
     select
       g.gene_id,
       g.biotype,
@@ -276,13 +276,13 @@ sub deduplicate_gene {
 
   'create index seq_region_idx on tmp_duplicate_gene (seq_region_id, seq_region_start);',
 
-  'create table tmp_gene_map as
+  'create temporary table tmp_gene_map as
     select
       tmp_singleton_gene.gene_id,
       tmp_duplicate_gene.gene_id as duplicate_gene_id
     from
       tmp_singleton_gene inner join
-      tmp_duplicate_gene using (seq_region_id, seq_region_start, seq_region_end, seq_region_strand);',
+      tmp_duplicate_gene using (analysis_id, seq_region_id, seq_region_start, seq_region_end, seq_region_strand);',
 
   'create unique index duplicate_gene_id_idx on tmp_gene_map (duplicate_gene_id);',
 
@@ -295,9 +295,9 @@ sub deduplicate_gene {
     gene g inner join
     tmp_duplicate_gene using (gene_id);',
 
-  'drop table tmp_singleton_gene;',
-  'drop table tmp_duplicate_gene;',
-  'drop table tmp_gene_map;',
+  'drop temporary table tmp_singleton_gene;',
+  'drop temporary table tmp_duplicate_gene;',
+  'drop temporary table tmp_gene_map;',
   );
   
   return @sql;
