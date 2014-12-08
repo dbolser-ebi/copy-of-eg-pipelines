@@ -39,7 +39,6 @@ my $optsd = [ @{ $cli_helper->get_dba_opts() },
 push( @{$optsd}, "file:s" );
 push( @{$optsd}, "verbose" );
 push( @{$optsd}, "write" );
-#push( @{$optsd}, "clean" );
 # process the command line with the supplied options plus a help subroutine
 my $opts = $cli_helper->process_args( $optsd, \&pod2usage );
 if ( $opts->{verbose} ) {
@@ -339,7 +338,8 @@ LINE: while ( my $line = <$INP> ) {
 	}
 
 	my $found_phenotype;
-	$logger->debug("Processing phenotype '$phenotype_name'");
+	$logger->debug("Processing phenotype '$phenotype_name'")
+	  ;
 	for my $phenotype (@pheno_terms) {
 	  my $ont_phenotype_name = lc( rm_sp( $phenotype->name() ) );
 	  if ( $phenotype_name =~ /$ont_phenotype_name/i ) {

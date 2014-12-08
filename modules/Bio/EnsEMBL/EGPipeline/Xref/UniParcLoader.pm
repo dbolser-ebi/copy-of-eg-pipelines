@@ -1,3 +1,4 @@
+
 =head1 LICENSE
 
 Copyright [1999-2014] EMBL-European Bioinformatics Institute
@@ -15,28 +16,56 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+=pod
+
+=head1 NAME
+
+Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader
+
+=head1 DESCRIPTION
+
+Loader that adds UPI xrefs to translations based on checksums
+
+=head1 Author
+
+Dan Staines
+
 =cut
 
 package Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader;
+use base Bio::EnsEMBL::EGPipeline::Xref::XrefLoader;
 use Log::Log4perl qw/:easy/;
 use Bio::EnsEMBL::Utils::Argument qw( rearrange );
-use Bio::EnsEMBL::Analysis;
 use Digest::MD5;
 
+=head1 CONSTRUCTOR
+=head2 new
+  Arg [-UNIPARC]  : 
+       Bio::EnsEMBL::DBSQL::DBAdaptor - UniParc database
+  Example    : $loader = Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader->new(...);
+  Description: Creates a new loader
+  Returntype : Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+=cut
 sub new {
   my ($proto, @args) = @_;
-  my $class = ref($proto) || $proto;
-  my $self = bless({'dbID' => $dbID}, $class);
-  ($self->{uniparc_dba}) = rearrange(['UNIPARC_DBA'], @args);
-  $self->{logger} = get_logger();
+  my $self = $proto->SUPER::new(@args);
+  ($self->{uniparc_dba}) =
+	rearrange(['UNIPARC_DBA'], @args);
   return $self;
 }
-
-sub logger {
-  my ($self) = @_;
-  return $self->{logger};
-}
-
+=head1 METHODS
+=head2 add_upis
+  Arg        : Bio::EnsEMBL::DBSQL::DBAdaptor (core)
+  Arg        : (optional) set to preserve old UPIs
+  Description: Adds UPIs to supplied core
+  Returntype : none
+  Exceptions : none
+  Caller     : general
+  Status     : Stable
+=cut
 sub add_upis {
   my ($self, $dba, $preserve_old) = @_;
   if (!defined $preserve_old) {
@@ -46,18 +75,34 @@ sub add_upis {
   my $translationN = 0;
   my $upiN         = 0;
   my $ddba         = $dba->get_DBEntryAdaptor();
-  $self->logger()->info("Processing translations for " . $dba->species());
-  my @translations = @{$dba->get_TranscriptAdaptor->fetch_all_by_biotype('protein_coding')};
+  $self->logger()
+	->info("Processing translations for " . $dba->species());
+  my @translations =
+	@{$dba->get_TranscriptAdaptor->fetch_all_by_biotype(
+													 'protein_coding')};
   my $analysis = $self->get_analysis($dba, 'xrefchecksum');
   for my $transcript (@translations) {
 	$translationN++;
-	$self->logger()->info("Processed $translationN/" . scalar @translations . " translations") if ($translationN % 1000 == 0);
-	$upiN += $self->add_upi($ddba, $transcript->translation(), $analysis);
+	$self->logger()
+	  ->info("Processed $translationN/" .
+			 scalar @translations . " translations")
+	  if ($translationN % 1000 == 0);
+	$upiN +=
+	  $self->add_upi($ddba, $transcript->translation(), $analysis);
   }
-  $self->logger()->info("Stored UPIs for $upiN of $translationN translations");
+  $self->logger()
+	->info("Stored UPIs for $upiN of $translationN translations");
   return;
-}
+} ## end sub add_upis
 
+=head2 remove_upis
+  Arg        : Bio::EnsEMBL::DBSQL::DBAdaptor (core)
+  Description: Remove existing UPIs from supplied core
+  Returntype : none
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+=cut
 sub remove_upis {
   my ($self, $dba) = @_;
   $self->logger()->info("Removing existing UniParc cross-references");
@@ -86,58 +131,66 @@ sub remove_upis {
   return;
 } ## end sub remove_upis
 
+=head2 add_upi
+  Arg        : Bio::EnsEMBL::DBSQL::DBEntryAdaptor (core)
+  Arg        : Bio::EnsEMBL::Translation - translation to analysis
+  Arg        : Bio::EnsEMBL::Analysis - analysis to use
+  Description: Find and add UPI for supplied translation
+  Returntype : none
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+=cut
 sub add_upi {
   my ($self, $ddba, $translation, $analysis) = @_;
   my $stored = 0;
-  $self->logger()->debug("Finding UPI for " . $translation->stable_id());
-  my $hash  = $self->md5_checksum($translation);
-  my @upis  = @{$self->{uniparc_dba}->dbc()->sql_helper->execute_simple(-SQL => q/select upi from uniparc.protein where md5=?/, -PARAMS => [$hash])};
+  $self->logger()
+	->debug("Finding UPI for " . $translation->stable_id());
+  my $hash = $self->md5_checksum($translation);
+  my @upis = @{
+	$self->{uniparc_dba}->dbc()->sql_helper->execute_simple(
+				 -SQL => q/select upi from uniparc.protein where md5=?/,
+				 -PARAMS => [$hash])};
   my $nUpis = scalar(@upis);
   if ($nUpis == 0) {
-	$self->logger()->warn("No UPI found for translation " . $translation->stable_id());
-  } elsif ($nUpis == 1) {
+	$self->logger()
+	  ->warn(
+		   "No UPI found for translation " . $translation->stable_id());
+  }
+  elsif ($nUpis == 1) {
 	$stored = 1;
-	$self->logger()->debug("UPI $upis[0] found for translation " . $translation->stable_id() . " - storing...");
-  my $dbentry = Bio::EnsEMBL::DBEntry->new(
-      -PRIMARY_ID => $upis[0],
-      -DISPLAY_ID => $upis[0],
-      -DBNAME     => 'UniParc',
-      -INFO_TYPE  => 'CHECKSUM');
-  $dbentry->analysis($analysis);
-	$ddba->store(
-    $dbentry,
-    $translation->dbID(),
-    'Translation'
-  );
-  } else {
-	$self->logger()->warn("Multiple UPIs found for translation " . $translation->stable_id());
+	$self->logger()
+	  ->debug("UPI $upis[0] found for translation " .
+			  $translation->stable_id() . " - storing...");
+	my $dbentry =
+	  Bio::EnsEMBL::DBEntry->new(-PRIMARY_ID => $upis[0],
+								 -DISPLAY_ID => $upis[0],
+								 -DBNAME     => 'UniParc',
+								 -INFO_TYPE  => 'CHECKSUM');
+	$dbentry->analysis($analysis);
+	$ddba->store($dbentry, $translation->dbID(), 'Translation');
+  }
+  else {
+	$self->logger()
+	  ->warn("Multiple UPIs found for translation " .
+			 $translation->stable_id());
   }
   return $stored;
-}
+} ## end sub add_upi
 
+=head2 md5_checksum
+  Arg        : Bio::EnsEMBL::Translation
+  Description: Calculate checksum for supplied sequence
+  Returntype : string
+  Exceptions : none
+  Caller     : internal
+  Status     : Stable
+=cut
 sub md5_checksum {
   my ($self, $sequence) = @_;
   my $digest = Digest::MD5->new();
   $digest->add($sequence->seq());
   return uc($digest->hexdigest());
-}
-
-sub get_analysis {
-  my ($self, $dba, $logic_name) = @_;
-  
-  my $aa = $dba->get_AnalysisAdaptor();
-  my $analysis = $aa->fetch_by_logic_name($logic_name);
-  if (!defined $analysis) {
-    $analysis = Bio::EnsEMBL::Analysis->new(
-      -logic_name => $logic_name,
-    );
-    $aa->store($analysis);
-    $analysis = $aa->fetch_by_logic_name($logic_name);
-    if (!defined $analysis) {
-      $self->logger()->warn("Analysis $logic_name could not be added to the core database.");
-    }
-  }
-  return $analysis;
 }
 
 1;
