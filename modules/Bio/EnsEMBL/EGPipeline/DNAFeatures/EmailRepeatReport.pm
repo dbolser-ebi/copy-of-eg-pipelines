@@ -110,7 +110,7 @@ sub text_summary {
   }
   
   my $text = "Recommended summary text for static content:\n".
-    "Repeats were annotated with the <a href='http://ensemblgenomes.org/info/data/repeat_features>".
+    "Repeats were annotated with the <a href='http://ensemblgenomes.org/info/data/repeat_features'>".
     "Ensembl Genomes repeat feature pipeline</a>. There are: ";
   $text .= join("; ", @results_text);
   $text .= ".\n\n";

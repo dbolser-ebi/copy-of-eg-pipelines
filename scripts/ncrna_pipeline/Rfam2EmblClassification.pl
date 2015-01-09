@@ -277,7 +277,7 @@ sub define_ncRNA_class {
     }
     elsif ($rfam_descr =~ /vault/i) {
 	$embl_feature_class = "vault_RNA";
-	$biotype = "v_RNA";
+	$biotype = "vault_RNA";
 	$kingdom = "eukaryota";
     }
     elsif ($rfam_descr =~ /hammerhead/i) {
@@ -330,7 +330,7 @@ sub define_ncRNA_class {
     }
     elsif ($rfam_descr =~ /telomerase/i) {
 	$embl_feature_class = "telomerase_RNA";
-	$biotype = "telo_RNA";
+	$biotype = "telomerase_RNA";
 	$kingdom = "eukaryota";
     }
     elsif ($rfam_descr =~ /^let-7|mir-?\w+|lin-4$/i) {
