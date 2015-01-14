@@ -82,7 +82,6 @@ sub run {
   my $blast_type      = $self->param('blast_type');
   my $blast_db_type   = $self->param('blast_db_type');
   
-  #  #formatdb -i fly.fasta -p F -n fly for blast_type=wu dna, -p T for proteins
   my $cmd;
   if ($blast_type eq 'wu') {
     $cmd = "$makeblastdb_exe -i $db_fasta_file -n $blast_db";
