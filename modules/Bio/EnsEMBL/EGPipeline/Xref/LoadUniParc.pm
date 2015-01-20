@@ -1,7 +1,7 @@
 
 =head1 LICENSE
 
-Copyright [1999-2014] EMBL-European Bioinformatics Institute
+Copyright [1999-2015] EMBL-European Bioinformatics Institute
 and Wellcome Trust Sanger Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,54 +20,45 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO
+Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc
 
 =head1 DESCRIPTION
 
-Runnable that invokes LoadUniProtGO on a core database
+Add UniParc xrefs to a core database.
 
 =head1 Author
 
-Dan Staines
+James Allen
 
 =cut
 
 use strict;
 use warnings;
 
-package Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO;
-use base qw/Bio::EnsEMBL::Production::Pipeline::Base/;
+package Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc;
 
-use Log::Log4perl qw/:easy/;
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use strict;
+use warnings;
+use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
+
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::EnsEMBL::EGPipeline::Xref::UniProtGOLoader;
-
-Log::Log4perl->easy_init($INFO);
+use Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader;
 
 sub run {
-  my ($self)     = @_;
-  my $dba        = $self->get_DBAdaptor;
-  my $dbc        = $dba->dbc;
-  my $species_id = $dba->species_id;
+  my ($self) = @_;
   
-  my $uniparc_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(
-			  -USER   => $self->param('uniparc_user'),
-			  -PASS   => $self->param('uniparc_pass'),
-			  -HOST   => $self->param('uniparc_host'),
-			  -PORT   => $self->param('uniparc_port'),
-			  -DBNAME => $self->param('uniparc_dbname'),
-			  -DRIVER => $self->param('uniparc_driver')
+  my $uniparc_db  = $self->param_required('uniparc_db');
+  my $uniparc_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniparc_db);
+  my $loader      = Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader->new
+  (
+    -UNIPARC_DBA => $uniparc_dba,
   );
-  my $loader =
-	Bio::EnsEMBL::EGPipeline::Xref::UniParcLoader->new(
-										   -UNIPARC_DBA=>$uniparc_dba);
-
-  my $logger = get_logger();
-  $logger->info("Connecting to core database " . $dba->dbc()->dbname());
-  $logger->info("Processing " . $dba->species());
-  $loader->add_upis($dba);
-
-} ## end sub run
+  
+  my $core_dba = $self->core_dba();
+  $self->analysis_setup($core_dba);
+  $self->external_db_reset($core_dba, 'UniParc');
+  $loader->add_upis($core_dba);
+  $self->external_db_update($core_dba, 'UniParc');
+}
 
 1;
