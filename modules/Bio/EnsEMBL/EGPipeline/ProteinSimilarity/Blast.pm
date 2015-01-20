@@ -58,6 +58,8 @@ sub param_defaults {
     'query_type'       => 'dna',
     'database_type'    => 'pep',
     'pvalue_threshold' => 0.01,
+    'filter_prune'     => 0,
+    'filter_min_score' => 200,
   };
 }
 
@@ -125,8 +127,8 @@ sub filter_output {
   
   my $filter = Bio::EnsEMBL::Analysis::Tools::FeatureFilter->new
     (
-      -min_score => 200,
-      -prune => 1,
+      -min_score => $self->param('filter_min_score'),
+      -prune     => $self->param('filter_prune'),
     );
   
   my $filtered = $filter->filter_results($runnable->output);
@@ -159,12 +161,13 @@ sub post_processing {
         );
         push @pfs, $pf;
       }
+      
+      # Output is cumulative, so need to manually erase existing results.
+      # (Note that calling the runnable's 'output' method will NOT work.
+      $runnable->{'output'} = \@pfs;
     }
   }
   
-  # Output is cumulative, so need to manually erase existing results.
-  # (Note that calling the runnable's 'output' method will NOT work.
-  $runnable->{'output'} = \@pfs;
 }
 
 sub make_parser {
