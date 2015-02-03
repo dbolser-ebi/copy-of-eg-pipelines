@@ -250,15 +250,14 @@ sub store_uniprot_xrefs {
 	-SQL => q/
 		delete ox.*,ix.*
 		from object_xref ox
-		join  xref x using (xref_id)
+		join xref x using (xref_id)
 		join external_db d using (external_db_id)
 		left join identity_xref ix using (object_xref_id)
 		where
-		d.db_name in ('Uniprot\/SWISSPROT','Uniprot\/SPTREMBL')
+		d.db_name in (?,?)
 		and ox.ensembl_id = ?
-		and ox.ensembl_object_type = 'Translation'
-	/,
-	-PARAMS => [$tid] );
+		and ox.ensembl_object_type = 'Translation'/,
+	-PARAMS => ['Uniprot/SWISSPROT','Uniprot/SPTREMBL',$tid] );
 
   for my $uniprot (@$uniprots) {
 
@@ -551,10 +550,10 @@ sub remove_xrefs {
 		join coord_system cs using (coord_system_id)
 		left join identity_xref ix using (object_xref_id)
 		where
-		d.db_name in ('Uniprot\/SWISSPROT','Uniprot\/SPTREMBL')
+		d.db_name in (?,?)
 		and cs.species_id=?
 	/,
-	-PARAMS => [ $dba->species_id() ] );
+	-PARAMS => [ 'Uniprot/SWISSPROT','Uniprot/SPTREMBL', $dba->species_id() ] );
   return;
 }
 
