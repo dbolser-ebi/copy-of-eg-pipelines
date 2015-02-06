@@ -1,7 +1,7 @@
 
 =head1 LICENSE
 
-Copyright [1999-2014] EMBL-European Bioinformatics Institute
+Copyright [1999-2015] EMBL-European Bioinformatics Institute
 and Wellcome Trust Sanger Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +24,11 @@ Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO
 
 =head1 DESCRIPTION
 
-Runnable that invokes LoadUniProtGO on a core database
+Add UniProt transitive GO xrefs to a core database.
 
 =head1 Author
 
-Dan Staines
+James Allen
 
 =cut
 
@@ -36,39 +36,30 @@ use strict;
 use warnings;
 
 package Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO;
-use base qw/Bio::EnsEMBL::Production::Pipeline::Base/;
 
-use Log::Log4perl qw/:easy/;
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
+use strict;
+use warnings;
+use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
+
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::EGPipeline::Xref::UniProtGOLoader;
 
-Log::Log4perl->easy_init($INFO);
-
 sub run {
-  my ($self)     = @_;
-  my $dba        = $self->get_DBAdaptor;
-  my $dbc        = $dba->dbc;
-  my $species_id = $dba->species_id;
-
-  my $uniprot_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(
-			  -USER   => $self->param('uniprot_user'),
-			  -PASS   => $self->param('uniprot_pass'),
-			  -HOST   => $self->param('uniprot_host'),
-			  -PORT   => $self->param('uniprot_port'),
-			  -DBNAME => $self->param('uniprot_dbname'),
-			  -DRIVER => $self->param('uniprot_driver')
+  my ($self) = @_;
+  
+  my $uniprot_db  = $self->param_required('uniprot_db');
+  my $uniprot_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniprot_db);
+  my $loader      = Bio::EnsEMBL::EGPipeline::Xref::UniProtGOLoader->new
+  (
+    -UNIPROT_DBA => $uniprot_dba,
+    -REPLACE_ALL => $self->param('replace_all'),
   );
-  my $loader =
-	Bio::EnsEMBL::EGPipeline::Xref::UniProtGOLoader->new(
-										   -UNIPROT_DBA => $uniprot_dba,
-										   -REPLACE_ALL => 1);
-
-  my $logger = get_logger();
-  $logger->info("Connecting to core database " . $dba->dbc()->dbname());
-  $logger->info("Processing " . $dba->species());
-  $loader->load_go_terms($dba);
-
-} ## end sub run
+  
+  my $core_dba = $self->core_dba();
+  $self->analysis_setup($core_dba);
+  $self->external_db_reset($core_dba, 'GO');
+  $loader->load_go_terms($core_dba);
+  $self->external_db_update($core_dba, 'GO');
+}
 
 1;
