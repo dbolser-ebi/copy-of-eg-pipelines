@@ -32,94 +32,26 @@ Dan Staines
 =cut
 
 package Bio::EnsEMBL::EGPipeline::Xref::XrefLoader;
-use Log::Log4perl qw/:easy/;
+use Log::Log4perl qw/:easy/
+use base Bio::EnsEMBL::EGPipeline::BaseLoader;
 use Bio::EnsEMBL::Utils::Argument qw( rearrange );
 use Bio::EnsEMBL::Analysis;
 use Digest::MD5;
+
 =head1 CONSTRUCTOR
 =head2 new
-  Arg [-NAME]  : 
-       string - human readable version of the name of the genome
-  Arg [-SPECIES]    : 
-       string - computable version of the name of the genome (lower case, no spaces)
-  Arg [-DBNAME] : 
-       string - name of the core database in which the genome can be found
-  Arg [-SPECIES_ID]  : 
-       int - identifier of the species within the core database for this genome
-  Arg [-TAXONOMY_ID] :
-        string - NCBI taxonomy identifier
-  Arg [-ASSEMBLY_NAME] :
-        string - name of the assembly
-  Arg [-ASSEMBLY_ID] :
-        string - INSDC assembly accession
-  Arg [-ASSEMBLY_LEVEL] :
-        string - highest assembly level (chromosome, supercontig etc.)
-  Arg [-GENEBUILD]:
-        string - identifier for genebuild
-  Arg [-DIVISION]:
-        string - name of Ensembl Genomes division (e.g. EnsemblBacteria, EnsemblPlants)
-  Arg [-STRAIN]:
-        string - name of strain to which genome belongs
-  Arg [-SEROTYPE]:
-        string - name of serotype to which genome belongs
-
-  Example    : $info = Bio::EnsEMBL::Utils::MetaData::GenomeInfo->new(...);
-  Description: Creates a new info object
-  Returntype : Bio::EnsEMBL::Utils::MetaData::GenomeInfo
+  Example    : $info = Bio::EnsEMBL::EGPipeline::Xref::XrefLoader->new();
+  Description: Creates a new loader object
+  Returntype : Bio::EnsEMBL::EGPipeline::Xref::XrefLoader
   Exceptions : none
-  Caller     : general
+  Caller     : internal
   Status     : Stable
 
 =cut
 sub new {
   my ($proto, @args) = @_;
-  my $class = ref($proto) || $proto;
-  my $self = bless({}, $class);
-  $self->{logger} = get_logger();
+  my $self = $proto->SUPER::new(@args);
   return $self;
-}
-=head1 METHODS
-=head2 logger
-  Arg        : (optional) logger to set
-  Description: Get logger
-  Returntype : logger object reference
-  Exceptions : none
-  Caller     : internal
-  Status     : Stable
-=cut
-sub logger {
-  my ($self) = @_;
-  if(!defined $self->{logger}) {
-  	  $self->{logger} = get_logger();
-  }
-  return $self->{logger};
-}
-
-=head2 get_analysis
-  Arg        : Bio::EnsEMBL::DBSQL::DBAdaptor for core database to write to
-  Arg        : logic name
-  Description: Get specified analysis object
-  Returntype : Bio::EnsEMBL::Analysis
-  Exceptions : none
-  Caller     : internal
-  Status     : Stable
-=cut
-sub get_analysis {
-  my ($self, $dba, $logic_name) = @_;
-  
-  my $aa = $dba->get_AnalysisAdaptor();
-  my $analysis = $aa->fetch_by_logic_name($logic_name);
-  if (!defined $analysis) {
-    $analysis = Bio::EnsEMBL::Analysis->new(
-      -logic_name => $logic_name,
-    );
-    $aa->store($analysis);
-    $analysis = $aa->fetch_by_logic_name($logic_name);
-    if (!defined $analysis) {
-      $self->logger()->warn("Analysis $logic_name could not be added to the core database.");
-    }
-  }
-  return $analysis;
 }
 
 =head2 get_translation_uniprot
