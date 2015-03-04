@@ -32,7 +32,8 @@ Dan Staines
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::Xref::BlastSearch;
+package Bio::EnsEMBL::EGPipeline::Xref::BlastSearch; 
+use base Bio::EnsEMBL::EGPipeline::Xref::RestService;
 use warnings;
 use strict;
 use Log::Log4perl qw/:easy/;
@@ -55,12 +56,13 @@ use Carp;
 
 =cut
 
+#my $srv = "ncbiblast";
+my $srv = "wublast";
+
 sub new {
   my ( $proto, @args ) = @_;
-  my $class = ref($proto) || $proto;
-  my $self = bless( {}, $class );
-  $self->{logger} = get_logger();
-  $self->{ua}     = LWP::UserAgent->new;
+  my $self = $proto->SUPER::new(@args);
+  $self->{url} = 'http://www.ebi.ac.uk/Tools/services/rest/'.$srv;
   return $self;
 }
 
@@ -82,119 +84,63 @@ sub logger {
   return $self->{logger};
 }
 
-my $submit_url =
-  'http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/run/';
-my $status_url =
-  'http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/status/';
-my $results_url =
-  'http://www.ebi.ac.uk/Tools/services/rest/ncbiblast/result/';
-
 sub search {
-  my ( $self, $seq, $collection, $stype, $program ) = @_;
+  my ( $self, $seq, $collection, $stype, $program, $opts ) = @_;
+  if(!defined $opts) {
+      $opts = { 
+          exp      => '1e-4'
+      }
+  }
   if ( ref $seq eq 'HASH' ) {
 	my %params = map {
-	  $_ => { email    => 'ensgen@ebi.ac.uk',
+	  $_ => { 
 			  sequence => $seq->{$_},
 			  database => [$collection],
 			  program  => $program,
-			  exp      => '1e-4',
 			  stype    => $stype }
 	} keys %$seq;
-	return $self->run_blast( \%params );
+	return $self->run_blast( \%params, $opts );
 
   }
   else {
-	return
+      return
 	  $self->run_blast(
 						{ 1 => { email    => 'ensgen@ebi.ac.uk',
 								 sequence => $seq,
 								 database => [$collection],
 								 program  => $program,
-								 exp      => '1e-4',
 								 stype    => $stype } } )->{1};
   }
 } ## end sub search
 
 sub run_blast {
-  my ( $self, $inputs ) = @_;
-  my $job_ids = {};
-  while ( my ( $id, $params ) = each %$inputs ) {
-	# submit job using post
-	$job_ids->{$id} = $self->post( $submit_url, $params );
-  }
-
-  # poll until completed
-  my $statuses = {};
-  while () {
-	while ( my ( $id, $job_id ) = each %$job_ids ) {
-	  if ( !defined $statuses->{$job_id} ) {
-		my $status = $self->get( $status_url . $job_id );
-		if ( $status ne 'RUNNING' ) {
-		  $statuses->{$job_id} = $status;
-		}
-	  }
-	}
-	last if ( scalar( keys %$statuses ) == scalar( keys %$job_ids ) );
-  }
-
-  my $results = {};
-  for my $id ( keys %{$inputs} ) {
-	my $job_id = $job_ids->{$id};
-	my $status = $statuses->{$job_id};
-	if ( $status eq 'FINISHED' ) {
-	  # get results
-	  my $results_str = $self->get( $results_url . $job_id . '/xml' );
-	  # parse results as XML
-	  my $pres = XMLin($results_str)->{SequenceSimilaritySearchResult};
-# service treats single and multiple hits differently in format, so need to check
-	  if ( $pres->{hits}{total} == 1 ) {
-		$results->{$id} =
-		  { $pres->{hits}->{hit}->{id} => $pres->{hits}->{hit} };
-	  }
-	  else {
-		$results->{$id} = $pres->{hits}->{hit};
-	  }
-
-	}
-	else {
-	  croak "BLAST completed with status $status";
-	}
+  my ( $self, $inputs, $opts ) = @_;
+  my $results = $self->run_jobs($inputs,$opts);
+  while (my ($id,$res) = each %$results) {
+      while( my ($hit,$hres) = each %$res) {
+          $hres->{query} = $id;
+          $hres->{expectation} = $hres->{alignments}{alignment}->[0]->{expectation}; 
+      }
   }
 
   return $results;
 
 } ## end sub run_blast
 
-sub get {
-  my ( $self, $url ) = @_;
-  my $response = $self->{ua}->get($url);
-  return $self->handle_response($response);
+sub parse_result {
+    my ($self, $results, $id, $results_str) = @_;
+    # parse results as XML
+    my $pres = XMLin($results_str)->{SequenceSimilaritySearchResult};
+# service treats single and multiple hits differently in format, so need to check
+    if ( $pres->{hits}{total} == 1 ) {
+        $results->{$id} =
+        { $pres->{hits}->{hit}->{id} => $pres->{hits}->{hit} };
+    }
+    else {
+        $results->{$id} = $pres->{hits}->{hit};
+    }    
+    return;
 }
 
-sub post {
-  my ( $self, $url, $params ) = @_;
-  my $response = $self->{ua}->post( $url, $params );
-  return $self->handle_response($response);
-}
-
-sub handle_response {
-  my ( $self, $response ) = @_;
-  my $content = $response->content();
-  if ( $response->is_error ) {
-	my $error_message = '';
-	# HTML response.
-	if ( $content =~ m/<h1>([^<]+)<\/h1>/ ) {
-	  $error_message = $1;
-	}
-	#  XML response.
-	elsif ( $content =~ m/<description>([^<]+)<\/description>/ ) {
-	  $error_message = $1;
-	}
-	croak 'Could not run BLAST: ' . $response->code .
-	  ' ' . $response->message . '  ' . $error_message;
-  }
-  return $content;
-
-}
 
 1;
