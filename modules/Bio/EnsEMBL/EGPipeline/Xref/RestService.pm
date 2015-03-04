@@ -37,10 +37,13 @@ use warnings;
 use strict;
 use Log::Log4perl qw/:easy/;
 use Bio::EnsEMBL::Utils::Argument qw( rearrange );
+use List::MoreUtils qw(natatime);
 use LWP::UserAgent;
 use XML::Simple;
 use Data::Dumper;
 use Carp;
+
+my $JOBN = 30;
 
 =head1 CONSTRUCTOR
 =head2 new
@@ -84,49 +87,66 @@ sub logger {
 
 sub run_jobs {
   my ( $self, $inputs, $opts, $renderer ) = @_;
-  my $job_ids = {};
+  my $results = {};
+
   my $submit_url = $self->{url}.'/run/';
   $opts->{email} ||= $ENV{USER}.'@ebi.ac.uk';
   $opts->{format} ||= 'xml';
   $renderer ||= 'xml';
-  while ( my ( $id, $params ) = each %$inputs ) {
-      while(my($k,$v) = each %$opts) {
-          $params->{$k} = $v;
+  $self->logger()->debug("Processing total of ".scalar(keys %$inputs));
+  my $it = natatime($JOBN,keys %$inputs);
+  
+  while(my @inputs_keys = $it->()) {
+
+      $self->logger()->debug("Processing chunk of ".scalar(@inputs_keys));
+
+      print Dumper($inputs);
+      my %inputs_chunk = map { $_ => $inputs->{$_} } @inputs_keys;
+      print Dumper(%inputs_chunk);
+      my $job_ids = {};
+      while ( my ( $id, $params ) = each %inputs_chunk ) {
+          while(my($k,$v) = each %$opts) {
+              $params->{$k} = $v;
+          }
+          # submit job using post
+          $self->logger()->debug("Submitting job for $id to $submit_url");
+          $job_ids->{$id} = $self->post( $submit_url, $params );
       }
-      # submit job using post
-      $job_ids->{$id} = $self->post( $submit_url, $params );
+      
+      my $status_url = $self->{url}.'/status/';
+      my $statuses = {};
+
+      $self->logger()->debug("Awaiting completion");
+      while () {
+          while ( my ( $id, $job_id ) = each %$job_ids ) {
+              if ( !defined $statuses->{$job_id} ) {
+                  my $status = $self->get( $status_url . $job_id );
+                  if ( $status ne 'RUNNING' ) {
+                      $statuses->{$job_id} = $status;
+                  }
+              }
+          }
+          last if ( scalar( keys %$statuses ) == scalar( keys %$job_ids ) );
+      }
+      $self->logger()->debug("All jobs complete - parsing results");
+
+      my $results_url = $self->{url}.'/result/';
+      for my $id ( keys %inputs_chunk ) {
+          my $job_id = $job_ids->{$id};
+          my $status = $statuses->{$job_id};
+          if ( $status eq 'FINISHED' ) {
+              
+              # get results
+              my $results_str = $self->get( $results_url . $job_id . '/'. $renderer );
+              
+              $self->parse_result($results,$id,$results_str);
+          }
+          else {
+              croak "Job $job_id completed with status $status";
+          }       
+      }
   }
-
-  my $status_url = $self->{url}.'/status/';
-  my $statuses = {};
-  while () {
-	while ( my ( $id, $job_id ) = each %$job_ids ) {
-	  if ( !defined $statuses->{$job_id} ) {
-		my $status = $self->get( $status_url . $job_id );
-		if ( $status ne 'RUNNING' ) {
-		  $statuses->{$job_id} = $status;
-		}
-	  }
-	}
-	last if ( scalar( keys %$statuses ) == scalar( keys %$job_ids ) );
-  }
-
-  my $results = {};
-  my $results_url = $self->{url}.'/result/';
-  for my $id ( keys %{$inputs} ) {
-	my $job_id = $job_ids->{$id};
-	my $status = $statuses->{$job_id};
-	if ( $status eq 'FINISHED' ) {
-
-            # get results
-            my $results_str = $self->get( $results_url . $job_id . '/'. $renderer );
-
-            $self->parse_result($results,$id,$results_str);
-	}
-	else {
-	  croak "Job $job_id completed with status $status";
-	}       
-  }
+  $self->logger()->debug("Returning ".scalar(keys %$results)." results");
   return $results;
 
 } ## end sub run_blast
