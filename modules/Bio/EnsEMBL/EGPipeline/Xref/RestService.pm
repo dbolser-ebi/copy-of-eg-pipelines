@@ -100,9 +100,7 @@ sub run_jobs {
 
       $self->logger()->debug("Processing chunk of ".scalar(@inputs_keys));
 
-      print Dumper($inputs);
       my %inputs_chunk = map { $_ => $inputs->{$_} } @inputs_keys;
-      print Dumper(%inputs_chunk);
       my $job_ids = {};
       while ( my ( $id, $params ) = each %inputs_chunk ) {
           while(my($k,$v) = each %$opts) {
