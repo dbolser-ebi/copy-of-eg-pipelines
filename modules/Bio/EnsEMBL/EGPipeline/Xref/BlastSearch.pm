@@ -119,6 +119,10 @@ sub run_blast {
   while (my ($id,$res) = each %$results) {
       while( my ($hit,$hres) = each %$res) {
           $hres->{query} = $id;
+          $hres->{id} = $hit;
+	  if($hres->{alignments}->{total} == 1) {
+	      $hres->{alignments}->{alignment} = [ $hres->{alignments}->{alignment} ];
+	  }
           $hres->{expectation} = $hres->{alignments}{alignment}->[0]->{expectation}; 
       }
   }
@@ -139,6 +143,7 @@ sub parse_result {
     else {
         $results->{$id} = $pres->{hits}->{hit};
     }    
+    
     return;
 }
 

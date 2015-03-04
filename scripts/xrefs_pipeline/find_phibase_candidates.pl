@@ -27,7 +27,7 @@ use Bio::EnsEMBL::DBSQL::DBAdaptor;
 my $cli_helper = Bio::EnsEMBL::Utils::CliHelper->new();
 
 # get the basic options for connecting to a database server
-my $optsd = [ @{ $cli_helper->get_dba_opts() }, "uniprot_file:s", "verbose" ];
+my $optsd = [ @{ $cli_helper->get_dba_opts() }, "uniprot_file:s", "verbose", "results_file:s" ];
 
 my $opts = $cli_helper->process_args( $optsd, \&pod2usage );
 if ( $opts->{verbose} ) {
@@ -36,6 +36,7 @@ if ( $opts->{verbose} ) {
 else {
   Log::Log4perl->easy_init($INFO);
 }
+$opts->{results_file} ||= $opts->{uniprot_file}.".out";
 
 my $logger = get_logger();
 
@@ -51,13 +52,19 @@ while(<$uniprot>) {
       my ($phi,$acc) = split;
       # fetch uniprot seq
       $logger->info("Fetching UniProt entry ".$acc);
-      my $up = get_uniprot_seq($acc);
-      $uniprots->{$acc} = $up;
-      $up->{phi} = $phi; 
+      eval {
+	  my $up = get_uniprot_seq($acc);
+	  $uniprots->{$acc} = $up;
+	  $up->{phi} = $phi; 
+      };
+      if($@) {
+	  $logger->warn("Could not find entry ".$acc);
+      }
 }
 close $uniprot;
 
 
+open my $out, ">", $opts->{results_file} or croak "Could not open results file ".$opts->{results_file};
 $logger->info("Connecting to core database(s)");
 for my $core_dba_details (@{$cli_helper->get_dba_args_for_opts($opts)}) {
   my $dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%{$core_dba_details});
@@ -71,6 +78,7 @@ for my $core_dba_details (@{$cli_helper->get_dba_args_for_opts($opts)}) {
 
   my %input = map {$_ => $uniprots->{$_}->{seq} } keys %$uniprots;
   my $results = $search->search(\%input,$collection,'protein','blastp',{exp      => '1e-5', scores=>5, alignments=>5});
+
 # get best hits in each case to allow for multi family
   my $best_hits = {};
   my $ts = {};
@@ -89,21 +97,25 @@ for my $core_dba_details (@{$cli_helper->get_dba_args_for_opts($opts)}) {
   }
   my $needle_results = $needle->align($needle_input);
   while(my($query,$hits) = each %$best_hits) {
-      print $uniprots->{$query}->{phi}. " - annotated with UniProt:$query (".$uniprots->{$query}->{des}.")\n";
+      my $outstr = $uniprots->{$query}->{phi}. " - annotated with UniProt:$query (".$uniprots->{$query}->{des}.")\n";
       my $i = 0;
       for my $hit (@{$hits}) {
           my $t = $ts->{$hit};
           my $g = $t->transcript()->get_Gene();
-          my $gene_str = "Gene ".$g->stable_id;
+          my $gene_str = "Gene ".$g->stable_id();
           my $nom =  $g->external_name();
           $gene_str.=" ($nom)" if(defined $nom);
-          $gene_str.=" ".$g->description;
+          $gene_str.=" ".$g->description() if(defined $nom);
           my $n = $needle_results->{$query.'-'.$hit};
-          print "Hit ".++$i.": ".$n->{id}."% identity (".$n->{pos}."/".$n->{len}.") to $hit ($gene_str)";
-          print $n->{aln}."\n";
+	  if($n->{id} >= 90) {
+	      $outstr.= "Hit ".++$i.": ".$n->{id}."% identity (".$n->{pos}."/".$n->{len}.") to $hit ($gene_str)";
+	      $outstr.= $n->{aln}."\n";
+	  }
       }
+      print $out $outstr if($i>0);
   }
 }
+close $out;
 
 sub get_uniprot_seq {
     my ($acc) = @_;
