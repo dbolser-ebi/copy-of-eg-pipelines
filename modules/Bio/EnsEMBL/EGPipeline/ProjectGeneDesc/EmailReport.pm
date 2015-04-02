@@ -67,9 +67,9 @@ sub description_summary {
   my $desc_match = "Projected from $from_species_text";
   
   my $dbh = $self->core_dbh();
-  my $sql = 'SELECT COUNT(*) AS Total FROM gene WHERE description LIKE "%?%"';
+  my $sql = 'SELECT COUNT(*) AS Total FROM gene WHERE description LIKE ?';
   my $sth = $dbh->prepare($sql);
-  $sth->execute($desc_match);
+  $sth->execute('%'.$desc_match.'%');
   
   my $title = "Number of projected descriptions from $from_species to $to_species:";
   my $columns = $sth->{NAME};
