@@ -44,7 +44,7 @@ use Data::Dumper;
   Arg [-UNIPROT_DBA]  : 
        string - adaptor for UniProt Oracle database (e.g. SWPREAD)
   Arg [-DBNAMES]    : 
-       array - array of database names to process (default is ArrayExpress, PDB, EMBL)
+       array - array of database names to process (default is ArrayExpress, PDB, EMBL, ChEMBL)
 
   Example    : $ldr = Bio::EnsEMBL::EGPipeline::Xref::UniProtGOLoader->new(...);
   Description: Creates a new loader object
@@ -60,7 +60,7 @@ sub new {
   ($self->{uniprot_dba}, $self->{dbnames}) =
 	rearrange(['UNIPROT_DBA', 'DBNAMES'], @args);
   if (!defined $self->{dbnames}) {
-	$self->{dbnames} = qw/ArrayExpress PDB EMBL/;
+	$self->{dbnames} = qw/ArrayExpress PDB EMBL ChEMBL/;
   }
   $self->{dbnames} = {%hash = map { $_ => 1 } @{$self->{dbnames}}};
   return $self;
@@ -129,8 +129,18 @@ sub store_xref {
   my ($self, $ddba, $tid, $uniprot) = @_;
   # get xrefs we're interested in
   my @xrefs = @{$self->get_xrefs_for_uniprot($uniprot->primary_id())};
-  my @xrefs = grep { defined $self->{dbnames}{$_->{DBNAME}} }
-	@xrefs;
+  
+  ## Dump some info about what we're (potentially) ignoring...
+  for( @xrefs ){
+      $self->logger->debug(
+          join("\t", $tid, $_->{DBNAME}, $_->{PRIMARY_ID})
+      );
+  }
+  
+  ## Trim out all but the list of what we want
+  @xrefs = grep { defined $self->{dbnames}{$_->{DBNAME}} }
+       @xrefs;
+  
   # special rules for ENA - we don't want genomic references where we have the CDS
   @xrefs = 
 	map {
@@ -177,7 +187,7 @@ sub store_xref {
 =cut
 sub get_xrefs_for_uniprot {
   my ($self, $ac) = @_;
-  $self->logger()->info("Getting xrefs for $ac");
+  $self->logger()->debug("Getting xrefs for $ac");
   my $xrefs = $self->{uniprot_dba}->dbc()->sql_helper()->execute(
 	-USE_HASHREFS => 1,
 	-SQL          => q/

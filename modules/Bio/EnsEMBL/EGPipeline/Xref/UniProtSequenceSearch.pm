@@ -30,6 +30,28 @@ Class for finding uniprot matches for a given sequence
 
 Dan Staines
 
+	}
+  }
+  # return IdentityXref objects
+  my @results = grep {$_->ensembl_identity()>=90} map {
+	my $result = $results->{$_};
+	my $ali    = $result->{alignments}->{alignment};
+	Bio::EnsEMBL::IdentityXref->new(
+	   -XREF_IDENTITY    => $ali->{identity},
+	   -ENSEMBL_IDENTITY => $ali->{identity},
+	   -SCORE            => $ali->{score},
+	   -EVALUE           => $ali->{expectation},
+	   -CIGAR_LINE       => $ali->{pattern},
+	   -XREF_START       => $ali->{matchSeq}->{start},
+	   -XREF_END         => $ali->{matchSeq}->{end},
+	   -ENSEMBL_START    => $ali->{querySeq}->{start},
+	   -ENSEMBL_END      => $ali->{querySeq}->{end},
+	   -PRIMARY_ID       => $result->{ac},
+	   -DISPLAY_ID       => $result->{ac},
+	   -DESCRIPTION      => $result->{description},
+	   -DBNAME => ( $result->{database} eq 'TR' ) ? 'Uniprot/SPTREMBL' :
+		 'Uniprot/SWISSPROT' );
+  } keys %$results;
 =cut
 
 package Bio::EnsEMBL::EGPipeline::Xref::UniProtSequenceSearch;
@@ -57,8 +79,9 @@ sub new {
   my $class = ref($proto) || $proto;
   my $self = bless( {}, $class );
   $self->{logger} = get_logger();
-  ( $self->{uniprot_dba} ) = rearrange( ['UNIPROT_DBA'], @args );
+  ( $self->{uniprot_dba}, $self->{cutoff} ) = rearrange( ['UNIPROT_DBA','CUTOFF'], @args );
   $self->{blast} = Bio::EnsEMBL::EGPipeline::Xref::BlastSearch->new();
+  $self->{cutoff}||= 90;
   return $self;
 }
 
@@ -121,9 +144,12 @@ sub parse {
 	}
   }
   # return IdentityXref objects
-  my @results = grep {$_->ensembl_identity()>=90} map {
+  my @results = grep {$_->ensembl_identity()>=$self->{cutoff}} map {
 	my $result = $results->{$_};
 	my $ali    = $result->{alignments}->{alignment};
+	if(ref($ali) eq 'ARRAY') {
+		$ali = $ali->[0];
+	}	
 	Bio::EnsEMBL::IdentityXref->new(
 	   -XREF_IDENTITY    => $ali->{identity},
 	   -ENSEMBL_IDENTITY => $ali->{identity},

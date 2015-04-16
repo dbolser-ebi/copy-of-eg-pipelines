@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# Copyright [1999-2014] EMBL-European Bioinformatics Institute
+# Copyright [1999-2015] EMBL-European Bioinformatics Institute
 # and Wellcome Trust Sanger Institute
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,12 +21,14 @@
 cd /nfs/panda/ensemblgenomes/production/ncgenes_pipelines 
 
 default_db_details="--host=mysql-eg-devel-3.ebi.ac.uk --port=4208 --user=ensrw --password=[replace_me]"
-db=ashbya_gossypii_core_11_64_1
+dbname=ashbya_gossypii_core_11_64_1
 
-perl scripts/generate_ncrna_stable_ids_ashbya_gossypii.pl \
+perl scripts/generate_ncrna_stable_ids.pl \
     ${default_db_details} \
     --dbname ${db} \
     --start EFAGO00000000000
+    --logic_name ncrna_eg
+    --type gene --type transcript --type exon
 =cut
 
 use warnings;
@@ -35,7 +37,7 @@ use DBI;
 use Getopt::Long;
 
 my $port = 3306; 
-my ($host, $dbname, $user, $pass, @types, $start);
+my ($host, $dbname, $user, $pass, @types, $start, $logic_name);
 
 GetOptions('dbuser|user=s'       => \$user,
 	   'dbpass|password=s'   => \$pass,
@@ -43,13 +45,14 @@ GetOptions('dbuser|user=s'       => \$user,
 	   'dbport|port=i'       => \$port,
 	   'dbname=s'            => \$dbname,
 	   'start=s'             => \$start,   # Pattern - USE ENS000001 or ENS for human, ENSMUS00001 or ENSMUS for mouse etc 
-                                               # don't add G/T/E/P for specific types !!!
-	   'types=s'             => \@types,
+                                               # Don't add G/T/E/P for specific types !!!
+	   'type=s'              => \@types,
+	   'logic_name=s'        => \$logic_name,
 	   'help'                => sub { usage(); exit(0); },
             );
 
 if (@types == 0) {
-    @types = ('gene','transcript','translation','exon');
+    @types = ('gene','transcript','exon');
 }
 
 print STDERR "Types: @types\n";
@@ -66,15 +69,33 @@ foreach my $type (@types) {
   my $table = $type . "_stable_id";
   my $sth;
 
-  # create and insert new stable_id;
+  # Create and insert new stable_id;
   # get starting stable ID, either specified or current max
   my $new_stable_id=$start;
 
   # Get the list of objects which don't have a stable_id yet
-
-  my $sql = "SELECT $type.${type}_id FROM $type WHERE stable_id like \"%RNA%\";";
   
-  print STDERR "fetching the list of objects without a stable_id for type, $type\n";
+  my $sql = undef;
+  
+  if (!defined $logic_name) {
+      $sql = "SELECT $type.${type}_id FROM $type WHERE stable_id like \"%RNA%\"";
+  }
+  else {
+      if ($type eq "gene" || $type eq "transcript") {
+	  $sql = "SELECT $type.${type}_id FROM $type, analysis WHERE stable_id like \"%RNA%\" AND $type.analysis_id = analysis.analysis_id AND logic_name = \"$logic_name\"";
+      }
+      elsif ($type eq "exon") {
+
+	  # More tricky
+
+	  $sql = "SELECT $type.${type}_id FROM $type, exon_transcript, transcript, analysis WHERE $type.stable_id like \"%RNA%\" AND $type.exon_id = exon_transcript.exon_id AND exon_transcript.transcript_id = transcript.transcript_id and transcript.analysis_id = analysis.analysis_id AND logic_name = \"$logic_name\"";
+      }
+
+      # Translation is not relevant anyway
+
+  }
+  
+  print STDERR "Fetching the list of objects without a stable_id for type, $type\n";
   print STDERR "sql: $sql\n";
 
   $sth = $dbi->prepare($sql);
@@ -82,7 +103,7 @@ foreach my $type (@types) {
 
   while (my ($object_id) = $sth->fetchrow_array()) { 
 
-      print STDERR "processing object, $object_id...\n";
+      print STDERR "Processing object, $object_id...\n";
 
       # scalar localtime gives: Thu May 21 15:06:18 2009
       # should be: 2006-06-26 10:44:34.0
@@ -185,17 +206,18 @@ sub usage {
 
   USAGE :  
 
-  generate_stable_ids.pl -dbuser|user {user} 
-                         -dbpass|pass {password} 
-                         -dbhost|host {host}
-                         -dbport|port {port} 
-                         -dbname {database} 
-                         -types {gene,exon,transcript,translation} 
-                         -start {first stable ID}
+  generate_ncrna_stable_ids.pl -dbuser|user {user} 
+                               -dbpass|pass {password} 
+                               -dbhost|host {host}
+                               -dbport|port {port} 
+                               -dbname {database} 
+                               -type {gene,exon,transcript,translation} 
+                               -start {first stable ID}
+                               -logic_name {analysis logic_name}
 
-  Argument to -types is a comma-separated list of types of stable IDs to be produced.
+  Argument to -type can take multiple values, e.g. '-type gene -type transcript'
 
-  If the -types argument is ommitted, stable IDs are generated for all types (gene,transcript,translation,exon).
+  If the -type argument is ommitted, stable IDs are generated for all ncRNA related types (gene,transcript,exon).
 
   Assigns stable IDs to objects that currently have none. Starting stable ID is found by incrementing the highest 
   current stable ID for that type *or* by using -start argument. The stable_ids are written to STDOUT. If no -start

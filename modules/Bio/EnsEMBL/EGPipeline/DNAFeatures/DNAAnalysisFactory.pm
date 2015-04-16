@@ -53,7 +53,7 @@ sub run {
       
     } elsif ($logic_name eq 'repeatmask') {
       unless ($self->param('no_repeatmasker')) {
-        if ($always_use_repbase || ! exists $$repeatmasker_library{$species}) {
+        if ($always_use_repbase || (! exists $$repeatmasker_library{$species} && ! exists $$repeatmasker_library{'all'})) {
           if ($self->check_repeatmasker($analysis, $species_rm, $pipeline_dir)) {
             $$analysis{'parameters'} .= " -species \"$species_rm\"";
           }
@@ -63,12 +63,13 @@ sub run {
       
     } elsif ($logic_name eq 'repeatmask_customlib') {
       unless ($self->param('no_repeatmasker')) {
-        if (exists $$repeatmasker_library{$species}) {
+        if (exists $$repeatmasker_library{$species} || exists $$repeatmasker_library{'all'}) {
           if (exists $$logic_names{$species}) {
             $$analysis{'logic_name'} = $$logic_names{$species};
           }
-          $$analysis{'db_file'} = $$repeatmasker_library{$species};
-          $$analysis{'parameters'} .= ' -lib "'.$$repeatmasker_library{$species}.'"';
+          my $library = $$repeatmasker_library{$species} || $$repeatmasker_library{'all'};
+          $$analysis{'db_file'} = $library;
+          $$analysis{'parameters'} .= ' -lib "'.$library.'"';
           push @$filtered_analyses, $analysis;
         }
       }

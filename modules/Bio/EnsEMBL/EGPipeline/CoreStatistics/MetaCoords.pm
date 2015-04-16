@@ -86,7 +86,7 @@ sub run {
 		$dbc->do(
 			"INSERT INTO meta_coord ".
         "SELECT '$table_name', s.coord_system_id, ".
-			  "MAX( t.seq_region_end - t.seq_region_start + 1 ) ".
+			  "MAX( CAST(t.seq_region_end AS SIGNED) - CAST(t.seq_region_start AS SIGNED) + 1 ) ".
 			  "FROM $table_name t ".
         "INNER JOIN seq_region s USING (seq_region_id) ".
         "INNER JOIN coord_system c USING (coord_system_id) ".

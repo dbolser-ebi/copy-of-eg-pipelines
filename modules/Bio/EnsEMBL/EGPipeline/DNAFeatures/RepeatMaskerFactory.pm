@@ -27,7 +27,10 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
   return {
-    'max_seq_length' => 1000000,
+    'max_seq_length'       => 1000000,
+    'repeatmasker_library' => {},
+    'logic_name'           => {},
+    'always_use_repbase'   => 0,
   };
 }
 
@@ -36,14 +39,18 @@ sub write_output {
   
   my $species = $self->param_required('species');
   my $repeatmasker_library = $self->param_required('repeatmasker_library');
-  my $logic_names = $self->param_required('logic_name');
+  my $logic_name_lookup = $self->param_required('logic_name');
+  my $always_use_repbase = $self->param_required('always_use_repbase');
   
-  my $logic_name = 'repeatmask';
-  if (exists $$repeatmasker_library{$species}) {
-    if (exists $$logic_names{$species}) {
-      $logic_name = $$logic_names{$species};
+  my @logic_names;
+  if ($always_use_repbase || (! exists $$repeatmasker_library{$species} && ! exists $$repeatmasker_library{'all'})) {
+    push @logic_names, 'repeatmask';
+  }
+  if (exists $$repeatmasker_library{$species} || exists $$repeatmasker_library{'all'}) {
+    if (exists $$logic_name_lookup{$species}) {
+      push @logic_names, $$logic_name_lookup{$species};
     } else {
-      $logic_name = 'repeatmask_customlib';
+      push @logic_names, 'repeatmask_customlib';
     }
   }
   
@@ -70,12 +77,15 @@ sub write_output {
           
           while ($start <= $seq_length) {
             my $querylocation = $seq->id.":$start-$end";
-            $self->dataflow_output_id(
-              {
-                'logic_name'    => $logic_name,
-                'queryfile'     => undef,
-                'querylocation' => $querylocation,
-              }, 1);
+            
+            foreach my $logic_name (@logic_names) {
+              $self->dataflow_output_id(
+                {
+                  'logic_name'    => $logic_name,
+                  'queryfile'     => undef,
+                  'querylocation' => $querylocation,
+                }, 1);
+            }
           
             $start = $end + 1;
             $end = $start + $max_seq_length - 1;
@@ -84,19 +94,23 @@ sub write_output {
         }
         
       } else {
+        foreach my $logic_name (@logic_names) {
+          $self->dataflow_output_id(
+            {
+              'logic_name' => $logic_name,
+              'queryfile'  => $queryfile,
+            }, 1);
+        }
+      }
+      
+    } else {
+      foreach my $logic_name (@logic_names) {
         $self->dataflow_output_id(
           {
             'logic_name' => $logic_name,
             'queryfile'  => $queryfile,
           }, 1);
       }
-      
-    } else {
-      $self->dataflow_output_id(
-        {
-          'logic_name' => $logic_name,
-          'queryfile'  => $queryfile,
-        }, 1);
     }
   }
   

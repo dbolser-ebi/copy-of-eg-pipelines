@@ -196,6 +196,10 @@ sub add_uniprot_xrefs {
 
 sub store_uniprot_xrefs {
   my ( $self, $ddba, $tid, $uniprots, $gene_id, $gene_attribs ) = @_;
+
+  my $n = 0;
+  return $n if scalar(@$uniprots) == 0;
+
   # remove existing uniprots for this translation first
   $ddba->dbc()->sql_helper()->execute_update(
 	-SQL => q/
@@ -211,8 +215,6 @@ sub store_uniprot_xrefs {
 	/,
 	-PARAMS => [$tid] );
 
-  my $n = 0;
-  return $n if scalar(@$uniprots) == 0;
   for my $uniprot (@$uniprots) {
 
 	if ( !$uniprot->{ac} || $uniprot->{ac} eq '' ) {
@@ -228,9 +230,13 @@ sub store_uniprot_xrefs {
 	my $dbentry =
 	  $ddba->fetch_by_db_accession( $uniprot->{type}, $uniprot->{ac} );
 	if ( !defined $dbentry ) {
+            my $nom;
+            if(defined $uniprot->{name} && scalar keys %{$uniprot->{name}}>0) {
+                $nom = join "; ", keys %{$uniprot->{name}};
+            }
 	  $dbentry = Bio::EnsEMBL::DBEntry->new(
 				-PRIMARY_ID  => $uniprot->{ac},
-				-DISPLAY_ID  => $uniprot->{name},
+				-DISPLAY_ID  => $nom,
 				-DESCRIPTION => $uniprot->{description},
 				-VERSION     => $uniprot->{version},
 				-DBNAME      => $uniprot->{type} );
@@ -342,8 +348,8 @@ sub set_gene_names {
 		if ( !defined $gd ) {
 		  $gd =
 			Bio::EnsEMBL::DBEntry->new( -PRIMARY_ID => $gene_name,
-										-DISPLAY_ID => $gene_name,
-										-DBNAME     => 'Uniprot_gn' );
+                                                    -DISPLAY_ID => $gene_name,
+                                                    -DBNAME     => 'Uniprot_gn' );
 		  # synonyms for this name
 		  my $synonyms = $gene_attribs->{synonyms}->{$gene_name};
 		  if ( defined $synonyms ) {
@@ -442,12 +448,7 @@ WHERE d.accession = ?
 		  $uniprot->{version} = $version;
 		}
 		if ( defined $name && $name ne '' ) {
-		  if ( defined $uniprot->{name} ) {
-			$uniprot->{name} .= "; $name";
-		  }
-		  else {
-			$uniprot->{name} = $name;
-		  }
+                    $uniprot->{name}->{$name} = 1;
 		}
 		if ( defined $type && $type ne '' ) {
 		  $uniprot->{type} =

@@ -324,16 +324,15 @@ LINE: while ( my $line = <$INP> ) {
 			   . $host_name );
 		}
 	  }
+          print "$host_name $host_tax_id\n";
 
 	  if ( defined $host_tax_id &&
 		   defined $host_name &&
-		   $host_tax_id ne '' &&
+		   $host_tax_id ne '' && $host_tax_id != 0 && 
 		   $host_name ne '' )
 	  {
-
 		$translation_ass->{host} =
 		  { id => $host_tax_id, label => $host_name };
-
 	  }
 	  else {
 		$logger->warn("Could not find host $host_id");
@@ -341,8 +340,8 @@ LINE: while ( my $line = <$INP> ) {
 	  $hN++;
 	} ## end for my $host_id (@host_ids)
 
-	if ( !defined $translation_ass->{host}{id} ||
-		 !defined $translation_ass->{host}{label} )
+	if ( !defined $translation_ass->{host}->{id} ||
+		 !defined $translation_ass->{host}->{label} )
 	{
 	  my $msg = "Host ID/label not defined for $phibase_id";
 	  $logger->warn($msg);
@@ -400,7 +399,9 @@ LINE: while ( my $line = <$INP> ) {
 	if ( defined $literature_ids ) {
 	  $logger->debug("Processing literature refs(s) '$literature_ids'");
 	  for my $publication ( split( /;/, $literature_ids ) ) {
-		push @{ $translation_ass->{pubmed} }, $publication;
+              if($publication ne '0') {
+                  push @{ $translation_ass->{pubmed} }, $publication;
+              }
 	  }
 	}
 	if ( defined $dois ) {
@@ -524,6 +525,7 @@ q/delete from gene_attrib where attrib_type_id=317 and value='PHI'/ );
 								 -RELEASE    => 1,
 								 -DISPLAY_ID => $ass->{condition}{label}
 			);
+                  
 		  my $host_db_entry =
 			Bio::EnsEMBL::DBEntry->new(
 									  -PRIMARY_ID => $ass->{host}{id},

@@ -145,9 +145,16 @@ sub run_blast {
 	  # get results
 	  my $results_str = $self->get( $results_url . $job_id . '/xml' );
 	  # parse results as XML
-	  $results->{$id} =
-		XMLin($results_str)->{SequenceSimilaritySearchResult}->{hits}
-		->{hit};
+	  my $pres = XMLin($results_str)->{SequenceSimilaritySearchResult};
+# service treats single and multiple hits differently in format, so need to check
+	  if ( $pres->{hits}{total} == 1 ) {
+		$results->{$id} =
+		  { $pres->{hits}->{hit}->{id} => $pres->{hits}->{hit} };
+	  }
+	  else {
+		$results->{$id} = $pres->{hits}->{hit};
+	  }
+
 	}
 	else {
 	  croak "BLAST completed with status $status";
