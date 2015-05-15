@@ -51,16 +51,25 @@ sub generate_filename {
   
   my $species            = $self->param('species');
   my $file_type          = $self->param('file_type');
-  my $pipeline_dir       = $self->param('pipeline_dir');
+  my $results_dir        = $self->param('results_dir');
   my $eg_dir_structure   = $self->param('eg_dir_structure');
   my $eg_filename_format = $self->param('eg_filename_format');
   
   if ($eg_dir_structure) {
     my $division = $self->get_division();
-    $pipeline_dir = catdir($pipeline_dir, $division, $file_type, $species);
-    $self->param('pipeline_dir', $pipeline_dir);
+    $results_dir = catdir($results_dir, $division, $file_type, $species);
+    $self->param('results_dir', $results_dir);
+ 
+    my $dba = $self->core_dba;
+
+    if($dba->is_multispecies()==1){
+      my ($results_dir1, $results_dir2) = split(/gff3\//, $results_dir); 
+      my $collection_db=$1 if($dba->dbc->dbname()=~/(.+)\_core/);
+      $results_dir = $results_dir1."gff3/".$collection_db."/".$results_dir2;
+    }
   }
-  make_path($pipeline_dir);
+
+  make_path($results_dir);
   
   my $filename;
   if ($eg_filename_format) {
@@ -69,7 +78,7 @@ sub generate_filename {
     $filename = $self->generate_vb_filename();
   }
   
-  return catdir($pipeline_dir, $filename);
+  return catdir($results_dir, $filename);
 }
 
 sub generate_eg_filename {

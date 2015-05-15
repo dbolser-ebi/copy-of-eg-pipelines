@@ -2,13 +2,13 @@
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneNamesProjection
+Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneDescProjection
 
 =cut
 
 =head1 DESCRIPTION
 
- Pipeline to project gene display_xref 
+ Pipeline to project gene description
  from one species to another by using the homologies derived 
  from the Compara ProteinTree pipeline. 
 
@@ -19,7 +19,7 @@ Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneNamesProjection
 ckong
 
 =cut
-package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneNamesProjection;
+package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneDescProjection;
 
 use strict;
 use warnings;
@@ -40,7 +40,7 @@ my ($flag_filter);
 my ($to_species, $from_species, $compara, $release);
 my ($method_link_type, $homology_types_allowed, $percent_id_filter, $percent_cov_filter);
 my ($log_file, $output_dir, $data);
-my ($geneName_source, $taxon_filter);
+my ($geneDesc_rules, $geneDesc_rules_target, $taxon_filter);
 my ($mlssa, $ha, $ma, $gdba);
 
 sub fetch_input {
@@ -48,17 +48,22 @@ sub fetch_input {
 
     $flag_store_projections = $self->param('flag_store_projections');
     $flag_backup            = $self->param('flag_backup');
+    $flag_filter            = $self->param('flag_filter');
+
     $to_species             = $self->param_required('species');
     $from_species           = $self->param_required('source');
     $compara                = $self->param_required('compara');
     $release                = $self->param_required('release');
+    
     $method_link_type       = $self->param_required('method_link_type');
     $homology_types_allowed = $self->param_required('homology_types_allowed');
     $percent_id_filter      = $self->param_required('percent_id_filter');
     $percent_cov_filter     = $self->param_required('percent_cov_filter');
     $log_file               = $self->param_required('output_dir');
     $output_dir             = $self->param_required('output_dir');
-    $geneName_source        = $self->param_required('geneName_source');
+
+    $geneDesc_rules         = $self->param_required('geneDesc_rules');
+    $geneDesc_rules_target  = $self->param_required('geneDesc_rules_target');
     $taxon_filter           = $self->param('taxon_filter');
 
     my $taxonomy_db 	    = $self->param('taxonomy_db');
@@ -92,7 +97,7 @@ sub run {
     my $to_dbea   = Bio::EnsEMBL::Registry->get_adaptor($to_species  , 'core', 'DBEntry');
     die("Problem getting DBadaptor(s) - check database connection details\n") if (!$from_ga || !$to_ga || !$to_ta || !$to_dbea);
 
-=pod
+
     Bio::EnsEMBL::Registry->load_registry_from_db(
             -host       => 'mysql-eg-mirror.ebi.ac.uk',
             -port       => 4157,
@@ -100,15 +105,14 @@ sub run {
             -pass       => 'writ3r',
             -db_version => '79',
    );
-=cut
 
-   $mlssa = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'MethodLinkSpeciesSet'); 
-   $ha    = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'Homology'); 
-   $gdba  = Bio::EnsEMBL::Registry->get_adaptor($compara, "compara", 'GenomeDB'); 
-   die "Can't connect to Compara database specified by $compara - check command-line and registry file settings" if (!$mlssa || !$ha ||!$gdba);
+    $mlssa = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'MethodLinkSpeciesSet'); 
+    $ha    = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'Homology'); 
+    $gdba  = Bio::EnsEMBL::Registry->get_adaptor($compara, "compara", 'GenomeDB'); 
+    die "Can't connect to Compara database specified by $compara - check command-line and registry file settings" if (!$mlssa || !$ha ||!$gdba);
 
     $self->check_directory($log_file);
-    $log_file  = $log_file."/".$from_species."-".$to_species."_GeneNamesProjection_logs.txt";
+    $log_file  = $log_file."/".$from_species."-".$to_species."_GeneDescProjection_logs.txt";
 
     # Write projection info metadata
     open  $data,">","$log_file" or die $!;
@@ -126,7 +130,7 @@ sub run {
     print $data "\n\tRetrieving homologies of method link type $method_link_type for mlss_id $mlss_id \n";
     my $homologies    = $self->fetch_homologies($ha, $mlss, $from_species, $data, $gdba, $homology_types_allowed, $percent_id_filter, $percent_cov_filter);
 
-    print $data "\n\tProjecting Gene Names & descriptions from $from_species to $to_species\n\n";
+    print $data "\n\tProjecting Gene Descriptions from $from_species to $to_species\n\n";
 
     my $total_genes   = scalar(keys %$homologies);
 
@@ -138,7 +142,7 @@ sub run {
        foreach my $to_stable_id (@to_genes) {
           my $to_gene  = $to_ga->fetch_by_stable_id($to_stable_id);
           next if (!$to_gene);
-          project_genenames($to_ga, $to_dbea, $from_gene, $to_gene);
+          project_genedesc($to_ga, $to_dbea, $from_gene, $to_gene);
        }
     }
     close($data);
@@ -154,37 +158,42 @@ sub write_output {
 ######################
 ## internal methods
 ######################
-sub project_genenames {
+sub project_genedesc {
     my ($to_geneAdaptor, $to_dbea, $from_gene, $to_gene) = @_;
 
-    # Project when 'source gene' has display_xref and 
-    # 'target gene' has NO display_xref
-    if(defined $from_gene->display_xref() && !defined $to_gene->display_xref()) {
-       my $from_gene_dbname     = $from_gene->display_xref->dbname();
-       my $from_gene_display_id = $from_gene->display_xref->display_id();         
+    my $gene_desc      = $from_gene->description();
+    my $gene_desc_trgt = $to_gene->description(); 
+    $gene_desc_trgt    ='' if !defined($gene_desc_trgt);
 
-       # Get all DBEntries for 'source gene' base on the dbname of display_xref  
-       foreach my $dbEntry (@{$from_gene->get_all_DBEntries($from_gene_dbname)}) { 
+    # Tests for source & target gene description rules
+    my $test1 = grep {$gene_desc      =~/$_/} @$geneDesc_rules; 
+    my $test2 = grep {$gene_desc_trgt =~/$_/} @$geneDesc_rules_target; 
 
-          if($dbEntry->display_id=~/$from_gene_display_id/  
-               && $flag_store_projections==1
-               && grep (/$from_gene_dbname/, @$geneName_source)){
+    # First check source gene has a description and 
+    # passed the description filtering rules
+    if(defined $from_gene->description() && $test1==0)
+    {
+      # Then check if target gene 
+      # does not have description OR
+      # its description didn't passed the filtering rules AND
+      # the flag to check for filtering rules is ON
+      if(!defined $to_gene->description() || ($test2==1 && $flag_filter==1))  
+      {
+        my $species_text = ucfirst($from_species);
+        $species_text    =~ s/_/ /g;
+        my $source_id    = $from_gene->stable_id();
+        $gene_desc       =~ s/(\[Source:)/$1Projected from $species_text ($source_id) /;
 
-             print $data "\t\tProject from:".$from_gene->stable_id()."\t";
-             print $data "to:".$to_gene->stable_id()."\t";
-             print $data "GeneName:".$from_gene->display_xref->display_id()."\t";
-             print $data "DB:".$from_gene->display_xref->dbname()."\n";
+        print $data "\t\tProject from: ".$from_gene->stable_id()."\t";
+        print $data "to: ".$to_gene->stable_id()."\t";
+        print $data "Gene Description: $gene_desc\n";
 
-	     # Adding projection source information 
-             $dbEntry->info_type("PROJECTION");
-             $dbEntry->info_text("projected from $from_species,".$from_gene->stable_id());
-
-            $to_dbea->store($dbEntry,$to_gene->dbID(), 'Gene', 1);
-            $to_gene->display_xref($dbEntry);
-            $to_geneAdaptor->update($to_gene);
-         }
+        if($flag_store_projections==1){
+#           $to_gene->description($gene_desc);
+#           $to_geneAdaptor->update($to_gene);
+        }
       }
-   } 
+    }
 
 }
 

@@ -20,6 +20,7 @@ package Bio::EnsEMBL::EGPipeline::FileDump::GFF3Dumper;
 
 use strict;
 use warnings;
+no  warnings 'redefine';
 use base ('Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper');
 
 use Bio::EnsEMBL::Utils::IO::GFFSerializer;
@@ -38,12 +39,12 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    'feature_types'    => ['Gene', 'Transcript'],
-    'include_scaffold' => 1,
+    'feature_type'     => ['Gene', 'Transcript'],
     'data_type'        => 'basefeatures',
     'file_type'        => 'gff3',
-    'logic_name'       => undef,
     'per_chromosome'   => 0,
+    'include_scaffold' => 1,
+    'logic_name'       => [],
   };
 }
 
@@ -53,10 +54,10 @@ sub run {
   my $db_type          = $self->param_required('db_type');
   my $out_file         = $self->param_required('out_file');
   my $out_fh           = $self->param_required('out_fh');
-  my $feature_types    = $self->param_required('feature_types');
+  my $feature_types    = $self->param_required('feature_type');
+  my $per_chromosome   = $self->param_required('per_chromosome');
   my $include_scaffold = $self->param_required('include_scaffold');
-  my $logic_name       = $self->param('logic_name');
-  my $per_chromosome   = $self->param('per_chromosome');
+  my $logic_names      = $self->param_required('logic_name');
   
   my $reg = 'Bio::EnsEMBL::Registry';
 
@@ -64,7 +65,8 @@ sub run {
   my $slices = $sa->fetch_all('toplevel');
   
   my $oa = $reg->get_adaptor('multi', 'ontology', 'OntologyTerm');
-  
+  die "Can't get OntologyTerm Adaptor - check that database exist in the server specified" if (!$oa);
+ 
   my $serializer = Bio::EnsEMBL::Utils::IO::GFFSerializer->new($oa, $out_fh);
   $serializer->print_main_header($slices);
   
@@ -91,11 +93,7 @@ sub run {
     }
     
     foreach my $feature_type (@$feature_types) {
-      my $features = $adaptors{$feature_type}->fetch_all_by_Slice($slice, $logic_name);
-      if ($feature_type eq 'Transcript') {
-        my $exons = $adaptors{'Exon'}->fetch_all_by_Slice($slice);
-        $features = $self->transcript_features($features, $exons);
-      }
+      my $features = $self->fetch_features($feature_type, $adaptors{$feature_type}, $logic_names, $slice);
       $serializer->print_feature_list($features);
       
       if ($per_chromosome && $has_chromosome) {
@@ -116,34 +114,63 @@ sub run {
   $self->param('out_files', $out_files)
 }
 
-sub transcript_features {
-  my ($self, $features, $exons) = @_;
+sub fetch_features {
+  my ($self, $feature_type, $adaptor, $logic_names, $slice) = @_;
   
-  my $exon_features = EnsEMBL::REST::EnsemblModel::ExonTranscript->build_all_from_Exons($exons);
-  my $cds_features = EnsEMBL::REST::EnsemblModel::CDS->new_from_Transcripts($features);
+  my @features;
+  if (scalar(@$logic_names) == 0) {
+    @features = @{$adaptor->fetch_all_by_Slice($slice)};
+  } else {
+    foreach my $logic_name (@$logic_names) {
+      my $features;
+      if ($feature_type eq 'Transcript') {
+        $features = $adaptor->fetch_all_by_Slice($slice, 0, $logic_name);
+      } else {
+        $features = $adaptor->fetch_all_by_Slice($slice, $logic_name);
+      }
+      push @features, @$features;
+    }
+  }
+  
+  if ($feature_type eq 'Transcript') {
+    my $exon_features = $self->exon_features(\@features);
+    push @features, @$exon_features;
+  }
+      
+  return \@features;
+}
+
+sub exon_features {
+  my ($self, $transcripts) = @_;
+  
+  my $cds_features = EnsEMBL::REST::EnsemblModel::CDS->new_from_Transcripts($transcripts);
+  my @exon_features;
   my @utr_features;
-  foreach my $transcript (@$features) {
+  
+  foreach my $transcript (@$transcripts) {
+    my $exons = $transcript->get_all_Exons();
+    my $exon_features = EnsEMBL::REST::EnsemblModel::ExonTranscript->build_all_from_Exons($exons);
+    push @exon_features, @$exon_features;
+    
     my $five_prime = $transcript->five_prime_utr_Feature;
     if ($five_prime) {
-      my $utrs = $self->utr_features($five_prime, 'five_prime_UTR', $transcript);
+      my $utrs = $self->utr_features($five_prime, 'five_prime_UTR', $transcript, $exons);
       push @utr_features, @$utrs;
     }
     
     my $three_prime  = $transcript->three_prime_utr_Feature;
     if ($three_prime) {
-      my $utrs = $self->utr_features($three_prime, 'three_prime_UTR', $transcript);
+      my $utrs = $self->utr_features($three_prime, 'three_prime_UTR', $transcript, $exons);
       push @utr_features, @$utrs;
     }
   }
   
-  return [@$features, @$exon_features, @$cds_features, @utr_features];
+  return [@exon_features, @$cds_features, @utr_features];
 }
 
 sub utr_features {
-  my ($self, $utr, $utr_type, $transcript) = @_;
+  my ($self, $utr, $utr_type, $transcript, $exons) = @_;
   my @utrs;
-  
-  my $exons = $transcript->get_all_Exons();
   
   foreach my $exon (@$exons) {
     my $strand = $exon->strand;
@@ -152,7 +179,7 @@ sub utr_features {
       slice     => $exon->slice,
       strand    => $strand,
       source    => $transcript->source,
-      parent_id => $transcript->stable_id,
+      parent_id => 'transcript:'.$transcript->stable_id,
       utr_type  => $utr_type,
     );
     
