@@ -1,0 +1,388 @@
+format-version: 1.2
+date: 06:09:2012 17:07
+saved-by: hp
+auto-generated-by: PHIbaseLoader, construct_phibase_obos.pl, v1.0
+synonymtypedef: systematic_synonym "Systematic synonym" EXACT
+default-namespace: phibase_host
+ontology: PHH
+
+[Term]
+id: PHH:001
+name: Arabidopsis thaliana
+namespace: arabidopsis_thaliana
+
+[Term]
+id: PHH:002
+name: Strawberry
+namespace: strawberry
+
+[Term]
+id: PHH:003
+name: Carnation
+namespace: carnation
+
+[Term]
+id: PHH:004
+name: Lettuce
+namespace: lettuce
+
+[Term]
+id: PHH:005
+name: See publication
+namespace: see_publication
+
+[Term]
+id: PHH:006
+name: Rose
+namespace: rose
+
+[Term]
+id: PHH:007
+name: Pea
+namespace: pea
+
+[Term]
+id: PHH:008
+name: Cabbage
+namespace: cabbage
+
+[Term]
+id: PHH:009
+name: Lime
+namespace: lime
+
+[Term]
+id: PHH:010
+name: Nicotiana benthamiana
+namespace: nicotiana_benthamiana
+
+[Term]
+id: PHH:011
+name: American chestnut tree
+namespace: american_chestnut_tree
+
+[Term]
+id: PHH:012
+name: Rat
+namespace: rat
+
+[Term]
+id: PHH:013
+name: Wheat
+namespace: wheat
+
+[Term]
+id: PHH:014
+name: Soybean
+namespace: soybean
+
+[Term]
+id: PHH:015
+name: Flax
+namespace: flax
+
+[Term]
+id: PHH:016
+name: Peanut
+namespace: peanut
+
+[Term]
+id: PHH:017
+name: Bovine
+namespace: bovine
+
+[Term]
+id: PHH:018
+name: Oat
+namespace: oat
+
+[Term]
+id: PHH:019
+name: Cucumber
+namespace: cucumber
+
+[Term]
+id: PHH:020
+name: Dictyostelium discoideum
+namespace: dictyostelium_discoideum
+
+[Term]
+id: PHH:021
+name: Canola
+namespace: canola
+
+[Term]
+id: PHH:022
+name: None
+namespace: none
+
+[Term]
+id: PHH:023
+name: Watermelon
+namespace: watermelon
+
+[Term]
+id: PHH:024
+name: Gerbera
+namespace: gerbera
+
+[Term]
+id: PHH:025
+name: Brassica napus
+namespace: brassica_napus
+
+[Term]
+id: PHH:026
+name: Brassica oleracea
+namespace: brassica_oleracea
+
+[Term]
+id: PHH:027
+name: Oil seed rape
+namespace: oil_seed_rape
+
+[Term]
+id: PHH:028
+name: Rye grass
+namespace: rye_grass
+
+[Term]
+id: PHH:029
+name: Chickpea
+namespace: chickpea
+
+[Term]
+id: PHH:030
+name: Eggplant
+namespace: eggplant
+
+[Term]
+id: PHH:031
+name: Rice
+namespace: rice
+
+[Term]
+id: PHH:032
+name: Brassica carinata
+namespace: brassica_carinata
+
+[Term]
+id: PHH:033
+name: Galleria mellonella
+namespace: galleria_mellonella
+
+[Term]
+id: PHH:034
+name: Vicia faba
+namespace: vicia_faba
+
+[Term]
+id: PHH:035
+name: Alfalfa
+namespace: alfalfa
+
+[Term]
+id: PHH:036
+name: Pear
+namespace: pear
+
+[Term]
+id: PHH:037
+name: Lily
+namespace: lily
+
+[Term]
+id: PHH:038
+name: Guinea pig
+namespace: guinea_pig
+
+[Term]
+id: PHH:039
+name: Gerbera flower petals
+namespace: gerbera_flower_petals
+
+[Term]
+id: PHH:040
+name: Sclerotium rolfsii
+namespace: sclerotium_rolfsii
+
+[Term]
+id: PHH:041
+name: Solanum huancabambense
+namespace: solanum_huancabambense
+
+[Term]
+id: PHH:042
+name: Weeping lovegrass
+namespace: weeping_lovegrass
+
+[Term]
+id: PHH:043
+name: Parsley
+namespace: parsley
+
+[Term]
+id: PHH:044
+name: Onion
+namespace: onion
+
+[Term]
+id: PHH:045
+name: Drosophila melanogaster
+namespace: drosophila_melanogaster
+
+[Term]
+id: PHH:046
+name: Human
+namespace: human
+
+[Term]
+id: PHH:047
+name: Raphanus sativus
+namespace: raphanus_sativus
+
+[Term]
+id: PHH:048
+name: Gherkin
+namespace: gherkin
+
+[Term]
+id: PHH:049
+name: Nematode
+namespace: nematode
+
+[Term]
+id: PHH:050
+name: Solanum microdontum
+namespace: solanum_microdontum
+
+[Term]
+id: PHH:051
+name: Barley
+namespace: barley
+
+[Term]
+id: PHH:052
+name: Brassica juncea
+namespace: brassica_juncea
+
+[Term]
+id: PHH:053
+name: Mouse
+namespace: mouse
+
+[Term]
+id: PHH:054
+name: Grape
+namespace: grape
+
+[Term]
+id: PHH:055
+name: Aphid
+namespace: aphid
+
+[Term]
+id: PHH:056
+name: Chili pepper
+namespace: chili_pepper
+
+[Term]
+id: PHH:057
+name: Artichoke
+namespace: artichoke
+
+[Term]
+id: PHH:058
+name: Rainbow trout
+namespace: rainbow_trout
+
+[Term]
+id: PHH:059
+name: Bean
+namespace: bean
+
+[Term]
+id: PHH:060
+name: Avocado
+namespace: avocado
+
+[Term]
+id: PHH:061
+name: Maize
+namespace: maize
+
+[Term]
+id: PHH:062
+name: Sorghum
+namespace: sorghum
+
+[Term]
+id: PHH:063
+name: Rhizoctonia solani
+namespace: rhizoctonia_solani
+
+[Term]
+id: PHH:064
+name: Tobacco
+namespace: tobacco
+
+[Term]
+id: PHH:065
+name: Stylosanthes
+namespace: stylosanthes
+
+[Term]
+id: PHH:066
+name: Tomato
+namespace: tomato
+
+[Term]
+id: PHH:067
+name: Cotton
+namespace: cotton
+
+[Term]
+id: PHH:068
+name: Coho salmon
+namespace: coho_salmon
+
+[Term]
+id: PHH:069
+name: Agaricus bisporus
+namespace: agaricus_bisporus
+
+[Term]
+id: PHH:070
+name: Acanthamoeba castellanii
+namespace: acanthamoeba_castellanii
+
+[Term]
+id: PHH:071
+name: Melon
+namespace: melon
+
+[Term]
+id: PHH:072
+name: Apple
+namespace: apple
+
+[Term]
+id: PHH:073
+name: Rabbit
+namespace: rabbit
+
+[Term]
+id: PHH:074
+name: Rye
+namespace: rye
+
+[Term]
+id: PHH:075
+name: Green pepper
+namespace: green_pepper
+
+[Term]
+id: PHH:076
+name: Potato
+namespace: potato
+

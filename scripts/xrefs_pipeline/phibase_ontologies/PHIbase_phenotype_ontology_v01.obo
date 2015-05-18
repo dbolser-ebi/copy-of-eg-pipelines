@@ -1,0 +1,63 @@
+format-version: 1.0           
+date: 06:09:2012 17:07             
+saved-by: hp
+auto-generated-by: PHIbaseLoader, construct_phibase_obos.pl, v1.0
+synonymtypedef: systematic_synonym "Systematic synonym" EXACT
+default-namespace: phibase_phenotype
+ontology: PHP
+
+[Term]
+id: PHP:001
+name: Chemistry target
+namespace: chemistry_target
+
+[Term]
+id: PHP:002
+name: Effector
+namespace: effector
+
+[Term]
+id: PHP:003
+name: Enhanced antagonism
+namespace: enhanced_antagonism
+
+[Term]
+id: PHP:004
+name: Increased virulence
+namespace: increased_virulence
+
+[Term]
+id: PHP:005
+name: Lethal
+namespace: lethal
+
+[Term]
+id: PHP:006
+name: Loss of pathogenicity
+namespace: loss_of_pathogenicity
+
+[Term]
+id: PHP:007
+name: Reduced virulence
+namespace: reduced_virulence
+
+[Term]
+id: PHP:008
+name: Resistant to chemical
+namespace: resistant_to_chemical
+
+[Term]
+id: PHP:009
+name: Sensitive to chemical
+namespace: sensitive_to_chemical
+
+[Term]
+id: PHP:010
+name: Unaffected pathogenicity
+namespace: unaffected_pathogenicity
+
+[Term]
+id: PHP:011
+name: Wild-type mutualism
+namespace: wild-type_mutualism
+

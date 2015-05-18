@@ -1,0 +1,12209 @@
+format-version: 1.0           
+date: 25:03:2013 15:00             
+saved-by: hp
+auto-generated-by: PHIbaseLoader, construct_phibase_obo.pl, v1.0
+synonymtypedef: systematic_synonym "Systematic synonym" EXACT
+default-namespace: phenotype
+ontology: PHI
+
+[Term]
+id: PHI:001
+name: phenotype
+namespace: phenotype
+
+[Term]
+id: PHI:002
+name: experimental evidence
+namespace: experimental_evidence
+
+[Term]                          
+id: PHI:100000                     
+name: phibase identifier     
+namespace: phibase_identifier
+
+[Term]
+id: PHI:003
+name: Chemistry target
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:004
+name: Effector
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:005
+name: Enhanced antagonism
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:006
+name: Increased virulence
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:007
+name: Lethal
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:008
+name: Loss of pathogenicity
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:009
+name: Reduced virulence
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:010
+name: Resistant to chemical
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:011
+name: Sensitive to chemical
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:012
+name: Unaffected pathogenicity
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:013
+name: Wild-type mutualism
+namespace: phenotype
+is_a: PHI:001
+
+[Term]
+id: PHI:014
+name: Gene disruption
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:015
+name: Gene mutation
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:016
+name: Characterised
+namespace: experimental_evidence
+is_a: PHI:015
+
+[Term]
+id: PHI:017
+name: Gene deletion
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:018
+name: Full
+namespace: experimental_evidence
+is_a: PHI:017
+
+[Term]
+id: PHI:019
+name: Partial
+namespace: experimental_evidence
+is_a: PHI:017
+
+[Term]
+id: PHI:020
+name: Cluster
+namespace: experimental_evidence
+is_a: PHI:017
+
+[Term]
+id: PHI:021
+name: Gene complementation
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:022
+name: Altered gene expression / gene regulation
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:023
+name: Overexpression
+namespace: experimental_evidence
+is_a: PHI:022
+
+[Term]
+id: PHI:024
+name: Down-regulation
+namespace: experimental_evidence
+is_a: PHI:022
+
+[Term]
+id: PHI:025
+name: Silencing
+namespace: experimental_evidence
+is_a: PHI:022
+
+[Term]
+id: PHI:026
+name: Biochemical analysis
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:027
+name: Functional test in host
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:028
+name: Direct injection
+namespace: experimental_evidence
+is_a: PHI:027
+
+[Term]
+id: PHI:029
+name: Transient expression
+namespace: experimental_evidence
+is_a: PHI:027
+
+[Term]
+id: PHI:030
+name: Sequence analysis of sensitive and resistant strains
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:031
+name: Heterologous expression
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:032
+name: Chemical complementation
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:033
+name: Other evidence
+namespace: experimental_evidence
+is_a: PHI:002
+
+[Term]
+id: PHI:100001
+name: 100001
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100002
+name: 100002
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100003
+name: 100003
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100004
+name: 100004
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100005
+name: 100005
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100006
+name: 100006
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100007
+name: 100007
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100008
+name: 100008
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100009
+name: 100009
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100010
+name: 100010
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100011
+name: 100011
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100012
+name: 100012
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100013
+name: 100013
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100014
+name: 100014
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100015
+name: 100015
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100016
+name: 100016
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100017
+name: 100017
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100018
+name: 100018
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100019
+name: 100019
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100020
+name: 100020
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100021
+name: 100021
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100022
+name: 100022
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100023
+name: 100023
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100024
+name: 100024
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100025
+name: 100025
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100026
+name: 100026
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100027
+name: 100027
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100028
+name: 100028
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100029
+name: 100029
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100030
+name: 100030
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100031
+name: 100031
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100032
+name: 100032
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100033
+name: 100033
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100034
+name: 100034
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100035
+name: 100035
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100036
+name: 100036
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100037
+name: 100037
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100038
+name: 100038
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100039
+name: 100039
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100040
+name: 100040
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100041
+name: 100041
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100042
+name: 100042
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100043
+name: 100043
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100044
+name: 100044
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100045
+name: 100045
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100046
+name: 100046
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100047
+name: 100047
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100048
+name: 100048
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100049
+name: 100049
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100050
+name: 100050
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100051
+name: 100051
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100052
+name: 100052
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100053
+name: 100053
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100054
+name: 100054
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100055
+name: 100055
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100056
+name: 100056
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100057
+name: 100057
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100058
+name: 100058
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100059
+name: 100059
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100060
+name: 100060
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100061
+name: 100061
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100062
+name: 100062
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100063
+name: 100063
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100064
+name: 100064
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100065
+name: 100065
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100066
+name: 100066
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100067
+name: 100067
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100068
+name: 100068
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100069
+name: 100069
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100070
+name: 100070
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100071
+name: 100071
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100072
+name: 100072
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100073
+name: 100073
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100074
+name: 100074
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100075
+name: 100075
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100076
+name: 100076
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100077
+name: 100077
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100078
+name: 100078
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100079
+name: 100079
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100080
+name: 100080
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100081
+name: 100081
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100082
+name: 100082
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100083
+name: 100083
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100084
+name: 100084
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100085
+name: 100085
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100086
+name: 100086
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100087
+name: 100087
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100088
+name: 100088
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100089
+name: 100089
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100090
+name: 100090
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100091
+name: 100091
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100092
+name: 100092
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100093
+name: 100093
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100094
+name: 100094
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100095
+name: 100095
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100096
+name: 100096
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100097
+name: 100097
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100098
+name: 100098
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100099
+name: 100099
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100100
+name: 100100
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100101
+name: 100101
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100102
+name: 100102
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100103
+name: 100103
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100104
+name: 100104
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100105
+name: 100105
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100106
+name: 100106
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100107
+name: 100107
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100108
+name: 100108
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100109
+name: 100109
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100110
+name: 100110
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100111
+name: 100111
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100112
+name: 100112
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100113
+name: 100113
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100114
+name: 100114
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100115
+name: 100115
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100116
+name: 100116
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100117
+name: 100117
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100118
+name: 100118
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100119
+name: 100119
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100120
+name: 100120
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100121
+name: 100121
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100122
+name: 100122
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100123
+name: 100123
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100124
+name: 100124
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100125
+name: 100125
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100126
+name: 100126
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100127
+name: 100127
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100128
+name: 100128
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100129
+name: 100129
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100130
+name: 100130
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100131
+name: 100131
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100132
+name: 100132
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100133
+name: 100133
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100134
+name: 100134
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100135
+name: 100135
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100136
+name: 100136
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100137
+name: 100137
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100138
+name: 100138
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100139
+name: 100139
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100140
+name: 100140
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100141
+name: 100141
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100142
+name: 100142
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100143
+name: 100143
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100144
+name: 100144
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100145
+name: 100145
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100146
+name: 100146
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100147
+name: 100147
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100148
+name: 100148
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100149
+name: 100149
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100150
+name: 100150
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100151
+name: 100151
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100152
+name: 100152
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100153
+name: 100153
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100154
+name: 100154
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100155
+name: 100155
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100156
+name: 100156
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100157
+name: 100157
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100158
+name: 100158
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100159
+name: 100159
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100160
+name: 100160
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100161
+name: 100161
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100162
+name: 100162
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100163
+name: 100163
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100164
+name: 100164
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100165
+name: 100165
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100166
+name: 100166
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100167
+name: 100167
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100168
+name: 100168
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100169
+name: 100169
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100170
+name: 100170
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100171
+name: 100171
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100172
+name: 100172
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100173
+name: 100173
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100174
+name: 100174
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100175
+name: 100175
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100176
+name: 100176
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100177
+name: 100177
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100178
+name: 100178
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100179
+name: 100179
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100180
+name: 100180
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100181
+name: 100181
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100182
+name: 100182
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100183
+name: 100183
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100184
+name: 100184
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100185
+name: 100185
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100186
+name: 100186
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100187
+name: 100187
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100188
+name: 100188
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100189
+name: 100189
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100190
+name: 100190
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100191
+name: 100191
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100192
+name: 100192
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100193
+name: 100193
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100194
+name: 100194
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100195
+name: 100195
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100196
+name: 100196
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100197
+name: 100197
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100198
+name: 100198
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100199
+name: 100199
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100200
+name: 100200
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100201
+name: 100201
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100202
+name: 100202
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100203
+name: 100203
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100204
+name: 100204
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100205
+name: 100205
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100206
+name: 100206
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100207
+name: 100207
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100208
+name: 100208
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100209
+name: 100209
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100210
+name: 100210
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100211
+name: 100211
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100212
+name: 100212
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100213
+name: 100213
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100214
+name: 100214
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100215
+name: 100215
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100216
+name: 100216
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100217
+name: 100217
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100218
+name: 100218
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100219
+name: 100219
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100220
+name: 100220
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100221
+name: 100221
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100222
+name: 100222
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100223
+name: 100223
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100224
+name: 100224
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100225
+name: 100225
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100226
+name: 100226
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100227
+name: 100227
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100228
+name: 100228
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100229
+name: 100229
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100230
+name: 100230
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100231
+name: 100231
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100232
+name: 100232
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100233
+name: 100233
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100234
+name: 100234
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100235
+name: 100235
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100236
+name: 100236
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100237
+name: 100237
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100238
+name: 100238
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100239
+name: 100239
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100240
+name: 100240
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100241
+name: 100241
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100242
+name: 100242
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100243
+name: 100243
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100244
+name: 100244
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100245
+name: 100245
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100246
+name: 100246
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100247
+name: 100247
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100248
+name: 100248
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100249
+name: 100249
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100250
+name: 100250
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100251
+name: 100251
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100252
+name: 100252
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100253
+name: 100253
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100254
+name: 100254
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100255
+name: 100255
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100256
+name: 100256
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100257
+name: 100257
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100258
+name: 100258
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100259
+name: 100259
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100260
+name: 100260
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100261
+name: 100261
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100262
+name: 100262
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100263
+name: 100263
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100264
+name: 100264
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100265
+name: 100265
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100266
+name: 100266
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100267
+name: 100267
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100268
+name: 100268
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100269
+name: 100269
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100270
+name: 100270
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100271
+name: 100271
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100272
+name: 100272
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100273
+name: 100273
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100274
+name: 100274
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100275
+name: 100275
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100276
+name: 100276
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100277
+name: 100277
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100278
+name: 100278
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100279
+name: 100279
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100280
+name: 100280
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100281
+name: 100281
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100282
+name: 100282
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100283
+name: 100283
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100284
+name: 100284
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100285
+name: 100285
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100286
+name: 100286
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100287
+name: 100287
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100288
+name: 100288
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100289
+name: 100289
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100290
+name: 100290
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100291
+name: 100291
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100292
+name: 100292
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100293
+name: 100293
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100294
+name: 100294
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100295
+name: 100295
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100296
+name: 100296
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100297
+name: 100297
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100298
+name: 100298
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100299
+name: 100299
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100300
+name: 100300
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100301
+name: 100301
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100302
+name: 100302
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100303
+name: 100303
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100304
+name: 100304
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100305
+name: 100305
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100306
+name: 100306
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100307
+name: 100307
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100308
+name: 100308
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100309
+name: 100309
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100310
+name: 100310
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100311
+name: 100311
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100312
+name: 100312
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100313
+name: 100313
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100314
+name: 100314
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100315
+name: 100315
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100316
+name: 100316
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100317
+name: 100317
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100318
+name: 100318
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100319
+name: 100319
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100320
+name: 100320
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100321
+name: 100321
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100322
+name: 100322
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100323
+name: 100323
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100324
+name: 100324
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100325
+name: 100325
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100326
+name: 100326
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100327
+name: 100327
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100328
+name: 100328
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100329
+name: 100329
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100330
+name: 100330
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100331
+name: 100331
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100332
+name: 100332
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100333
+name: 100333
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100334
+name: 100334
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100335
+name: 100335
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100336
+name: 100336
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100337
+name: 100337
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100338
+name: 100338
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100339
+name: 100339
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100340
+name: 100340
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100341
+name: 100341
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100342
+name: 100342
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100343
+name: 100343
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100344
+name: 100344
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100345
+name: 100345
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100346
+name: 100346
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100347
+name: 100347
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100348
+name: 100348
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100349
+name: 100349
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100350
+name: 100350
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100351
+name: 100351
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100352
+name: 100352
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100353
+name: 100353
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100354
+name: 100354
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100355
+name: 100355
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100356
+name: 100356
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100357
+name: 100357
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100358
+name: 100358
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100359
+name: 100359
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100360
+name: 100360
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100361
+name: 100361
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100362
+name: 100362
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100363
+name: 100363
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100364
+name: 100364
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100365
+name: 100365
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100366
+name: 100366
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100367
+name: 100367
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100368
+name: 100368
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100369
+name: 100369
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100370
+name: 100370
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100371
+name: 100371
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100372
+name: 100372
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100373
+name: 100373
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100374
+name: 100374
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100375
+name: 100375
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100376
+name: 100376
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100377
+name: 100377
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100378
+name: 100378
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100379
+name: 100379
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100380
+name: 100380
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100381
+name: 100381
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100382
+name: 100382
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100383
+name: 100383
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100384
+name: 100384
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100385
+name: 100385
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100386
+name: 100386
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100387
+name: 100387
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100388
+name: 100388
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100389
+name: 100389
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100390
+name: 100390
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100391
+name: 100391
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100392
+name: 100392
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100393
+name: 100393
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100394
+name: 100394
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100395
+name: 100395
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100396
+name: 100396
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100397
+name: 100397
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100398
+name: 100398
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100399
+name: 100399
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100400
+name: 100400
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100401
+name: 100401
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100402
+name: 100402
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100403
+name: 100403
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100404
+name: 100404
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100405
+name: 100405
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100406
+name: 100406
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100407
+name: 100407
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100408
+name: 100408
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100409
+name: 100409
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100410
+name: 100410
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100411
+name: 100411
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100412
+name: 100412
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100413
+name: 100413
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100414
+name: 100414
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100415
+name: 100415
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100416
+name: 100416
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100417
+name: 100417
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100418
+name: 100418
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100419
+name: 100419
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100420
+name: 100420
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100421
+name: 100421
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100422
+name: 100422
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100423
+name: 100423
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100424
+name: 100424
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100425
+name: 100425
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100426
+name: 100426
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100427
+name: 100427
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100428
+name: 100428
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100429
+name: 100429
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100430
+name: 100430
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100431
+name: 100431
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100432
+name: 100432
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100433
+name: 100433
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100434
+name: 100434
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100435
+name: 100435
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100436
+name: 100436
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100437
+name: 100437
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100438
+name: 100438
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100439
+name: 100439
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100440
+name: 100440
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100441
+name: 100441
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100442
+name: 100442
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100443
+name: 100443
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100444
+name: 100444
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100445
+name: 100445
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100446
+name: 100446
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100447
+name: 100447
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100448
+name: 100448
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100449
+name: 100449
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100450
+name: 100450
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100451
+name: 100451
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100452
+name: 100452
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100453
+name: 100453
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100454
+name: 100454
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100455
+name: 100455
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100456
+name: 100456
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100457
+name: 100457
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100458
+name: 100458
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100459
+name: 100459
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100460
+name: 100460
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100461
+name: 100461
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100462
+name: 100462
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100463
+name: 100463
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100464
+name: 100464
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100465
+name: 100465
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100466
+name: 100466
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100467
+name: 100467
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100468
+name: 100468
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100469
+name: 100469
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100470
+name: 100470
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100471
+name: 100471
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100472
+name: 100472
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100473
+name: 100473
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100474
+name: 100474
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100475
+name: 100475
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100476
+name: 100476
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100477
+name: 100477
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100478
+name: 100478
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100479
+name: 100479
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100480
+name: 100480
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100481
+name: 100481
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100482
+name: 100482
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100483
+name: 100483
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100484
+name: 100484
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100485
+name: 100485
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100486
+name: 100486
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100487
+name: 100487
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100488
+name: 100488
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100489
+name: 100489
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100490
+name: 100490
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100491
+name: 100491
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100492
+name: 100492
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100493
+name: 100493
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100494
+name: 100494
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100495
+name: 100495
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100496
+name: 100496
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100497
+name: 100497
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100498
+name: 100498
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100499
+name: 100499
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100500
+name: 100500
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100501
+name: 100501
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100502
+name: 100502
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100503
+name: 100503
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100504
+name: 100504
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100505
+name: 100505
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100506
+name: 100506
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100507
+name: 100507
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100508
+name: 100508
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100509
+name: 100509
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100510
+name: 100510
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100511
+name: 100511
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100512
+name: 100512
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100513
+name: 100513
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100514
+name: 100514
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100515
+name: 100515
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100516
+name: 100516
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100517
+name: 100517
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100518
+name: 100518
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100519
+name: 100519
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100520
+name: 100520
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100521
+name: 100521
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100522
+name: 100522
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100523
+name: 100523
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100524
+name: 100524
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100525
+name: 100525
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100526
+name: 100526
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100527
+name: 100527
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100528
+name: 100528
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100529
+name: 100529
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100530
+name: 100530
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100531
+name: 100531
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100532
+name: 100532
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100533
+name: 100533
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100534
+name: 100534
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100535
+name: 100535
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100536
+name: 100536
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100537
+name: 100537
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100538
+name: 100538
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100539
+name: 100539
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100540
+name: 100540
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100541
+name: 100541
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100542
+name: 100542
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100543
+name: 100543
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100544
+name: 100544
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100545
+name: 100545
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100546
+name: 100546
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100547
+name: 100547
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100548
+name: 100548
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100549
+name: 100549
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100550
+name: 100550
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100551
+name: 100551
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100552
+name: 100552
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100553
+name: 100553
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100554
+name: 100554
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100555
+name: 100555
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100556
+name: 100556
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100557
+name: 100557
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100558
+name: 100558
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100559
+name: 100559
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100560
+name: 100560
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100561
+name: 100561
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100562
+name: 100562
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100563
+name: 100563
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100564
+name: 100564
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100565
+name: 100565
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100566
+name: 100566
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100567
+name: 100567
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100568
+name: 100568
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100569
+name: 100569
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100570
+name: 100570
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100571
+name: 100571
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100572
+name: 100572
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100573
+name: 100573
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100574
+name: 100574
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100575
+name: 100575
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100576
+name: 100576
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100577
+name: 100577
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100578
+name: 100578
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100579
+name: 100579
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100580
+name: 100580
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100581
+name: 100581
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100582
+name: 100582
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100583
+name: 100583
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100584
+name: 100584
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100585
+name: 100585
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100586
+name: 100586
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100587
+name: 100587
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100588
+name: 100588
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100589
+name: 100589
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100590
+name: 100590
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100591
+name: 100591
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100592
+name: 100592
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100593
+name: 100593
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100594
+name: 100594
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100595
+name: 100595
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100596
+name: 100596
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100597
+name: 100597
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100598
+name: 100598
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100599
+name: 100599
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100600
+name: 100600
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100601
+name: 100601
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100602
+name: 100602
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100603
+name: 100603
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100604
+name: 100604
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100605
+name: 100605
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100606
+name: 100606
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100607
+name: 100607
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100608
+name: 100608
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100609
+name: 100609
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100610
+name: 100610
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100611
+name: 100611
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100612
+name: 100612
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100613
+name: 100613
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100614
+name: 100614
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100615
+name: 100615
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100616
+name: 100616
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100617
+name: 100617
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100618
+name: 100618
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100619
+name: 100619
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100620
+name: 100620
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100621
+name: 100621
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100622
+name: 100622
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100623
+name: 100623
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100624
+name: 100624
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100625
+name: 100625
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100626
+name: 100626
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100627
+name: 100627
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100628
+name: 100628
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100629
+name: 100629
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100630
+name: 100630
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100631
+name: 100631
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100632
+name: 100632
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100633
+name: 100633
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100634
+name: 100634
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100635
+name: 100635
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100636
+name: 100636
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100637
+name: 100637
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100638
+name: 100638
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100639
+name: 100639
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100640
+name: 100640
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100641
+name: 100641
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100642
+name: 100642
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100643
+name: 100643
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100644
+name: 100644
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100645
+name: 100645
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100646
+name: 100646
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100647
+name: 100647
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100648
+name: 100648
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100649
+name: 100649
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100650
+name: 100650
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100651
+name: 100651
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100652
+name: 100652
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100653
+name: 100653
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100654
+name: 100654
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100655
+name: 100655
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100656
+name: 100656
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100657
+name: 100657
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100658
+name: 100658
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100659
+name: 100659
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100660
+name: 100660
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100661
+name: 100661
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100662
+name: 100662
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100663
+name: 100663
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100664
+name: 100664
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100665
+name: 100665
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100666
+name: 100666
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100667
+name: 100667
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100668
+name: 100668
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100669
+name: 100669
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100670
+name: 100670
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100671
+name: 100671
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100672
+name: 100672
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100673
+name: 100673
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100674
+name: 100674
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100675
+name: 100675
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100676
+name: 100676
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100677
+name: 100677
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100678
+name: 100678
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100679
+name: 100679
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100680
+name: 100680
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100681
+name: 100681
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100682
+name: 100682
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100683
+name: 100683
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100684
+name: 100684
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100685
+name: 100685
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100686
+name: 100686
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100687
+name: 100687
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100688
+name: 100688
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100689
+name: 100689
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100690
+name: 100690
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100691
+name: 100691
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100692
+name: 100692
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100693
+name: 100693
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100694
+name: 100694
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100695
+name: 100695
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100696
+name: 100696
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100697
+name: 100697
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100698
+name: 100698
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100699
+name: 100699
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100700
+name: 100700
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100701
+name: 100701
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100702
+name: 100702
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100703
+name: 100703
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100704
+name: 100704
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100705
+name: 100705
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100706
+name: 100706
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100707
+name: 100707
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100708
+name: 100708
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100709
+name: 100709
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100710
+name: 100710
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100711
+name: 100711
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100712
+name: 100712
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100713
+name: 100713
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100714
+name: 100714
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100715
+name: 100715
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100716
+name: 100716
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100717
+name: 100717
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100718
+name: 100718
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100719
+name: 100719
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100720
+name: 100720
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100721
+name: 100721
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100722
+name: 100722
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100723
+name: 100723
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100724
+name: 100724
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100725
+name: 100725
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100726
+name: 100726
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100727
+name: 100727
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100728
+name: 100728
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100729
+name: 100729
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100730
+name: 100730
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100731
+name: 100731
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100732
+name: 100732
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100733
+name: 100733
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100734
+name: 100734
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100735
+name: 100735
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100736
+name: 100736
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100737
+name: 100737
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100738
+name: 100738
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100739
+name: 100739
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100740
+name: 100740
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100741
+name: 100741
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100742
+name: 100742
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100743
+name: 100743
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100744
+name: 100744
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100745
+name: 100745
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100746
+name: 100746
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100747
+name: 100747
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100748
+name: 100748
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100749
+name: 100749
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100750
+name: 100750
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100751
+name: 100751
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100752
+name: 100752
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100753
+name: 100753
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100754
+name: 100754
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100755
+name: 100755
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100756
+name: 100756
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100757
+name: 100757
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100758
+name: 100758
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100759
+name: 100759
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100760
+name: 100760
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100761
+name: 100761
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100762
+name: 100762
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100763
+name: 100763
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100764
+name: 100764
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100765
+name: 100765
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100766
+name: 100766
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100767
+name: 100767
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100768
+name: 100768
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100769
+name: 100769
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100770
+name: 100770
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100771
+name: 100771
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100772
+name: 100772
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100773
+name: 100773
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100774
+name: 100774
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100775
+name: 100775
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100776
+name: 100776
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100777
+name: 100777
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100778
+name: 100778
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100779
+name: 100779
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100780
+name: 100780
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100781
+name: 100781
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100782
+name: 100782
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100783
+name: 100783
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100784
+name: 100784
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100785
+name: 100785
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100786
+name: 100786
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100787
+name: 100787
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100788
+name: 100788
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100789
+name: 100789
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100790
+name: 100790
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100791
+name: 100791
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100792
+name: 100792
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100793
+name: 100793
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100794
+name: 100794
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100795
+name: 100795
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100796
+name: 100796
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100797
+name: 100797
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100798
+name: 100798
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100799
+name: 100799
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100800
+name: 100800
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100801
+name: 100801
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100802
+name: 100802
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100803
+name: 100803
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100804
+name: 100804
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100805
+name: 100805
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100806
+name: 100806
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100807
+name: 100807
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100808
+name: 100808
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100809
+name: 100809
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100810
+name: 100810
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100811
+name: 100811
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100812
+name: 100812
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100813
+name: 100813
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100814
+name: 100814
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100815
+name: 100815
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100816
+name: 100816
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100817
+name: 100817
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100818
+name: 100818
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100819
+name: 100819
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100820
+name: 100820
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100821
+name: 100821
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100822
+name: 100822
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100823
+name: 100823
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100824
+name: 100824
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100825
+name: 100825
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100826
+name: 100826
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100827
+name: 100827
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100828
+name: 100828
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100829
+name: 100829
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100830
+name: 100830
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100831
+name: 100831
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100832
+name: 100832
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100833
+name: 100833
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100834
+name: 100834
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100835
+name: 100835
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100836
+name: 100836
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100837
+name: 100837
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100838
+name: 100838
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100839
+name: 100839
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100840
+name: 100840
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100841
+name: 100841
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100842
+name: 100842
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100843
+name: 100843
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100844
+name: 100844
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100845
+name: 100845
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100846
+name: 100846
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100847
+name: 100847
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100848
+name: 100848
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100849
+name: 100849
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100850
+name: 100850
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100851
+name: 100851
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100852
+name: 100852
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100853
+name: 100853
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100854
+name: 100854
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100855
+name: 100855
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100856
+name: 100856
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100857
+name: 100857
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100858
+name: 100858
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100859
+name: 100859
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100860
+name: 100860
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100861
+name: 100861
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100862
+name: 100862
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100863
+name: 100863
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100864
+name: 100864
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100865
+name: 100865
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100866
+name: 100866
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100867
+name: 100867
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100868
+name: 100868
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100869
+name: 100869
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100870
+name: 100870
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100871
+name: 100871
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100872
+name: 100872
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100873
+name: 100873
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100874
+name: 100874
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100875
+name: 100875
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100876
+name: 100876
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100877
+name: 100877
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100878
+name: 100878
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100879
+name: 100879
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100880
+name: 100880
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100881
+name: 100881
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100882
+name: 100882
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100883
+name: 100883
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100884
+name: 100884
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100885
+name: 100885
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100886
+name: 100886
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100887
+name: 100887
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100888
+name: 100888
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100889
+name: 100889
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100890
+name: 100890
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100891
+name: 100891
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100892
+name: 100892
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100893
+name: 100893
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100894
+name: 100894
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100895
+name: 100895
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100896
+name: 100896
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100897
+name: 100897
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100898
+name: 100898
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100899
+name: 100899
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100900
+name: 100900
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100901
+name: 100901
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100902
+name: 100902
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100903
+name: 100903
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100904
+name: 100904
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100905
+name: 100905
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100906
+name: 100906
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100907
+name: 100907
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100908
+name: 100908
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100909
+name: 100909
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100910
+name: 100910
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100911
+name: 100911
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100912
+name: 100912
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100913
+name: 100913
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100914
+name: 100914
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100915
+name: 100915
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100916
+name: 100916
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100917
+name: 100917
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100918
+name: 100918
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100919
+name: 100919
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100920
+name: 100920
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100921
+name: 100921
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100922
+name: 100922
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100923
+name: 100923
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100924
+name: 100924
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100925
+name: 100925
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100926
+name: 100926
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100927
+name: 100927
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100928
+name: 100928
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100929
+name: 100929
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100930
+name: 100930
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100931
+name: 100931
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100932
+name: 100932
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100933
+name: 100933
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100934
+name: 100934
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100935
+name: 100935
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100936
+name: 100936
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100937
+name: 100937
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100938
+name: 100938
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100939
+name: 100939
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100940
+name: 100940
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100941
+name: 100941
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100942
+name: 100942
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100943
+name: 100943
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100944
+name: 100944
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100945
+name: 100945
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100946
+name: 100946
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100947
+name: 100947
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100948
+name: 100948
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100949
+name: 100949
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100950
+name: 100950
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100951
+name: 100951
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100952
+name: 100952
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100953
+name: 100953
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100954
+name: 100954
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100955
+name: 100955
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100956
+name: 100956
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100957
+name: 100957
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100958
+name: 100958
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100959
+name: 100959
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100960
+name: 100960
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100961
+name: 100961
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100962
+name: 100962
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100963
+name: 100963
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100964
+name: 100964
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100965
+name: 100965
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100966
+name: 100966
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100967
+name: 100967
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100968
+name: 100968
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100969
+name: 100969
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100970
+name: 100970
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100971
+name: 100971
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100972
+name: 100972
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100973
+name: 100973
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100974
+name: 100974
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100975
+name: 100975
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100976
+name: 100976
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100977
+name: 100977
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100978
+name: 100978
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100979
+name: 100979
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100980
+name: 100980
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100981
+name: 100981
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100982
+name: 100982
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100983
+name: 100983
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100984
+name: 100984
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100985
+name: 100985
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100986
+name: 100986
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100987
+name: 100987
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100988
+name: 100988
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100989
+name: 100989
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100990
+name: 100990
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100991
+name: 100991
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100992
+name: 100992
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100993
+name: 100993
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100994
+name: 100994
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100995
+name: 100995
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100996
+name: 100996
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100997
+name: 100997
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100998
+name: 100998
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:100999
+name: 100999
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101000
+name: 101000
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101001
+name: 101001
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101002
+name: 101002
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101003
+name: 101003
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101004
+name: 101004
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101005
+name: 101005
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101006
+name: 101006
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101007
+name: 101007
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101008
+name: 101008
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101009
+name: 101009
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101010
+name: 101010
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101011
+name: 101011
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101012
+name: 101012
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101013
+name: 101013
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101014
+name: 101014
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101015
+name: 101015
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101016
+name: 101016
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101017
+name: 101017
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101018
+name: 101018
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101019
+name: 101019
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101020
+name: 101020
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101021
+name: 101021
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101022
+name: 101022
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101023
+name: 101023
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101024
+name: 101024
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101025
+name: 101025
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101026
+name: 101026
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101027
+name: 101027
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101028
+name: 101028
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101029
+name: 101029
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101030
+name: 101030
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101031
+name: 101031
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101032
+name: 101032
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101033
+name: 101033
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101034
+name: 101034
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101035
+name: 101035
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101036
+name: 101036
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101037
+name: 101037
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101038
+name: 101038
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101039
+name: 101039
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101040
+name: 101040
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101041
+name: 101041
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101042
+name: 101042
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101043
+name: 101043
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101044
+name: 101044
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101045
+name: 101045
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101046
+name: 101046
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101047
+name: 101047
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101048
+name: 101048
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101049
+name: 101049
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101050
+name: 101050
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101051
+name: 101051
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101052
+name: 101052
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101053
+name: 101053
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101054
+name: 101054
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101055
+name: 101055
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101056
+name: 101056
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101057
+name: 101057
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101058
+name: 101058
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101059
+name: 101059
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101060
+name: 101060
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101061
+name: 101061
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101062
+name: 101062
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101063
+name: 101063
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101064
+name: 101064
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101065
+name: 101065
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101066
+name: 101066
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101067
+name: 101067
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101068
+name: 101068
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101069
+name: 101069
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101070
+name: 101070
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101071
+name: 101071
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101072
+name: 101072
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101073
+name: 101073
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101074
+name: 101074
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101075
+name: 101075
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101076
+name: 101076
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101077
+name: 101077
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101078
+name: 101078
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101079
+name: 101079
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101080
+name: 101080
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101081
+name: 101081
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101082
+name: 101082
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101083
+name: 101083
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101084
+name: 101084
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101085
+name: 101085
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101086
+name: 101086
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101087
+name: 101087
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101088
+name: 101088
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101089
+name: 101089
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101090
+name: 101090
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101091
+name: 101091
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101092
+name: 101092
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101093
+name: 101093
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101094
+name: 101094
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101095
+name: 101095
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101096
+name: 101096
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101097
+name: 101097
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101098
+name: 101098
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101099
+name: 101099
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101100
+name: 101100
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101101
+name: 101101
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101102
+name: 101102
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101103
+name: 101103
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101104
+name: 101104
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101105
+name: 101105
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101106
+name: 101106
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101107
+name: 101107
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101108
+name: 101108
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101109
+name: 101109
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101110
+name: 101110
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101111
+name: 101111
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101112
+name: 101112
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101113
+name: 101113
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101114
+name: 101114
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101115
+name: 101115
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101116
+name: 101116
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101117
+name: 101117
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101118
+name: 101118
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101119
+name: 101119
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101120
+name: 101120
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101121
+name: 101121
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101122
+name: 101122
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101123
+name: 101123
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101124
+name: 101124
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101125
+name: 101125
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101126
+name: 101126
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101127
+name: 101127
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101128
+name: 101128
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101129
+name: 101129
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101130
+name: 101130
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101131
+name: 101131
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101132
+name: 101132
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101133
+name: 101133
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101134
+name: 101134
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101135
+name: 101135
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101136
+name: 101136
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101137
+name: 101137
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101138
+name: 101138
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101139
+name: 101139
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101140
+name: 101140
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101141
+name: 101141
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101142
+name: 101142
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101143
+name: 101143
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101144
+name: 101144
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101145
+name: 101145
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101146
+name: 101146
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101147
+name: 101147
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101148
+name: 101148
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101149
+name: 101149
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101150
+name: 101150
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101151
+name: 101151
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101152
+name: 101152
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101153
+name: 101153
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101154
+name: 101154
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101155
+name: 101155
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101156
+name: 101156
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101157
+name: 101157
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101158
+name: 101158
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101159
+name: 101159
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101160
+name: 101160
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101161
+name: 101161
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101162
+name: 101162
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101163
+name: 101163
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101164
+name: 101164
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101165
+name: 101165
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101166
+name: 101166
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101167
+name: 101167
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101168
+name: 101168
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101169
+name: 101169
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101170
+name: 101170
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101171
+name: 101171
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101172
+name: 101172
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101173
+name: 101173
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101174
+name: 101174
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101175
+name: 101175
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101176
+name: 101176
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101177
+name: 101177
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101178
+name: 101178
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101179
+name: 101179
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101180
+name: 101180
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101181
+name: 101181
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101182
+name: 101182
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101183
+name: 101183
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101184
+name: 101184
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101185
+name: 101185
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101186
+name: 101186
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101187
+name: 101187
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101188
+name: 101188
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101189
+name: 101189
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101190
+name: 101190
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101191
+name: 101191
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101192
+name: 101192
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101193
+name: 101193
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101194
+name: 101194
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101195
+name: 101195
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101196
+name: 101196
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101197
+name: 101197
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101198
+name: 101198
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101199
+name: 101199
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101200
+name: 101200
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101201
+name: 101201
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101202
+name: 101202
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101203
+name: 101203
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101204
+name: 101204
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101205
+name: 101205
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101206
+name: 101206
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101207
+name: 101207
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101208
+name: 101208
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101209
+name: 101209
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101210
+name: 101210
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101211
+name: 101211
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101212
+name: 101212
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101213
+name: 101213
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101214
+name: 101214
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101215
+name: 101215
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101216
+name: 101216
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101217
+name: 101217
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101218
+name: 101218
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101219
+name: 101219
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101220
+name: 101220
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101221
+name: 101221
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101222
+name: 101222
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101223
+name: 101223
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101224
+name: 101224
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101225
+name: 101225
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101226
+name: 101226
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101227
+name: 101227
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101228
+name: 101228
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101229
+name: 101229
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101230
+name: 101230
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101231
+name: 101231
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101232
+name: 101232
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101233
+name: 101233
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101234
+name: 101234
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101235
+name: 101235
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101236
+name: 101236
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101237
+name: 101237
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101238
+name: 101238
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101239
+name: 101239
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101240
+name: 101240
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101241
+name: 101241
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101242
+name: 101242
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101243
+name: 101243
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101244
+name: 101244
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101245
+name: 101245
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101246
+name: 101246
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101247
+name: 101247
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101248
+name: 101248
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101249
+name: 101249
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101250
+name: 101250
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101251
+name: 101251
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101252
+name: 101252
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101253
+name: 101253
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101254
+name: 101254
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101255
+name: 101255
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101256
+name: 101256
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101257
+name: 101257
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101258
+name: 101258
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101259
+name: 101259
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101260
+name: 101260
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101261
+name: 101261
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101262
+name: 101262
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101263
+name: 101263
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101264
+name: 101264
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101265
+name: 101265
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101266
+name: 101266
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101267
+name: 101267
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101268
+name: 101268
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101269
+name: 101269
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101270
+name: 101270
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101271
+name: 101271
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101272
+name: 101272
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101273
+name: 101273
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101274
+name: 101274
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101275
+name: 101275
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101276
+name: 101276
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101277
+name: 101277
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101278
+name: 101278
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101279
+name: 101279
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101280
+name: 101280
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101281
+name: 101281
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101282
+name: 101282
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101283
+name: 101283
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101284
+name: 101284
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101285
+name: 101285
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101286
+name: 101286
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101287
+name: 101287
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101288
+name: 101288
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101289
+name: 101289
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101290
+name: 101290
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101291
+name: 101291
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101292
+name: 101292
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101293
+name: 101293
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101294
+name: 101294
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101295
+name: 101295
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101296
+name: 101296
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101297
+name: 101297
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101298
+name: 101298
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101299
+name: 101299
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101300
+name: 101300
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101301
+name: 101301
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101302
+name: 101302
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101303
+name: 101303
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101304
+name: 101304
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101305
+name: 101305
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101306
+name: 101306
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101307
+name: 101307
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101308
+name: 101308
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101309
+name: 101309
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101310
+name: 101310
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101311
+name: 101311
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101312
+name: 101312
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101313
+name: 101313
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101314
+name: 101314
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101315
+name: 101315
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101316
+name: 101316
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101317
+name: 101317
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101318
+name: 101318
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101319
+name: 101319
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101320
+name: 101320
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101321
+name: 101321
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101322
+name: 101322
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101323
+name: 101323
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101324
+name: 101324
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101325
+name: 101325
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101326
+name: 101326
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101327
+name: 101327
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101328
+name: 101328
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101329
+name: 101329
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101330
+name: 101330
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101331
+name: 101331
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101332
+name: 101332
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101333
+name: 101333
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101334
+name: 101334
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101335
+name: 101335
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101336
+name: 101336
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101337
+name: 101337
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101338
+name: 101338
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101339
+name: 101339
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101340
+name: 101340
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101341
+name: 101341
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101342
+name: 101342
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101343
+name: 101343
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101344
+name: 101344
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101345
+name: 101345
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101346
+name: 101346
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101347
+name: 101347
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101348
+name: 101348
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101349
+name: 101349
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101350
+name: 101350
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101351
+name: 101351
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101352
+name: 101352
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101353
+name: 101353
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101354
+name: 101354
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101355
+name: 101355
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101356
+name: 101356
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101357
+name: 101357
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101358
+name: 101358
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101359
+name: 101359
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101360
+name: 101360
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101361
+name: 101361
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101362
+name: 101362
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101363
+name: 101363
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101364
+name: 101364
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101365
+name: 101365
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101366
+name: 101366
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101367
+name: 101367
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101368
+name: 101368
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101369
+name: 101369
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101370
+name: 101370
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101371
+name: 101371
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101372
+name: 101372
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101373
+name: 101373
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101374
+name: 101374
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101375
+name: 101375
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101376
+name: 101376
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101377
+name: 101377
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101378
+name: 101378
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101379
+name: 101379
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101380
+name: 101380
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101381
+name: 101381
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101382
+name: 101382
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101383
+name: 101383
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101384
+name: 101384
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101385
+name: 101385
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101386
+name: 101386
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101387
+name: 101387
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101388
+name: 101388
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101389
+name: 101389
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101390
+name: 101390
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101391
+name: 101391
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101392
+name: 101392
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101393
+name: 101393
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101394
+name: 101394
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101395
+name: 101395
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101396
+name: 101396
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101397
+name: 101397
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101398
+name: 101398
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101399
+name: 101399
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101400
+name: 101400
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101401
+name: 101401
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101402
+name: 101402
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101403
+name: 101403
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101404
+name: 101404
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101405
+name: 101405
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101406
+name: 101406
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101407
+name: 101407
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101408
+name: 101408
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101409
+name: 101409
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101410
+name: 101410
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101411
+name: 101411
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101412
+name: 101412
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101413
+name: 101413
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101414
+name: 101414
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101415
+name: 101415
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101416
+name: 101416
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101417
+name: 101417
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101418
+name: 101418
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101419
+name: 101419
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101420
+name: 101420
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101421
+name: 101421
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101422
+name: 101422
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101423
+name: 101423
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101424
+name: 101424
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101425
+name: 101425
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101426
+name: 101426
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101427
+name: 101427
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101428
+name: 101428
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101429
+name: 101429
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101430
+name: 101430
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101431
+name: 101431
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101432
+name: 101432
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101433
+name: 101433
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101434
+name: 101434
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101435
+name: 101435
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101436
+name: 101436
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101437
+name: 101437
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101438
+name: 101438
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101439
+name: 101439
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101440
+name: 101440
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101441
+name: 101441
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101442
+name: 101442
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101443
+name: 101443
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101444
+name: 101444
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101445
+name: 101445
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101446
+name: 101446
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101447
+name: 101447
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101448
+name: 101448
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101449
+name: 101449
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101450
+name: 101450
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101451
+name: 101451
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101452
+name: 101452
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101453
+name: 101453
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101454
+name: 101454
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101455
+name: 101455
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101456
+name: 101456
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101457
+name: 101457
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101458
+name: 101458
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101459
+name: 101459
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101460
+name: 101460
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101461
+name: 101461
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101462
+name: 101462
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101463
+name: 101463
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101464
+name: 101464
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101465
+name: 101465
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101466
+name: 101466
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101467
+name: 101467
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101468
+name: 101468
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101469
+name: 101469
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101470
+name: 101470
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101471
+name: 101471
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101472
+name: 101472
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101473
+name: 101473
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101474
+name: 101474
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101475
+name: 101475
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101476
+name: 101476
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101477
+name: 101477
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101478
+name: 101478
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101479
+name: 101479
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101480
+name: 101480
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101481
+name: 101481
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101482
+name: 101482
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101483
+name: 101483
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101484
+name: 101484
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101485
+name: 101485
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101486
+name: 101486
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101487
+name: 101487
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101488
+name: 101488
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101489
+name: 101489
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101490
+name: 101490
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101491
+name: 101491
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101492
+name: 101492
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101493
+name: 101493
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101494
+name: 101494
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101495
+name: 101495
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101496
+name: 101496
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101497
+name: 101497
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101498
+name: 101498
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101499
+name: 101499
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101500
+name: 101500
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101501
+name: 101501
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101502
+name: 101502
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101503
+name: 101503
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101504
+name: 101504
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101505
+name: 101505
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101506
+name: 101506
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101507
+name: 101507
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101508
+name: 101508
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101509
+name: 101509
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101510
+name: 101510
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101511
+name: 101511
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101512
+name: 101512
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101513
+name: 101513
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101514
+name: 101514
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101515
+name: 101515
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101516
+name: 101516
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101517
+name: 101517
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101518
+name: 101518
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101519
+name: 101519
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101520
+name: 101520
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101521
+name: 101521
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101522
+name: 101522
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101523
+name: 101523
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101524
+name: 101524
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101525
+name: 101525
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101526
+name: 101526
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101527
+name: 101527
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101528
+name: 101528
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101529
+name: 101529
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101530
+name: 101530
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101531
+name: 101531
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101532
+name: 101532
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101533
+name: 101533
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101534
+name: 101534
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101535
+name: 101535
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101536
+name: 101536
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101537
+name: 101537
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101538
+name: 101538
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101539
+name: 101539
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101540
+name: 101540
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101541
+name: 101541
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101542
+name: 101542
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101543
+name: 101543
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101544
+name: 101544
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101545
+name: 101545
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101546
+name: 101546
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101547
+name: 101547
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101548
+name: 101548
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101549
+name: 101549
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101550
+name: 101550
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101551
+name: 101551
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101552
+name: 101552
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101553
+name: 101553
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101554
+name: 101554
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101555
+name: 101555
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101556
+name: 101556
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101557
+name: 101557
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101558
+name: 101558
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101559
+name: 101559
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101560
+name: 101560
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101561
+name: 101561
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101562
+name: 101562
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101563
+name: 101563
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101564
+name: 101564
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101565
+name: 101565
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101566
+name: 101566
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101567
+name: 101567
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101568
+name: 101568
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101569
+name: 101569
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101570
+name: 101570
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101571
+name: 101571
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101572
+name: 101572
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101573
+name: 101573
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101574
+name: 101574
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101575
+name: 101575
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101576
+name: 101576
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101577
+name: 101577
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101578
+name: 101578
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101579
+name: 101579
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101580
+name: 101580
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101581
+name: 101581
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101582
+name: 101582
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101583
+name: 101583
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101584
+name: 101584
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101585
+name: 101585
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101586
+name: 101586
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101587
+name: 101587
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101588
+name: 101588
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101589
+name: 101589
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101590
+name: 101590
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101591
+name: 101591
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101592
+name: 101592
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101593
+name: 101593
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101594
+name: 101594
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101595
+name: 101595
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101596
+name: 101596
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101597
+name: 101597
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101598
+name: 101598
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101599
+name: 101599
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101600
+name: 101600
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101601
+name: 101601
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101602
+name: 101602
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101603
+name: 101603
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101604
+name: 101604
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101605
+name: 101605
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101606
+name: 101606
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101607
+name: 101607
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101608
+name: 101608
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101609
+name: 101609
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101610
+name: 101610
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101611
+name: 101611
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101612
+name: 101612
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101613
+name: 101613
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101614
+name: 101614
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101615
+name: 101615
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101616
+name: 101616
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101617
+name: 101617
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101618
+name: 101618
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101619
+name: 101619
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101620
+name: 101620
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101621
+name: 101621
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101622
+name: 101622
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101623
+name: 101623
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101624
+name: 101624
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101625
+name: 101625
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101626
+name: 101626
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101627
+name: 101627
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101628
+name: 101628
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101629
+name: 101629
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101630
+name: 101630
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101631
+name: 101631
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101632
+name: 101632
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101633
+name: 101633
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101634
+name: 101634
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101635
+name: 101635
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101636
+name: 101636
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101637
+name: 101637
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101638
+name: 101638
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101639
+name: 101639
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101640
+name: 101640
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101641
+name: 101641
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101642
+name: 101642
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101643
+name: 101643
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101644
+name: 101644
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101645
+name: 101645
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101646
+name: 101646
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101647
+name: 101647
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101648
+name: 101648
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101649
+name: 101649
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101650
+name: 101650
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101651
+name: 101651
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101652
+name: 101652
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101653
+name: 101653
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101654
+name: 101654
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101655
+name: 101655
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101656
+name: 101656
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101657
+name: 101657
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101658
+name: 101658
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101659
+name: 101659
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101660
+name: 101660
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101661
+name: 101661
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101662
+name: 101662
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101663
+name: 101663
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101664
+name: 101664
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101665
+name: 101665
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101666
+name: 101666
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101667
+name: 101667
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101668
+name: 101668
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101669
+name: 101669
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101670
+name: 101670
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101671
+name: 101671
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101672
+name: 101672
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101673
+name: 101673
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101674
+name: 101674
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101675
+name: 101675
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101676
+name: 101676
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101677
+name: 101677
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101678
+name: 101678
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101679
+name: 101679
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101680
+name: 101680
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101681
+name: 101681
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101682
+name: 101682
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101683
+name: 101683
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101684
+name: 101684
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101685
+name: 101685
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101686
+name: 101686
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101687
+name: 101687
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101688
+name: 101688
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101689
+name: 101689
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101690
+name: 101690
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101691
+name: 101691
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101692
+name: 101692
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101693
+name: 101693
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101694
+name: 101694
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101695
+name: 101695
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101696
+name: 101696
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101697
+name: 101697
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101698
+name: 101698
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101699
+name: 101699
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101700
+name: 101700
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101701
+name: 101701
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101702
+name: 101702
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101703
+name: 101703
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101704
+name: 101704
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101705
+name: 101705
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101706
+name: 101706
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101707
+name: 101707
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101708
+name: 101708
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101709
+name: 101709
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101710
+name: 101710
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101711
+name: 101711
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101712
+name: 101712
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101713
+name: 101713
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101714
+name: 101714
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101715
+name: 101715
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101716
+name: 101716
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101717
+name: 101717
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101718
+name: 101718
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101719
+name: 101719
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101720
+name: 101720
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101721
+name: 101721
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101722
+name: 101722
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101723
+name: 101723
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101724
+name: 101724
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101725
+name: 101725
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101726
+name: 101726
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101727
+name: 101727
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101728
+name: 101728
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101729
+name: 101729
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101730
+name: 101730
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101731
+name: 101731
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101732
+name: 101732
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101733
+name: 101733
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101734
+name: 101734
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101735
+name: 101735
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101736
+name: 101736
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101737
+name: 101737
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101738
+name: 101738
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101739
+name: 101739
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101740
+name: 101740
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101741
+name: 101741
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101742
+name: 101742
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101743
+name: 101743
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101744
+name: 101744
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101745
+name: 101745
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101746
+name: 101746
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101747
+name: 101747
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101748
+name: 101748
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101749
+name: 101749
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101750
+name: 101750
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101751
+name: 101751
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101752
+name: 101752
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101753
+name: 101753
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101754
+name: 101754
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101755
+name: 101755
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101756
+name: 101756
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101757
+name: 101757
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101758
+name: 101758
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101759
+name: 101759
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101760
+name: 101760
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101761
+name: 101761
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101762
+name: 101762
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101763
+name: 101763
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101764
+name: 101764
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101765
+name: 101765
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101766
+name: 101766
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101767
+name: 101767
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101768
+name: 101768
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101769
+name: 101769
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101770
+name: 101770
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101771
+name: 101771
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101772
+name: 101772
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101773
+name: 101773
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101774
+name: 101774
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101775
+name: 101775
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101776
+name: 101776
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101777
+name: 101777
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101778
+name: 101778
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101779
+name: 101779
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101780
+name: 101780
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101781
+name: 101781
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101782
+name: 101782
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101783
+name: 101783
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101784
+name: 101784
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101785
+name: 101785
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101786
+name: 101786
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101787
+name: 101787
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101788
+name: 101788
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101789
+name: 101789
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101790
+name: 101790
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101791
+name: 101791
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101792
+name: 101792
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101793
+name: 101793
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101794
+name: 101794
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101795
+name: 101795
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101796
+name: 101796
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101797
+name: 101797
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101798
+name: 101798
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101799
+name: 101799
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101800
+name: 101800
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101801
+name: 101801
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101802
+name: 101802
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101803
+name: 101803
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101804
+name: 101804
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101805
+name: 101805
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101806
+name: 101806
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101807
+name: 101807
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101808
+name: 101808
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101809
+name: 101809
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101810
+name: 101810
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101811
+name: 101811
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101812
+name: 101812
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101813
+name: 101813
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101814
+name: 101814
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101815
+name: 101815
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101816
+name: 101816
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101817
+name: 101817
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101818
+name: 101818
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101819
+name: 101819
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101820
+name: 101820
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101821
+name: 101821
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101822
+name: 101822
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101823
+name: 101823
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101824
+name: 101824
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101825
+name: 101825
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101826
+name: 101826
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101827
+name: 101827
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101828
+name: 101828
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101829
+name: 101829
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101830
+name: 101830
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101831
+name: 101831
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101832
+name: 101832
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101833
+name: 101833
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101834
+name: 101834
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101835
+name: 101835
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101836
+name: 101836
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101837
+name: 101837
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101838
+name: 101838
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101839
+name: 101839
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101840
+name: 101840
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101841
+name: 101841
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101842
+name: 101842
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101843
+name: 101843
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101844
+name: 101844
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101845
+name: 101845
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101846
+name: 101846
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101847
+name: 101847
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101848
+name: 101848
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101849
+name: 101849
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101850
+name: 101850
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101851
+name: 101851
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101852
+name: 101852
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101853
+name: 101853
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101854
+name: 101854
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101855
+name: 101855
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101856
+name: 101856
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101857
+name: 101857
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101858
+name: 101858
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101859
+name: 101859
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101860
+name: 101860
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101861
+name: 101861
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101862
+name: 101862
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101863
+name: 101863
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101864
+name: 101864
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101865
+name: 101865
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101866
+name: 101866
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101867
+name: 101867
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101868
+name: 101868
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101869
+name: 101869
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101870
+name: 101870
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101871
+name: 101871
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101872
+name: 101872
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101873
+name: 101873
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101874
+name: 101874
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101875
+name: 101875
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101876
+name: 101876
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101877
+name: 101877
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101878
+name: 101878
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101879
+name: 101879
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101880
+name: 101880
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101881
+name: 101881
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101882
+name: 101882
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101883
+name: 101883
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101884
+name: 101884
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101885
+name: 101885
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101886
+name: 101886
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101887
+name: 101887
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101888
+name: 101888
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101889
+name: 101889
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101890
+name: 101890
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101891
+name: 101891
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101892
+name: 101892
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101893
+name: 101893
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101894
+name: 101894
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101895
+name: 101895
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101896
+name: 101896
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101897
+name: 101897
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101898
+name: 101898
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101899
+name: 101899
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101900
+name: 101900
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101901
+name: 101901
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101902
+name: 101902
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101903
+name: 101903
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101904
+name: 101904
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101905
+name: 101905
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101906
+name: 101906
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101907
+name: 101907
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101908
+name: 101908
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101909
+name: 101909
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101910
+name: 101910
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101911
+name: 101911
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101912
+name: 101912
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101913
+name: 101913
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101914
+name: 101914
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101915
+name: 101915
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101916
+name: 101916
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101917
+name: 101917
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101918
+name: 101918
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101919
+name: 101919
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101920
+name: 101920
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101921
+name: 101921
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101922
+name: 101922
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101923
+name: 101923
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101924
+name: 101924
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101925
+name: 101925
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101926
+name: 101926
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101927
+name: 101927
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101928
+name: 101928
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101929
+name: 101929
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101930
+name: 101930
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101931
+name: 101931
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101932
+name: 101932
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101933
+name: 101933
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101934
+name: 101934
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101935
+name: 101935
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101936
+name: 101936
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101937
+name: 101937
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101938
+name: 101938
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101939
+name: 101939
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101940
+name: 101940
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101941
+name: 101941
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101942
+name: 101942
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101943
+name: 101943
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101944
+name: 101944
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101945
+name: 101945
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101946
+name: 101946
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101947
+name: 101947
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101948
+name: 101948
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101949
+name: 101949
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101950
+name: 101950
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101951
+name: 101951
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101952
+name: 101952
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101953
+name: 101953
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101954
+name: 101954
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101955
+name: 101955
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101956
+name: 101956
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101957
+name: 101957
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101958
+name: 101958
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101959
+name: 101959
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101960
+name: 101960
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101961
+name: 101961
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101962
+name: 101962
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101963
+name: 101963
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101964
+name: 101964
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101965
+name: 101965
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101966
+name: 101966
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101967
+name: 101967
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101968
+name: 101968
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101969
+name: 101969
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101970
+name: 101970
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101971
+name: 101971
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101972
+name: 101972
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101973
+name: 101973
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101974
+name: 101974
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101975
+name: 101975
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101976
+name: 101976
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101977
+name: 101977
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101978
+name: 101978
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101979
+name: 101979
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101980
+name: 101980
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101981
+name: 101981
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101982
+name: 101982
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101983
+name: 101983
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101984
+name: 101984
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101985
+name: 101985
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101986
+name: 101986
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101987
+name: 101987
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101988
+name: 101988
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101989
+name: 101989
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101990
+name: 101990
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101991
+name: 101991
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101992
+name: 101992
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101993
+name: 101993
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101994
+name: 101994
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101995
+name: 101995
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101996
+name: 101996
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101997
+name: 101997
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101998
+name: 101998
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:101999
+name: 101999
+namespace: phibase_identifier
+is_a: PHI:100000
+
+[Term]
+id: PHI:102000
+name: 102000
+namespace: phibase_identifier
+is_a: PHI:100000
+

@@ -1,0 +1,108 @@
+format-version: 1.0             
+date: 06:09:2012 17:07                        
+saved-by: hp 
+auto-generated-by: PHIbaseLoader, construct_phibase_obos.pl, v1.0  
+synonymtypedef: systematic_synonym "Systematic synonym" EXACT    
+default-namespace: phibase_condition          
+ontology: PHC
+
+[Term]
+id: PHC:012
+name: Sequence analysis of sensitive and resistant strains
+namespace: sequence_analysis_of_sensitive_and_resistant_strains
+
+[Term]
+id: PHC:013
+name: Altered gene expression
+namespace: altered_gene_expression
+
+[Term]
+id: PHC:014
+name: Altered gene regulation
+namespace: altered_gene_regulation
+
+[Term]
+id: PHC:015
+name: Overexpression
+namespace: overexpression
+
+[Term]
+id: PHC:016
+name: Silencing
+namespace: silencing
+
+[Term]
+id: PHC:017
+name: Mutation
+namespace: mutation
+
+[Term]
+id: PHC:018
+name: Characterised
+namespace: characterised
+
+[Term]
+id: PHC:019
+name: Gene disruption
+namespace: gene_disruption
+
+[Term]
+id: PHC:020
+name: Gene deletion
+namespace: gene_deletion
+
+[Term]
+id: PHC:021
+name: Complementation
+namespace: complementation
+
+[Term]
+id: PHC:022
+name: Biochemical evidence
+namespace: biochemical_evidence
+
+[Term]
+id: PHC:023
+name: Biochemical analysis
+namespace: biochemical_analysis
+
+[Term]
+id: PHC:024
+name: Functional test in host
+namespace: functional_test_in_host
+
+[Term]
+id: PHC:025
+name: Direct injection
+namespace: direct_injection
+
+[Term]
+id: PHC:026
+name: Down- and upregulation
+namespace: down-_and_upregulation
+
+[Term]
+id: PHC:027
+name: Downregulation
+namespace: downregulation
+
+[Term]
+id: PHC:028
+name: Transient expression
+namespace: transient_expression
+
+[Term]
+id: PHC:029
+name: Other evidence
+namespace: other_evidence
+
+[Term]
+id: PHC:030
+name: Sexual cross
+namespace: sexual_cross
+
+[Term]
+id: PHC:031
+name: Sequencing of resistance conferring allele
+namespace: sequencing_of_resistance_conferring_allele
+
