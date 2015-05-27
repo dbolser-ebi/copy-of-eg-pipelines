@@ -47,6 +47,7 @@ sub run {
   my $from_species = $self->param_required('source');
   my $to_species   = $self->param_required('species');
   my $log_file     = $self->param_required('log_file');
+  my $store_data   = $self->param_required('store_data');
   
   my $from_ga = Bio::EnsEMBL::Registry->get_adaptor($from_species, 'core', 'Gene');
   my $to_ga   = Bio::EnsEMBL::Registry->get_adaptor($to_species, 'core', 'Gene');
@@ -62,6 +63,10 @@ sub run {
   print $data "\nProjection log\n";
   print $data "\tfrom: $from_species ($from_db), $from_count protein-coding genes\n";
   print $data "\tto:   $to_species ($to_db), $to_count protein-coding genes\n";
+  
+  if ($store_data) {
+    $self->remove_existing($from_species);
+  }
   
   my $homologies = $self->fetch_homologies($from_species, $to_species);
   my $homology_count = scalar keys(%$homologies);
@@ -162,6 +167,20 @@ sub filter_homologies {
   }
   
   return \%filtered_homologies;
+}
+
+sub remove_existing {
+  my ($self, $from_species) = @_;
+  
+  my $from_species_text = ucfirst($from_species);
+  $from_species_text =~ s/_/ /g;
+  
+  my $dbh = $self->core_dbh();
+  my $sql =
+    "UPDATE gene SET description = NULL ".
+    "WHERE description LIKE '%[Source:Projected from $from_species_text%'";
+  
+  $dbh->do($sql) or $self->throw("Failed to execute: $sql");
 }
 
 sub project_description {
