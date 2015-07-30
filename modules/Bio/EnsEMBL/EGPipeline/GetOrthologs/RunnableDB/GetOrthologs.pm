@@ -102,24 +102,32 @@ sub run {
     my $output_dir  = $self->param('output_dir');
     my $output_file = $output_dir."/orthologs-$from_prod_sp-$to_prod_sp.tsv";
     my $datestring  = localtime();
+
+    my $division = 'Ensembl';
+    if ($from_meta->get_division()) {
+      $division = $from_meta->get_division() ; 
+    }
     
     open FILE , ">$output_file" or die "couldn't open file " . $output_file . " $!";
     print FILE "## " . $datestring . "\n";
     print FILE "## orthologs from $from_prod_sp to $to_prod_sp\n";
     print FILE "## division " . $compara . "\n";
     print FILE "## compara db " . $mlssa->dbc->dbname() . "\n";
+    print FILE "## Division " . $division . "\n"; 
 
     # Fetch homologies, returntype - hash of arrays
     my $from_sp_alias = $gdba->fetch_by_registry_name($from_sp)->name();
     my $homologies    = $ha->fetch_all_by_MethodLinkSpeciesSet($mlss);
     my $homologies_ct = scalar(@$homologies);
 
+    my $mod_identifier = $division;
+
     $self->warning("Retrieving $homologies_ct homologies of method link type $ml_type for mlss_id $mlss_id\n");
 
     foreach my $homology (@{$homologies}) {
        # 'from' member
        my $from_member      = $homology->get_Member_by_GenomeDB($from_gdb)->[0];
-       my $from_stable_id   = $from_member->stable_id();
+       my $from_stable_id   = $mod_identifier . ":" . $from_member->stable_id();
        my $from_perc_id     = $from_member->perc_id();
        my $from_gene        = $from_member->get_Transcript->get_Gene();
        my $from_translation = $from_member->get_Translation();
@@ -133,7 +141,7 @@ sub run {
        my $to_members        = $homology->get_Member_by_GenomeDB($to_gdb);
 
        foreach my $to_member (@$to_members) {
-          my $to_stable_id   = $to_member->stable_id();
+          my $to_stable_id   = $mod_identifier . ":" . $to_member->stable_id();
           my $to_perc_id     = $to_member->perc_id();
           my $to_gene        = $to_member->get_Transcript->get_Gene();
           my $to_translation = $to_member->get_Translation();
@@ -141,26 +149,28 @@ sub run {
           next if (!$to_translation);
           my $to_uniprot     = get_uniprot($to_translation);
 
+          my $from_identifier = $mod_identifier . ":" . $from_gene->stable_id;
+          my $to_identifier = $mod_identifier . ":" . $to_gene->stable_id;
 
           if (scalar(@$from_uniprot) == 0 && scalar(@$to_uniprot) == 0) {
-             print FILE "$from_prod_sp\t" . $from_gene->stable_id . "\t$from_stable_id\tno_uniprot\t$from_perc_id\t";
-             print FILE "$to_prod_sp\t" . $to_gene->stable_id . "\t$to_stable_id\tno_uniprot\t$to_perc_id\t" .$homology->description."\n";
+             print FILE "$from_prod_sp\t" . $from_identifier . "\t$from_stable_id\tno_uniprot\t$from_perc_id\t";
+             print FILE "$to_prod_sp\t" . $to_identifier . "\t$to_stable_id\tno_uniprot\t$to_perc_id\t" .$homology->description."\n";
           } elsif (scalar(@$from_uniprot) == 0) {
             foreach my $to_xref (@$to_uniprot) {
-             print FILE "$from_prod_sp\t" . $from_gene->stable_id . "\t$from_stable_id\tno_uniprot\t$from_perc_id\t";
-             print FILE "$to_prod_sp\t" . $to_gene->stable_id . "\t$to_stable_id\t$to_xref\t$to_perc_id\t" .$homology->description."\n";
+             print FILE "$from_prod_sp\t" . $from_identifier . "\t$from_stable_id\tno_uniprot\t$from_perc_id\t";
+             print FILE "$to_prod_sp\t" . $to_identifier . "\t$to_stable_id\t$to_xref\t$to_perc_id\t" .$homology->description."\n";
             }
          } elsif (scalar(@$to_uniprot) == 0) {
             foreach my $from_xref (@$from_uniprot) {
-               print FILE "$from_prod_sp\t" . $from_gene->stable_id . "\t$from_stable_id\t$from_xref\t$from_perc_id\t";
-               print FILE "$to_prod_sp\t" . $to_gene->stable_id . "\t$to_stable_id\tno_uniprot\t$to_perc_id\t" .$homology->description."\n";
+               print FILE "$from_prod_sp\t" . $from_identifier . "\t$from_stable_id\t$from_xref\t$from_perc_id\t";
+               print FILE "$to_prod_sp\t" . $to_identifier . "\t$to_stable_id\tno_uniprot\t$to_perc_id\t" .$homology->description."\n";
             }
          }
          else {
            foreach my $to_xref (@$to_uniprot) {
               foreach my $from_xref (@$from_uniprot) {
-                 print FILE "$from_prod_sp\t" . $from_gene->stable_id . "\t$from_stable_id\t$from_xref\t$from_perc_id\t";
-                 print FILE "$to_prod_sp\t" . $to_gene->stable_id . "\t$to_stable_id\t$to_xref\t$to_perc_id\t" .$homology->description."\n";
+                 print FILE "$from_prod_sp\t" . $from_identifier . "\t$from_stable_id\t$from_xref\t$from_perc_id\t";
+                 print FILE "$to_prod_sp\t" . $to_identifier . "\t$to_stable_id\t$to_xref\t$to_perc_id\t" .$homology->description."\n";
               }
            }
         } 
