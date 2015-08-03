@@ -59,11 +59,7 @@ if ( defined $opts->{dbname} ) {
 }
 else {
   $logger->info("Loading registry");
-  Bio::EnsEMBL::Registry->load_registry_from_db( -USER => $opts->{user},
-												 -PASS => $opts->{pass},
-												 -HOST => $opts->{host},
-												 -PORT => $opts->{port}
-  );
+  Bio::EnsEMBL::LookUp::LocalLookUp->register_all_dbs($opts->{host},$opts->{port},$opts->{user},$opts->{pass},$opts->{dbpattern});
 }
 $logger->info("Loading helper");
 my $lookup =
@@ -172,69 +168,66 @@ LINE: while ( my $line = <$INP> ) {
 
   # 0 PHI-base accession no,
   # 1 PHI-base accession,
-  # 2 Obsolete PHI accession,
-  # 3 DB_Type
-  # 4 Accession,
-  # 5 Obsolete EMBL accession,
-  # 6 Locus ID,
-  # 7 AA sequence #no EMBL#,
-  # 8 NT sequence #no EMBL#,
-  # 9 Associated strain,
-  # 10 Gene name,
-  # 11 Genome location,
-  # 12 Multiple mutation,
-  # 13 Pathogen NCBI Taxonomy ID,
-  # 14 Pathogen species,
-  # 15 Strain,
-  # 16 Disease name,
-  # 17 Monocot/Dicot plant,
-  # 18 Host NCBI Taxonomy ID,
-  # 19 Experimental host,
-  # 20 Function,
-  # 21 GO annotation,
-  # 22 Database,
-  # 23 Pathway,
-  # 24 Phenotype of mutant,
-  # 25 Mating defect prior to penetration,
-  # 26 Pre-penetration defect,
-  # 27 Penetration defect,
-  # 29 Post-penetration defect,
-  # 29 Vegetative spores,
-  # 30 Sexual spores,
-  # 31 In vitro growth,
-  # 32 Spore germination,
-  # 33 Essential gene (Lethal knockout),
-  # 34 Inducer,
-  # 35 CAS,
-  # 36 Host target,
-  # 37 Host response,
-  # 38 Experimental evidence,
-  # 39 Species Expert,
-  # 40 Entered by,
-  # 41 Manual (M) or textmining (T),
-  # 42 Literature ID,
-  # 43 Literature source,
-  # 44 DOI,
-  # 45 Full citation,
-  # 46 Author email,
-  # 47 Comments,
-  # 48 Reference
-  # 49 Year published
+  # 2 Database
+  # 3 Accession,
+  # 5 Locus ID,
+  # 6 AA sequence #no EMBL#,
+  # 7 NT sequence #no EMBL#,
+  # 8 Associated strain,
+  # 9 Gene name,
+  # 10 Genome location,
+  # 15 Multiple mutation,
+  # 16 Pathogen NCBI Taxonomy ID,
+  # 17 Pathogen species,
+  # 19 Strain,
+  # 20 Disease name,
+  # 21 Monocot/Dicot plant,
+  # 22 Host NCBI Taxonomy ID,
+  # 23 Experimental host,
+  # 28 Function,
+  # 29 GO annotation,
+  # 30 Database,
+  # 31 Pathway,
+  # 32 Phenotype of mutant,
+  # 33 Mating defect prior to penetration,
+  # 34 Pre-penetration defect,
+  # 35 Penetration defect,
+  # 36 Post-penetration defect,
+  # 38 Vegetative spores,
+  # 39 Sexual spores,
+  # 40 In vitro growth,
+  # 41 Spore germination,
+  # 42 Essential gene (Lethal knockout),
+  # 43 Inducer,
+  # 44 CAS,
+  # 45 Host target,
+  # 48 Host response,
+  # 49 Experimental evidence,
+  # 51 Species Expert,
+  # 52 Entered by,
+  # 53 Literature ID,
+  # 54 Literature source,
+  # 55 DOI,
+  # 56 Full citation,
+  # 57 Author email,
+  # 58 Comments,
+  # 59 Reference
+  # 60 Year published
   my @cols = split( "\t", $line );
 
   my $phibase_id      = $cols[1];
-  my $db_name         = $cols[3];
-  my $acc             = $cols[4];
-  my $locus           = $cols[6];
-  my $gene_name       = $cols[10];
-  my $tax_id          = $cols[13];
-  my $species_name    = $cols[14];
-  my $host_ids        = $cols[18];
-  my $host_names      = $cols[19];
-  my $phenotype_name  = $cols[24];
-  my $condition_names = $cols[38];
-  my $literature_ids  = $cols[42];
-  my $dois            = $cols[44];
+  my $db_name         = $cols[2];
+  my $acc             = $cols[3];
+  my $locus           = $cols[5];
+  my $gene_name       = $cols[9];
+  my $tax_id          = $cols[16];
+  my $species_name    = $cols[17];
+  my $host_ids        = $cols[22];
+  my $host_names      = $cols[23];
+  my $phenotype_name  = $cols[32];
+  my $condition_names = $cols[48];
+  my $literature_ids  = $cols[53];
+  my $dois            = $cols[56];
 
   for my $var ( $phibase_id, $acc, $tax_id, $phenotype_name ) {
 	if ( !defined $var ) {
@@ -376,9 +369,15 @@ LINE: while ( my $line = <$INP> ) {
 	my %fix_cond_divergences = (
 							'complementation' => 'gene complementation',
 							'mutation'        => 'gene mutation', );
+
+	if(!defined $condition_names || $condition_names eq '') {
+	  $msg = "No conditions supplied";
+	  $logger->warn($msg);
+	  next;
+	} 
 	$logger->debug("Processing condition(s) '$condition_names'");
 	for my $condition_full_name (
-						   split( /;/, lc( rm_sp($condition_names) ) ) )
+						   split( /[;\/]/, lc( rm_sp($condition_names) ) ) )
 	{
 	  $condition_full_name = $fix_cond_divergences{$condition_full_name}
 		if exists $fix_cond_divergences{$condition_full_name};
@@ -393,6 +392,12 @@ LINE: while ( my $line = <$INP> ) {
 		  last;
 		}
 	  }
+	}
+
+	if(!defined $translation_ass->{condition}{id} ||!defined $translation_ass->{condition}{label}) {
+	  $msg = "No valid conditions found: ".$condition_names;
+	  $logger->warn($msg);
+	  next;
 	}
 
 	#deal with the publications
@@ -562,16 +567,34 @@ q/delete from gene_attrib where attrib_type_id=317 and value='PHI'/ );
 		  }
 		} ## end for my $ass (@$asses)
 		$logger->debug(
-		  "Storing " . $phi_dbentry->display_id() . " on translation " .
-			$translation . " from " . $dba->species() .
-			" from " . $dba->dbc()->dbname() . "/" . $dba->species_id );
+		    "Storing " . $phi_dbentry->display_id() . " on translation " .
+		    $translation . " from " . $dba->species() .
+		    " from " . $dba->dbc()->dbname() . "/" . $dba->species_id );
+	      eval {
 		$dbentry_adaptor->store( $phi_dbentry, $translation,
-								 'Translation' );
-	  } ## end while ( my ( $phi, $asses...))
-	} ## end while ( my ( $translation...))
-	$logger->info( "Stored " . $xN .
-		 " xrefs on " . $tN . " translations from " . $dba->species() );
-  } ## end while ( my ( $genome, $translations...))
+					 'Translation' );
+	      };
+	      if($@) {
+		$logger->debug(
+		    "Storing " . $phi_dbentry->display_id() . " on translation " .
+		    $translation . " from " . $dba->species() .
+		    " from " . $dba->dbc()->dbname() . "/" . $dba->species_id.": ".$@ );
+		print Dumper($asses);
+	      }
+	} ## end while ( my ( $phi, $asses...))
+  } ## end while ( my ( $translation...))
+	$logger->info("Stored ".$xN." xrefs on ".$tN." translations from ".$dba->species());
+} ## end while ( my ( $genome, $translations...))
+#		  "Storing " . $phi_dbentry->display_id() . " on translation " .
+#			$translation . " from " . $dba->species() .
+#			" from " . $dba->dbc()->dbname() . "/" . $dba->species_id );
+#		$dbentry_adaptor->store( $phi_dbentry, $translation,
+#								 'Translation' );
+#	  } ## end while ( my ( $phi, $asses...))
+#	} ## end while ( my ( $translation...))
+#	$logger->info( "Stored " . $xN .
+#		 " xrefs on " . $tN . " translations from " . $dba->species() );
+#  } ## end while ( my ( $genome, $translations...))
 
   # now add the colours
 

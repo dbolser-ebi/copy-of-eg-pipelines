@@ -35,13 +35,19 @@ sub param_defaults {
 
 sub fetch_input {
   my ($self) = @_;
-  my $out_file = $self->param('out_file');
+  my $species       = $self->param('species');
+  my $results_dir   = $self->param('results_dir');
+  my $out_file_stem = $self->param('out_file_stem');
   
-  if (!defined $out_file) {
+  my $out_file;
+  if (defined $out_file_stem) {
+    $out_file = catdir($results_dir, "$species.$out_file_stem");
+  } else {
     $out_file = $self->generate_filename();
-    $self->param('out_file', $out_file);
-    $self->param('out_files', [$out_file]);
   }
+  
+  $self->param('out_file', $out_file);
+  $self->param('out_files', [$out_file]);
   open(my $fh, '>', $out_file) or $self->throw("Cannot open file $out_file: $!");
   $self->param('out_fh', $fh);
 }
@@ -52,30 +58,24 @@ sub generate_filename {
   my $species            = $self->param('species');
   my $file_type          = $self->param('file_type');
   my $results_dir        = $self->param('results_dir');
+  my $filename           = $self->param('filename');
   my $eg_dir_structure   = $self->param('eg_dir_structure');
   my $eg_filename_format = $self->param('eg_filename_format');
   
   if ($eg_dir_structure) {
-    my $division = $self->get_division();
-    $results_dir = catdir($results_dir, $division, $file_type, $species);
+    my ($division, $collection) = $self->get_division();
+    $results_dir = catdir($results_dir, $division, $file_type, $collection, $species);
     $self->param('results_dir', $results_dir);
- 
-    my $dba = $self->core_dba;
-
-    if($dba->is_multispecies()==1){
-      my ($results_dir1, $results_dir2) = split(/gff3\//, $results_dir); 
-      my $collection_db=$1 if($dba->dbc->dbname()=~/(.+)\_core/);
-      $results_dir = $results_dir1."gff3/".$collection_db."/".$results_dir2;
-    }
   }
 
   make_path($results_dir);
   
-  my $filename;
-  if ($eg_filename_format) {
-    $filename = $self->generate_eg_filename();
-  } else {
-    $filename = $self->generate_vb_filename();
+  if (!$filename) {
+    if ($eg_filename_format) {
+      $filename = $self->generate_eg_filename();
+    } else {
+      $filename = $self->generate_vb_filename();
+    }
   }
   
   return catdir($results_dir, $filename);
@@ -116,15 +116,16 @@ sub get_division {
   my ($self) = @_;
   
   my $dba = $self->core_dba;  
-  my $division;
-  if ($dba->dbc->dbname() =~ /(\w+)\_\d+_collection_/) {
+  my ($division, $collection);
+  if ($dba->dbc->dbname() =~ /(\w+)(\_[0-9a-zA-Z]+_collection)_/) {
     $division = $1;
+    $collection = "$division$2";
   } else {
     $division = $dba->get_MetaContainer->get_division();
     $division = lc($division);
     $division =~ s/ensembl//;
   }
-  return $division;
+  return ($division, $collection);
 }
 
 sub has_chromosome {

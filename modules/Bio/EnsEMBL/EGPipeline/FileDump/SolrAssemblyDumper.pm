@@ -83,7 +83,7 @@ sub run{
 
 	my $descr = join(" ", $t->coord_system_name ,  $t->seq_region_name, '(' . $t->length . ' bp)' ,  $scientific_name, 'assembly' , $insdc );
 
-	my $url = $species_url . "/Location/View?r=" . $t->seq_region_name . ':' . 1 . '-' . $t->length ;
+	my $url = '/' . $species_url . "/Location/View?r=" . $t->seq_region_name . ':' . 1 . '-' . $t->length ;
 
 	my $top_seq = {
 	    'id' => 'Genome/assembly/sequence/' . $t->seq_region_name,
@@ -122,7 +122,7 @@ sub run{
 		    if ($log){  $log->print( join( "\t", $l->coord_system_name, $l->get_seq_region_id, $l->seq_region_name, $l->length ) , "\n" ) }
 
 		    my $child_descr = join(" ", $l->coord_system_name ,  $l->seq_region_name, '('. $l->length . ' bp)' ,  $scientific_name, 'assembly' , $insdc );
-		    my $child_url = $species_url . "/Location/View?r=" . $l->seq_region_name . ':' . 1 . '-' . $l->length ;
+		    my $child_url = '/' . $species_url . "/Location/View?r=" . $l->seq_region_name . ':' . 1 . '-' . $l->length ;
 
 		    my $child_obj = {
 			'id' => 'Genome/assembly/sequence/' . $l->seq_region_name,

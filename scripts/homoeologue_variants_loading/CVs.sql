@@ -1,8 +1,8 @@
 -- atrib_type table
 
-INSERT INTO `attrib_type` VALUES (420,'A_homoeologue_locus','homoeologous locus in A','homoeologous locus in A');
-INSERT INTO `attrib_type` VALUES (421,'B_homoeologue_locus','homoeologous locus in B','homoeologous locus in B');
-INSERT INTO `attrib_type` VALUES (422,'D_homoeologue_locus','homoeologous locus in D','homoeologous locus in D');
+INSERT INTO `attrib_type` VALUES (450,'A_homoeologue_locus','homoeologous locus in A','homoeologous locus in A');
+INSERT INTO `attrib_type` VALUES (451,'B_homoeologue_locus','homoeologous locus in B','homoeologous locus in B');
+INSERT INTO `attrib_type` VALUES (452,'D_homoeologue_locus','homoeologous locus in D','homoeologous locus in D');
 
 -- attrib table
 

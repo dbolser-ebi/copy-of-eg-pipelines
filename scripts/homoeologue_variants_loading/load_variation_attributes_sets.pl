@@ -90,9 +90,9 @@ print STDERR "Parsing mapping done\n";
 
 # Todo: Make sure these IDs are right
 
-my $A_attrib_type_id = 420;
-my $B_attrib_type_id = 421;
-my $D_attrib_type_id = 422;
+my $A_attrib_type_id = 450;
+my $B_attrib_type_id = 451;
+my $D_attrib_type_id = 452;
 
 my $vs_AB = 4;
 my $vs_AD = 5;
@@ -201,11 +201,17 @@ foreach my $group_id (keys (%$attributes_href)) {
 	$get_variation_id_sth->execute($stable_id);
 	my ($variation_id) = $get_variation_id_sth->fetchrow_array();
 
-	if ($verbose) {
-	    print STDERR "inserting vvs row with variation_id, variation_set_id, $variation_id, $vs_id\n";
+	if (!defined $variation_id) {
+	    warn "Failed to fetch variant with stable_id, '$stable_id'!\n";
 	}
+	else {
 
-	$insert_vsv_sth->execute($variation_id,$vs_id);
+	    if ($verbose) {
+		print STDERR "inserting vvs row with variation_id, variation_set_id, $variation_id, $vs_id\n";
+	    }
+	    
+	    $insert_vsv_sth->execute($variation_id,$vs_id);
+	}
     }
 
 }
