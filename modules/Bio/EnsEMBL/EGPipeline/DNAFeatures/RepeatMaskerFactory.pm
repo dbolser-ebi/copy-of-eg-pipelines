@@ -27,10 +27,7 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
   return {
-    'max_seq_length'       => 1000000,
-    'repeatmasker_library' => {},
-    'logic_name'           => {},
-    'always_use_repbase'   => 0,
+    'max_seq_length' => 1000000,
   };
 }
 
@@ -38,17 +35,18 @@ sub write_output {
   my ($self) = @_;
   
   my $species = $self->param_required('species');
-  my $repeatmasker_library = $self->param_required('repeatmasker_library');
-  my $logic_name_lookup = $self->param_required('logic_name');
   my $always_use_repbase = $self->param_required('always_use_repbase');
+  my $rm_library = $self->param_required('rm_library');
+  my $rm_logic_name = $self->param_required('rm_logic_name');
   
   my @logic_names;
-  if ($always_use_repbase || (! exists $$repeatmasker_library{$species} && ! exists $$repeatmasker_library{'all'})) {
+  if ($always_use_repbase || (! exists $$rm_library{$species} && ! exists $$rm_library{'all'})) {
     push @logic_names, 'repeatmask';
   }
-  if (exists $$repeatmasker_library{$species} || exists $$repeatmasker_library{'all'}) {
-    if (exists $$logic_name_lookup{$species}) {
-      push @logic_names, $$logic_name_lookup{$species};
+  if (exists $$rm_library{$species} || exists $$rm_library{'all'}) {
+    if (exists $$rm_logic_name{$species} || exists $$rm_logic_name{'all'}) {
+      my $name = $$rm_logic_name{$species} || $$rm_logic_name{'all'};
+      push @logic_names, $name;
     } else {
       push @logic_names, 'repeatmask_customlib';
     }

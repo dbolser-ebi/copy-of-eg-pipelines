@@ -24,10 +24,10 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
   return {
-    'no_dust'              => 0,
-    'no_repeatmasker'      => 0,
-    'no_trf'               => 0,
-    'repeatmasker_library' => undef,
+    'no_dust'         => 0,
+    'no_repeatmasker' => 0,
+    'no_trf'          => 0,
+    'max_seq_length'  => 1000000,
   };
 }
 
@@ -35,9 +35,10 @@ sub run {
   my ($self) = @_;
   my $species = $self->param_required('species');
   my $dna_analyses = $self->param_required('dna_analyses');
-  my $repeatmasker_library = $self->param_required('repeatmasker_library');
-  my $logic_names = $self->param_required('logic_name');
   my $always_use_repbase = $self->param_required('always_use_repbase');
+  my $rm_library = $self->param_required('rm_library');
+  my $rm_sensitivity = $self->param_required('rm_sensitivity');
+  my $rm_logic_name = $self->param_required('rm_logic_name');
   my $pipeline_dir = $self->param_required('pipeline_dir');
   my $db_backup_file = $self->param('db_backup_file');
   
@@ -53,23 +54,59 @@ sub run {
       
     } elsif ($logic_name eq 'repeatmask') {
       unless ($self->param('no_repeatmasker')) {
-        if ($always_use_repbase || (! exists $$repeatmasker_library{$species} && ! exists $$repeatmasker_library{'all'})) {
+        # This is analysis with the repbase library. If the sensitivity is
+        # given then use that setting, otherwise the default is 'medium'.
+        
+        if ($always_use_repbase || (! exists $$rm_library{$species} && ! exists $$rm_library{'all'})) {
           if ($self->check_repeatmasker($analysis, $species_rm, $pipeline_dir)) {
-            $$analysis{'parameters'} .= " -species \"$species_rm\"";
+            $$analysis{'parameters'} .= " -species \"$species_rm\" ";
           }
+          
+          my $sensitivity = 'automatic';
+          if (exists $$rm_sensitivity{$species} || exists $$rm_sensitivity{'all'}) {
+            $sensitivity = $$rm_sensitivity{$species} || $$rm_sensitivity{'all'};
+          }
+          if ($sensitivity =~ /^automatic$/i) {
+            $sensitivity = 'medium';
+          }
+          $self->warning("Sensitivity for $species set to $sensitivity for RepBase library");
+          $$analysis{'parameters'} .= $self->rm_engine_params($sensitivity);
+          
           push @$filtered_analyses, $analysis;
         }
       }
       
     } elsif ($logic_name eq 'repeatmask_customlib') {
       unless ($self->param('no_repeatmasker')) {
-        if (exists $$repeatmasker_library{$species} || exists $$repeatmasker_library{'all'}) {
-          if (exists $$logic_names{$species}) {
-            $$analysis{'logic_name'} = $$logic_names{$species};
-          }
-          my $library = $$repeatmasker_library{$species} || $$repeatmasker_library{'all'};
+        # This is analysis with a custom repeat library. Such a library
+        # can be species-specific, or a single library can be used against
+        # all species to which the pipeline is applied.
+        # Similarly, the logic_name for the analysis and the sensitivity
+        # can be species-specific or universal. If the sensitivity is set
+        # to 'automatic' then the file sizes are used to have a stab at
+        # suitable parameters; note that this is species-specific, even if
+        # a single repeat library is applied to multiple species.
+        
+        if (exists $$rm_library{$species} || exists $$rm_library{'all'}) {
+          my $library = $$rm_library{$species} || $$rm_library{'all'};
           $$analysis{'db_file'} = $library;
-          $$analysis{'parameters'} .= ' -lib "'.$library.'"';
+          $$analysis{'parameters'} .= " -lib \"$library\" ";
+          
+          my $sensitivity = 'automatic';
+          if (exists $$rm_sensitivity{$species} || exists $$rm_sensitivity{'all'}) {
+            $sensitivity = $$rm_sensitivity{$species} || $$rm_sensitivity{'all'};
+          }
+          if ($sensitivity =~ /^automatic$/i) {
+            $sensitivity = $self->set_sensitivity($library);
+          }
+          $self->warning("Sensitivity for $species set to $sensitivity for library '$library'");
+          $$analysis{'parameters'} .= $self->rm_engine_params($sensitivity);
+          
+          if (exists $$rm_logic_name{$species} || exists $$rm_logic_name{'all'}) {
+            my $name = $$rm_logic_name{$species} || $$rm_logic_name{'all'};
+            $$analysis{'logic_name'} = $name;
+          }
+          
           push @$filtered_analyses, $analysis;
         }
       }
@@ -117,6 +154,69 @@ sub check_repeatmasker {
   } else {
     return 1;
   }
+}
+
+sub rm_engine_params {
+  my ($self, $sensitivity) = @_;
+  my $rm_engine_params = '';
+  
+  if ($sensitivity =~ /^very_?low$/i) {
+    $rm_engine_params = ' -engine ncbi -q ';
+  } elsif ($sensitivity =~ /^low$/i) {
+    $rm_engine_params = ' -engine ncbi ';
+  } elsif ($sensitivity =~ /^medium$/i) {
+    $rm_engine_params = ' -engine crossmatch -q ';
+  } elsif ($sensitivity =~ /^high$/i) {
+    $rm_engine_params = ' -engine crossmatch ';
+  } elsif ($sensitivity =~ /^very_?high$/i) {
+    $rm_engine_params = ' -engine crossmatch -s ';
+  }
+  
+  return $rm_engine_params;
+}
+
+sub set_sensitivity {
+  my ($self, $library) = @_;
+  my $large_genome = 1e9;
+  my $large_genome_medium_limit = 50e12;
+  my $small_genome_high_limit = 15e12;
+  my $small_genome_medium_limit = 100e12;
+  
+  my $sensitivity;
+  
+  # Get genome size.
+  my $dbh = $self->core_dbh();
+  my $seq_region_length_sql = '
+    SELECT sum(length) FROM
+      seq_region INNER JOIN
+      seq_region_attrib USING (seq_region_id) INNER JOIN
+      attrib_type USING (attrib_type_id)
+    WHERE code = "toplevel"
+  ;';
+  my ($seq_region_length) = $dbh->selectrow_array($seq_region_length_sql);
+  
+  # Get product of input and library size, as a rough guide
+  # to how much 'stuff' will need to be done by RepeatMasker.
+  my $library_size = -s $library;
+  my $size = $self->param('max_seq_length') * $library_size;
+  
+  if ($seq_region_length > $large_genome) {
+    if ($size < $large_genome_medium_limit) {
+      $sensitivity = 'medium';
+    } else {
+      $sensitivity = 'low';
+    }
+  } else {
+    if ($size < $small_genome_high_limit) {
+      $sensitivity = 'high';
+    } elsif ($size < $small_genome_medium_limit) {
+      $sensitivity = 'medium';
+    } else {
+      $sensitivity = 'low';
+    }
+  }
+  
+  return $sensitivity;
 }
 
 1;

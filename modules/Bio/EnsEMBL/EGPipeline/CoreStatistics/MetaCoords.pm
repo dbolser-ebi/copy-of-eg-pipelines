@@ -43,8 +43,17 @@ use warnings;
 use base qw/Bio::EnsEMBL::Production::Pipeline::Base/;
 use Bio::EnsEMBL::Utils::Exception qw(throw);
 
+sub param_defaults {
+  my ($self) = @_;
+  
+  return {
+    'db_type' => 'core',
+  };
+}
+
 sub run {
   my ($self) = @_;
+  my $db_type    = $self->param('db_type');
   my $backup_dir = $self->param('meta_coord_dir');
   
   my @table_names = qw(
@@ -66,7 +75,7 @@ sub run {
     transcript
   );
 
-  my $dba = $self->get_DBAdaptor;
+  my $dba = $self->get_DBAdaptor($db_type);
   my $dbc = $dba->dbc;
   my $species_id = $dba->species_id;
   

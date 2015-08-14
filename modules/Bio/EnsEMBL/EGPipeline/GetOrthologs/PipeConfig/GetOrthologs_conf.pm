@@ -15,7 +15,8 @@ sub default_options {
         
 		'registry'  	    => '',
         'pipeline_name'     => $self->o('ENV','USER').'_GetOrthologs_'.$self->o('ensembl_release'),
-        'output_dir'        => '/nfs/nobackup/ensemblgenomes/'.$self->o('ENV', 'USER').'/workspace/'.$self->o('pipeline_name'),     
+        'output_dir'        => '/nfs/ftp/pub/databases/ensembl/projections/'.$self->o('ENV', 'USER').'/workspace/'.$self->o('pipeline_name'),     
+
 		'method_link_type'  => 'ENSEMBL_ORTHOLOGUES',
 
         # hive_capacity values for analysis
