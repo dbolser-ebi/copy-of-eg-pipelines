@@ -40,7 +40,6 @@ sub run {
   my $clean_up      = $self->param_required('clean_up');
   my $length_file   = $self->param_required('length_file');
   my $bam_file      = $self->param_required('merged_bam_file');
-  my $ini_file      = $self->param_required('ini_file');
   
   my $wig_file = "$bam_file.wig";
   (my $bw_file = $bam_file) =~ s/\.bam$/\.bw/;
@@ -62,13 +61,11 @@ sub run {
     " $wig_file ".
     " $length_file ".
     " $bw_file ";
-  system($bw_cmd) == 0 || $self->throw("Cannot execute $wig_cmd");
+  system($bw_cmd) == 0 || $self->throw("Cannot execute $bw_cmd");
 
   if ($clean_up) {
     unlink $wig_file;
   }
-  
-  $self->update_inifile($ini_file, $bam_file, $bw_file);
   
   $self->param('bw_file', $bw_file);
 }
@@ -76,27 +73,11 @@ sub run {
 sub write_output {
   my ($self) = @_;
   
-  $self->dataflow_output_id({'bw_file' => $self->param('bw_file')}, 1);
-}
-
-sub update_inifile {
-  my ($self, $ini_file, $bam_file, $bw_file) = @_;
+  my $dataflow_output = {
+    'bw_file' => $self->param('bw_file'),
+  };
   
-  open (my $read_fh, '<', $ini_file) or die "Failed to open file '$ini_file'";
-  my $ini_text;
-  {
-    local $/;
-    $ini_text = <$read_fh>;
-  }
-  close($read_fh);
-  
-  $ini_text =~ s/ENSEMBL_INTERNAL_BAM_SOURCES/ENSEMBL_INTERNAL_BIGWIG_SOURCES/m;
-  $ini_text =~ s/$bam_file/$bw_file/m;
-  $ini_text =~ s/source_type\s*=\s*bam/source_type = bigWig/m;
-  
-  open (my $write_fh, '>', $ini_file) or die "Failed to open file '$ini_file'";
-  print $write_fh $ini_text;
-  close($write_fh);
+  $self->dataflow_output_id($dataflow_output, 1);
 }
 
 1;

@@ -22,9 +22,6 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor);
-use File::Spec::Functions qw(catdir);
-
 sub param_defaults {
   my ($self) = @_;
   
@@ -71,27 +68,12 @@ sub fetch_input {
 sub run {
   my ($self) = @_;
   
-  my $mode        = $self->param_required('mode');
-  my $work_dir    = $self->param_required('work_directory');
-  my $genome_file = $self->param_required('genome_file');
   my $aligner     = $self->param_required('aligner_object');
+  my $genome_file = $self->param_required('genome_file');
+  my $seq_file_1  = $self->param_required('seq_file_1');
+  my $seq_file_2  = $self->param('seq_file_2');
+  my $sam_file    = $self->param_required('sam_file');
   my $clean_up    = $self->param_required('clean_up');
-  
-  my ($seq_file_1, $seq_file_2, $sam_file);
-  
-  if ($mode eq 'file') {
-    $seq_file_1 = $self->param_required('split_file');
-    $sam_file = "$seq_file_1.sam";
-    
-  } elsif ($mode eq 'study') {
-    my $run_acc  = $self->param_required('run_acc');
-    ($seq_file_1, $seq_file_2) = $self->retrieve_files($work_dir, $run_acc);
-    $sam_file = catdir($work_dir, "$run_acc.sam");
-    
-  } else {
-    $self->throw("Unrecognised mode of operation, '$mode'");
-    
-  }
   
   $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
   my $bam_file = $aligner->sam_to_bam($sam_file);
@@ -106,7 +88,6 @@ sub write_output {
   
   my $dataflow_output = {
     'bam_file' => $self->param('bam_file'),
-    'merge_id' => $self->param('merge_id'),
   };
   
   $self->dataflow_output_id($dataflow_output, 1);
@@ -135,67 +116,6 @@ sub max_intron_length {
   }
   
   return $max_intron_length;
-}
-
-sub retrieve_files {
-  my ($self, $work_dir, $run_acc) = @_;
-  
-  my $run_adaptor = get_adaptor('Run');
-  my ($run) = @{$run_adaptor->get_by_accession($run_acc)};
-  my @files = @{$run->files()};
-  
-  my $experiment = $run->experiment();
-  my $paired = defined $experiment->design()->{LIBRARY_DESCRIPTOR}{LIBRARY_LAYOUT}{PAIRED};
-  
-  my ($seq_file_1, $seq_file_2);
-  
-  if ($paired) {
-    if (scalar(@files) != 2) {
-	    $self->throw("A paired read experiment can only have 2 files");
-    }
-    
-    $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq");
-    $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq");
-    
-    if (-e $seq_file_2) {
-      $self->warning("File '$seq_file_2' exists, and will be deleted");
-      #unlink $seq_file_2;
-    }
-  } else {
-    $seq_file_1 = catdir($work_dir, "$run_acc\_all.fastq");
-  }
-    
-  if (-e $seq_file_1) {
-    $self->warning("File '$seq_file_1' exists, and will be deleted");
-    #unlink $seq_file_1;
-  }
-  
-  for my $file (@files) {
-    my $file_name = $file->file_name();
-    
-    if (index($file_name, '.fastq') != -1) {
-      my $fq = $file->retrieve($work_dir);
-      my $seq_file = $seq_file_1;
-      
-      if ($paired) {
-        if (index($file_name, '_1.fastq') != -1) {
-          $seq_file = $seq_file_1;
-        } elsif (index($file_name, '_2.fastq') != -1) {
-          $seq_file = $seq_file_2;
-        } else {
-          $self->throw("Cannot process paired end file '$file_name'");
-        }
-      }
-      
-      my $cmd = "zcat $fq >> $seq_file";
-      system($cmd) == 0 || $self->throw("Cannot execute $cmd");
-      #unlink $fq;
-    } else {
-      $self->throw("Cannot process file '$file_name'");
-    }
-  }
-  
-  return ($seq_file_1, $seq_file_2);
 }
 
 1;

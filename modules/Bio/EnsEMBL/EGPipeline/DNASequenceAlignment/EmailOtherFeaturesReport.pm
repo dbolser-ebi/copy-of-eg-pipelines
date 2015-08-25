@@ -50,11 +50,12 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   
-  my $species    = $self->param_required('species');
-  my $mode       = $self->param_required('mode');
-  my $aligner    = $self->param_required('aligner');
-  my $data_type  = $self->param_required('data_type');
-  my $logic_name = $self->param_required('logic_name');
+  my $species      = $self->param_required('species');
+  my $file         = $self->param('file');
+  my $file_species = $self->param('file_species');
+  my $aligner      = $self->param_required('aligner');
+  my $data_type    = $self->param_required('data_type');
+  my $logic_name   = $self->param_required('logic_name');
   
   my $dba = $self->get_DBAdaptor($self->param_required('db_type'));
   my $dbh = $dba->dbc->db_handle();
@@ -69,17 +70,15 @@ sub fetch_input {
     "The DNA Sequence Alignment pipeline has completed for $species, ".
     "using $data_type sequences, and the $aligner aligner. ";
   
-  if ($mode eq 'file') {
-    my $seq_file     = $self->param('seq_file');
-    my $species_file = $self->param('species_file');
-    
-    if (exists $$species_file{$species}) {
-      push @$seq_file, $$species_file{$species};
-    }
-    my $seq_files = join(', ', @$seq_file);
+  if (exists $$file_species{$species}) {
+    push @$file, $$file_species{$species};
+  }
+  
+  if (scalar(@$file)) {
+    my $files = join(', ', @$file);
   
     my ($seq_count, $seq_length) = (0, 0);
-    foreach my $fasta_file (@$seq_file) {
+    foreach my $fasta_file (@$file) {
       my $seqs = Bio::SeqIO->new(-format => 'Fasta', -file => $fasta_file);
       while (my $seq = $seqs->next_seq) {
         $seq_count++;
@@ -90,7 +89,7 @@ sub fetch_input {
     my $seq_hit_pcage = sprintf("%.0f", ($unique_hits/$seq_count)*100);
     
     $text .=
-      "Across all DNA files ($seq_files) there are $seq_count sequences ".
+      "Across all DNA files ($files) there are $seq_count sequences ".
       "with a total length of $mb_length Mb. ".
       "Of that total, $unique_hits unique hits ($seq_hit_pcage%) ".
       "were mapped to the genome.\n\n";
