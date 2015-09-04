@@ -28,13 +28,16 @@ use base (
 sub param_defaults {
   my ($self) = @_;
   
-  return {
+  my $param_defaults = {
     %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
     %{$self->Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpGenome::param_defaults},
     'dump_level' => 'toplevel',
     'data_type'  => 'scaffolds',
     'file_type'  => 'fa',
-  };
+  }
+  $$param_defaults{'repeat_masking'} = 'soft';
+  
+  return $param_defaults;
 }
 
 sub run {
