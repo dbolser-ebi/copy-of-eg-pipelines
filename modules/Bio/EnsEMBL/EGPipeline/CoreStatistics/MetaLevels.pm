@@ -43,8 +43,17 @@ use warnings;
 
 use base qw/Bio::EnsEMBL::Production::Pipeline::Base/;
 
+sub param_defaults {
+  my ($self) = @_;
+  
+  return {
+    'db_type' => 'core',
+  };
+}
+
 sub run {
   my ($self) = @_;
+  my $db_type = $self->param('db_type');
   
   my @feature_types = qw(
     gene
@@ -58,7 +67,7 @@ sub run {
     simple_feature
   );
 
-  my $dba = $self->get_DBAdaptor;
+  my $dba = $self->get_DBAdaptor($db_type);
 	my $ma = $dba->get_MetaContainer();
 	my @not_inserted;
 

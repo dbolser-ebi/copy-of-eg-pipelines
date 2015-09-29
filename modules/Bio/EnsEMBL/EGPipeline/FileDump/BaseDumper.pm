@@ -28,6 +28,7 @@ use File::Spec::Functions qw(catdir);
 sub param_defaults {
   return {
     'db_type'            => 'core',
+    'gene_centric'       => 0,
     'eg_dir_structure'   => 0,
     'eg_filename_format' => 0,
   };
@@ -35,6 +36,15 @@ sub param_defaults {
 
 sub fetch_input {
   my ($self) = @_;
+  
+  if (defined $self->param('escape_branch') and 
+      $self->input_job->retry_count >= $self->input_job->analysis->max_retry_count) 
+  {
+    $self->dataflow_output_id($self->input_id, $self->param('escape_branch'));
+    $self->input_job->autoflow(0);
+    $self->complete_early("Failure probably due to memory limit, retrying with a higher limit.");
+  }
+  
   my $species       = $self->param('species');
   my $results_dir   = $self->param('results_dir');
   my $out_file_stem = $self->param('out_file_stem');
@@ -48,8 +58,14 @@ sub fetch_input {
   
   $self->param('out_file', $out_file);
   $self->param('out_files', [$out_file]);
-  open(my $fh, '>', $out_file) or $self->throw("Cannot open file $out_file: $!");
-  $self->param('out_fh', $fh);
+}
+
+sub write_output {
+  my ($self) = @_;
+  
+  foreach my $out_file (@{$self->param('out_files')}) {
+    $self->dataflow_output_id({out_file => $out_file}, 1);
+  }
 }
 
 sub generate_filename {
@@ -84,7 +100,7 @@ sub generate_filename {
 sub generate_eg_filename {
   my ($self) = @_;
   
-  my $species  = $self->param('species');
+  my $species   = $self->param('species');
   my $file_type = $self->param('file_type');
   
   my $dba = $self->core_dba;
@@ -99,15 +115,23 @@ sub generate_eg_filename {
 sub generate_vb_filename {
   my ($self) = @_;
   
-  my $species  = $self->param('species');
-  my $data_type = $self->param('data_type');
-  my $file_type = $self->param('file_type');
+  my $species      = $self->param('species');
+  my $data_type    = $self->param('data_type');
+  my $file_type    = $self->param('file_type');
+  my $gene_centric = $self->param('gene_centric');
   
   $species =~ s/_/-/;
+  $species =~ s/[A-Z]$//;
   my $dba = $self->core_dba;
   my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
-  my $gene_set = $dba->get_MetaContainer()->single_value_by_key('genebuild.version');
-  my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$gene_set.$file_type";
+  $strain =~ s/\s+/\-/g;
+  my $version;
+  if ($gene_centric) {
+    $version = $dba->get_MetaContainer()->single_value_by_key('genebuild.version');
+  } else {
+    $version = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
+  }
+  my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$version.$file_type";
   
   return $filename;
 }
@@ -126,33 +150,6 @@ sub get_division {
     $division =~ s/ensembl//;
   }
   return ($division, $collection);
-}
-
-sub has_chromosome {
-  my ($self, $dba) = @_;
-  my $helper = $dba->dbc->sql_helper();
-  my $sql = q{
-    SELECT COUNT(*) FROM
-    coord_system cs INNER JOIN
-    seq_region sr USING (coord_system_id) INNER JOIN
-    seq_region_attrib sa USING (seq_region_id) INNER JOIN
-    attrib_type at USING (attrib_type_id)
-    WHERE cs.species_id = ?
-    AND at.code = 'karyotype_rank'
-  };
-  my $count = $helper->execute_single_result(-SQL => $sql, -PARAMS => [$dba->species_id()]);
-  
-  $dba->dbc->disconnect_if_idle();
-  
-  return $count;
-}
-
-sub write_output {
-  my ($self) = @_;
-  
-  foreach my $out_file (@{$self->param('out_files')}) {
-    $self->dataflow_output_id({out_file => $out_file}, 1);
-  }
 }
 
 1;
