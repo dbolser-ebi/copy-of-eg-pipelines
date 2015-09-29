@@ -54,7 +54,8 @@ sub fetch_input {
   my $dba = $self->get_DBAdaptor($self->param_required('db_type'));
   my $dbh = $dba->dbc->db_handle();
   
-  my $text;
+  my $counts;
+  my @logic_names;
   
   if ($run_cmscan) {
     my $rfam_logic_name   = $self->param_required('rfam_logic_name');
@@ -71,21 +72,40 @@ sub fetch_input {
     } else {
       $logic_name = 'cmscan_custom';
     }
+    push @logic_names, $logic_name;
     
-    my ($unique, $low_conf, $high_conf) = $self->report_counts($dbh, $logic_name);
-    my $summary = $self->report_summary($dbh, $logic_name);
+    my ($unique, $low_conf, $high_conf) = $self->cmscan_counts($dbh, $logic_name);
     
-    my $text = 
-      "The RNA Features pipeline has completed for $species, having aligned ".
-      "$unique distinct covariance models with cmscan.\n\n".
+    $counts .= 
+      "The pipeline aligned $unique distinct covariance models with cmscan ".
+      "(logic_name: $logic_name).\n\n".
       "There are $low_conf low confidence (1e-3 >= e-value > 1e-6) alignments, ".
-      "and $high_conf high confidence (e-value <= 1e-6) alignments.\n\n$summary";
+      "and $high_conf high confidence (e-value <= 1e-6) alignments.\n\n";
   }
+  
+  if ($run_trnascan) {
+    my $logic_name = 'trnascan';
+    push @logic_names, $logic_name;
+    
+    my ($unique, $low_conf, $high_conf) = $self->trnascan_counts($dbh, $logic_name);
+    
+    $counts .= 
+      "The pipeline aligned $unique distinct tRNA models with tRNAscan-SE ".
+      "(logic_name: $logic_name).\n\n".
+      "There are $low_conf low confidence (COVE score < 40) alignments, ".
+      "and $high_conf high confidence (COVE score >= 40) alignments.\n\n";
+  }
+  
+  my $summary = $self->report_summary($dbh, \@logic_names);
+  my $text =
+    "The RNA Features pipeline has completed for $species.\n\n".
+    "$counts\n\n".
+    "$summary\n\n";
   
   $self->param('text', $text);
 }
 
-sub report_counts {
+sub cmscan_counts {
   my ($self, $dbh, $logic_name) = @_;
   
   my $unique_sql =
@@ -109,8 +129,34 @@ sub report_counts {
   return ($unique, $low_conf, $high_conf);
 }
 
-sub report_summary {
+sub trnascan_counts {
   my ($self, $dbh, $logic_name) = @_;
+  
+  my $unique_sql =
+    'SELECT COUNT(distinct hit_name) FROM '.
+    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
+    'WHERE logic_name = "'.$logic_name.'";';
+  my ($unique) = $dbh->selectrow_array($unique_sql);
+  
+  my $low_conf_sql =
+    'SELECT COUNT(*) FROM '.
+    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
+    'WHERE logic_name = "'.$logic_name.'" AND score < 40;';
+  my ($low_conf) = $dbh->selectrow_array($low_conf_sql);
+  
+  my $high_conf_sql =
+    'SELECT COUNT(*) FROM '.
+    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
+    'WHERE logic_name = "'.$logic_name.'" AND score >= 40;';
+  my ($high_conf) = $dbh->selectrow_array($high_conf_sql);
+  
+  return ($unique, $low_conf, $high_conf);
+}
+
+sub report_summary {
+  my ($self, $dbh, $logic_names) = @_;
+  
+  my $logic_name_list = "'" . join("','", @$logic_names) . "'";
   
   my $sql = "
     SELECT
@@ -135,6 +181,8 @@ sub report_summary {
       ) AS biotype,
       COUNT(*) AS count_of_alignments
     FROM dna_align_feature
+    INNER JOIN analysis USING (analysis_id)
+    WHERE logic_name in ($logic_name_list)
     GROUP BY biotype
     ORDER BY biotype
   ;";

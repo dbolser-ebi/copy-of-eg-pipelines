@@ -329,8 +329,8 @@ sub parse_result {
       $self->parse_alignment($structure, $subject_seq, $query_seq);
     
     my @extra_data = (
-      "Desc=\"$rna_desc\"",
       "Biotype=$biotype",
+      "Desc=\"$rna_desc\"",
       "Trunc=$trunc",
       "Accuracy=$accuracy",
       "Bias=$bias",
@@ -413,7 +413,7 @@ sub parse_alignment {
       } else {
         $cigar .= $count if $count > 1;
         $cigar .= $state;
-        $state   = 'I';
+        $state  = 'I';
         $count  = 1;
       }
     } else {
@@ -425,7 +425,7 @@ sub parse_alignment {
         } else {
           $cigar .= $count if $count > 1;
           $cigar .= $state;
-          $state   = 'D';
+          $state  = 'D';
           $count  = 1;
         }
       } else {
@@ -434,7 +434,7 @@ sub parse_alignment {
         } else {
           $cigar .= $count if $count > 1;
           $cigar .= $state;
-          $state   = 'M';
+          $state  = 'M';
           $count  = 1;
         }
       }

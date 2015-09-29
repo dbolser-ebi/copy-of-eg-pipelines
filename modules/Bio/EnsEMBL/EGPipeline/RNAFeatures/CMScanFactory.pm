@@ -39,18 +39,8 @@ sub write_output {
   my $rfam_logic_name = $self->param_required('rfam_logic_name');
   my $cm_file         = $self->param_required('cmscan_cm_file');
   my $logic_name      = $self->param_required('cmscan_logic_name');
-  my $cpu             = $self->param_required('cmscan_cpu');
   my $db_name         = $self->param_required('cmscan_db_name');
-  my $heuristics      = $self->param_required('cmscan_heuristics');
-  my $threshold       = $self->param_required('cmscan_threshold');
-  my $recreate_index  = $self->param_required('cmscan_recreate_index');
-  
-  my $parameters_hash = {
-    -cpu            => $cpu,
-    -heuristics     => $heuristics,
-    -threshold      => $threshold,
-    -recreate_index => $recreate_index,
-  };
+  my $parameters_hash = $self->param_required('parameters_hash');
   
   my @logic_names;
   
