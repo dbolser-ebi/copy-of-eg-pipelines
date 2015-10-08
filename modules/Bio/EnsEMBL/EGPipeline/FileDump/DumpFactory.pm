@@ -104,10 +104,10 @@ sub agp_assembly {
   
   if ($has_chromosomes) {
     $$output_ids{seq_level} = 'scaffold';
-    $$output_ids{data_type} = 'chromosome2scaffold';
+    $$output_ids{data_type} = 'scaffold2chromosome';
   } else {
     $$output_ids{seq_level} = 'contig';
-    $$output_ids{data_type} = 'scaffold2contig';
+    $$output_ids{data_type} = 'contig2scaffold';
   }
 }
 

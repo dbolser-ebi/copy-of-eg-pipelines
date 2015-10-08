@@ -256,6 +256,7 @@ sub Bio::EnsEMBL::Transcript::summary_as_hash {
   $summary{'id'}              = $self->display_id;
   $summary{'Parent'}          = $parent_gene->stable_id;
   $summary{'biotype'}         = $self->biotype;
+  $summary{'description'}     = $self->description;
   $summary{'version'}         = $self->version;
   
   # Add xrefs
