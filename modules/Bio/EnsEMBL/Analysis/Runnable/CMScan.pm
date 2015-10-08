@@ -328,18 +328,17 @@ sub parse_result {
     my ($ungapped_structure, $cigar) =
       $self->parse_alignment($structure, $subject_seq, $query_seq);
     
-    my @extra_data = (
-      "Biotype=$biotype",
-      "Desc=\"$rna_desc\"",
-      "Trunc=$trunc",
-      "Accuracy=$accuracy",
-      "Bias=$bias",
-      "GC=$gc",
-      "Significant=$significant",
-      "Structure=$ungapped_structure",
+    my %extra_data = (
+      'Biotype' => $biotype,
+      'Desc' => $rna_desc,
+      'Trunc' => $trunc,
+      'Accuracy' => $accuracy,
+      'Bias' => $bias,
+      'GC' => $gc,
+      'Significant' => $significant,
+      'Structure' => $ungapped_structure,
     );
-    
-    unshift @extra_data, "Accession=$rna_acc" if $rna_acc && $rna_acc ne '-';
+    $extra_data{'Accession'} = $rna_acc if $rna_acc && $rna_acc ne '-';
     
     my %hit =
     ( 
@@ -353,7 +352,7 @@ sub parse_result {
       -p_value      => $evalue,
       -hseqname     => $rna_name,
       -cigar_string => $cigar,
-      -extra_data   => join(';', @extra_data),
+      -extra_data   => \%extra_data,
     );
   
     return \%hit;

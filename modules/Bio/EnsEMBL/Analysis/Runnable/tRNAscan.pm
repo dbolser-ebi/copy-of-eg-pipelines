@@ -72,13 +72,16 @@ sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
   
-  my ($pseudo, $db_name) = rearrange(['PSEUDO', 'DB_NAME',], @args);
+  my ($pseudo, $search_mode, $db_name) =
+    rearrange(['PSEUDO', 'SEARCH_MODE', 'DB_NAME',], @args);
   
   $self->program('tRNAscan-SE') if (!$self->program);
   $self->options(' -Q ') if (!$self->options);
   
   $pseudo = 0 unless $pseudo;
   $self->pseudo($pseudo);
+  
+  $self->search_mode($search_mode);
   
   $db_name = 'TRNASCAN_SE' unless $db_name;
   $self->db_name($db_name);
@@ -90,6 +93,12 @@ sub pseudo {
   my $self = shift;
   $self->{'pseudo'} = shift if (@_);
   return $self->{'pseudo'};
+}
+
+sub search_mode {
+  my $self = shift;
+  $self->{'search_mode'} = shift if (@_);
+  return $self->{'search_mode'};
 }
 
 sub db_name {
@@ -119,6 +128,17 @@ sub run_analysis {
   my $options = $self->options;
   unless ($self->pseudo) {
     $options .= " --nopseudo ";
+  }
+  if ($self->search_mode) {
+    if ($self->search_mode =~ /arch/i) {
+      $options .= " --arch ";
+    } elsif ($self->search_mode =~ /bact/i) {
+      $options .= " --bact ";
+    } elsif ($self->search_mode =~ /general/i) {
+      $options .= " --general ";
+    } elsif ($self->search_mode =~ /organ/i) {
+      $options .= " --organ ";
+    }
   }
   $self->options($options);
   
@@ -198,9 +218,9 @@ sub parse_results {
     my $biotype = "tRNA";
     $biotype .= "_pseudogene" if $aa_name eq 'Pseudo';
     
-    my @extra_data = (
-      "Biotype=$biotype",
-      "Desc=\"$rna_desc\"",
+    my %extra_data = (
+      'Biotype' => $biotype,
+      'Desc' => $rna_desc,
     );
     
     if (defined $score) {
@@ -216,7 +236,7 @@ sub parse_results {
         -hseqname         => $rna_name,
         -cigar_string     => $cigar,
         -external_db_name => $self->db_name,
-        -extra_data       => join(';', @extra_data),
+        -extra_data       => \%extra_data,
       );
       push (@features, $feature);
     }
