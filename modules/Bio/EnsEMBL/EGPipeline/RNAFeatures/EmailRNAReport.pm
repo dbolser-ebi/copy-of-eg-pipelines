@@ -165,18 +165,18 @@ sub report_summary {
           external_data,
           INSTR(
             external_data,
-            'Biotype='
-          )+8
+            \"'Biotype' => \"
+          )+14
         ),
         INSTR(
           SUBSTRING(
             external_data,
             INSTR(
               external_data,
-              'Biotype='
-            )+8
+            \"'Biotype' => \"
+            )+14
           ),
-          ';'
+          \"'\"
         )-1
       ) AS biotype,
       COUNT(*) AS count_of_alignments
