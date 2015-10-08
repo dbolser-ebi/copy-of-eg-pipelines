@@ -3,6 +3,7 @@ package Bio::EnsEMBL::EGPipeline::GetOrthologs::PipeConfig::GetOrthologs_conf;
 use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
+#use base ('Bio::EnsEMBL::Hive::PipeConfig::EnsemblGeneric_conf');  
 use Bio::EnsEMBL::Hive::Version 2.2;
 use Bio::EnsEMBL::ApiVersion qw/software_version/;
 
@@ -14,7 +15,7 @@ sub default_options {
         %{ $self->SUPER::default_options() },
         
 		'registry'  	    => '',
-        'pipeline_name'     => $self->o('ENV','USER').'_GetOrthologs_'.$self->o('ensembl_release'),
+        'pipeline_name'  => $self->o('hive_dbname'),       
         'output_dir'        => '/nfs/ftp/pub/databases/ensembl/projections/'.$self->o('ENV', 'USER').'/workspace/'.$self->o('pipeline_name'),     
 
 		'method_link_type'  => 'ENSEMBL_ORTHOLOGUES',

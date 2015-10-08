@@ -34,7 +34,7 @@ sub param_defaults {
     'dump_level' => 'toplevel',
     'data_type'  => 'scaffolds',
     'file_type'  => 'fa',
-  }
+  };
   $$param_defaults{'repeat_masking'} = 'soft';
   
   return $param_defaults;
