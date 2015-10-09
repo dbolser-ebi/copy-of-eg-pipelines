@@ -144,6 +144,8 @@ sub filter_homologies {
   my %filtered_homologies;
   foreach my $homology (@{$homologies}) {
     if (exists $homology_types{$homology->description}) {
+      next unless $homology->is_tree_compliant() == 1;
+      
       my ($from_stable_id, @to_stable_ids);
       my $from_seen = 0;
       my $members = $homology->get_all_Members();
