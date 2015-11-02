@@ -29,44 +29,47 @@ use Bio::EnsEMBL::Gene;
 use Bio::EnsEMBL::Transcript;
 use Bio::EnsEMBL::Exon;
 use Bio::EnsEMBL::RepeatFeature;
-use EnsEMBL::REST::EnsemblModel::CDS;
-use EnsEMBL::REST::EnsemblModel::ExonTranscript;
-use Bio::EnsEMBL::EGPipeline::FileDump::SeqRegion;
-use Bio::EnsEMBL::EGPipeline::FileDump::UTR;
+
+use Path::Tiny qw(path);
 
 sub param_defaults {
   my ($self) = @_;
   
   return {
     %{$self->SUPER::param_defaults},
-    'feature_type'     => ['Gene', 'Transcript'],
-    'data_type'        => 'basefeatures',
-    'file_type'        => 'gff3',
-    'per_chromosome'   => 0,
-    'include_scaffold' => 1,
-    'logic_name'       => [],
+    'feature_type'       => ['Gene', 'Transcript'],
+    'data_type'          => 'basefeatures',
+    'file_type'          => 'gff3',
+    'per_chromosome'     => 0,
+    'include_scaffold'   => 1,
+    'logic_name'         => [],
+    'remove_id_prefix'   => 0,
+    'relabel_transcript' => 0,
+    'remove_separators'  => 0,
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $species          = $self->param_required('species');
-  my $db_type          = $self->param_required('db_type');
-  my $out_file         = $self->param_required('out_file');
-  my $out_fh           = $self->param_required('out_fh');
-  my $feature_types    = $self->param_required('feature_type');
-  my $per_chromosome   = $self->param_required('per_chromosome');
-  my $include_scaffold = $self->param_required('include_scaffold');
-  my $logic_names      = $self->param_required('logic_name');
+  my $species            = $self->param_required('species');
+  my $db_type            = $self->param_required('db_type');
+  my $out_file           = $self->param_required('out_file');
+  my $feature_types      = $self->param_required('feature_type');
+  my $per_chromosome     = $self->param_required('per_chromosome');
+  my $include_scaffold   = $self->param_required('include_scaffold');
+  my $logic_names        = $self->param_required('logic_name');
+  my $remove_id_prefix   = $self->param_required('remove_id_prefix');
+  my $relabel_transcript = $self->param_required('relabel_transcript');
+  my $remove_separators  = $self->param_required('remove_separators');
   
   my $reg = 'Bio::EnsEMBL::Registry';
-
+  
   my $sa = $reg->get_adaptor($species, $db_type, 'Slice');
   my $slices = $sa->fetch_all('toplevel');
   
   my $oa = $reg->get_adaptor('multi', 'ontology', 'OntologyTerm');
-  die "Can't get OntologyTerm Adaptor - check that database exist in the server specified" if (!$oa);
- 
+  
+  open(my $out_fh, '>', $out_file) or $self->throw("Cannot open file $out_file: $!");
   my $serializer = Bio::EnsEMBL::Utils::IO::GFFSerializer->new($oa, $out_fh);
   $serializer->print_main_header($slices);
   
@@ -84,20 +87,20 @@ sub run {
   }
   
   my %chr;
-  my $has_chromosome = $self->has_chromosome($sa);
+  my $has_chromosomes = $self->has_chromosomes($sa);
   
   foreach my $slice (@$slices) {
     if ($include_scaffold) {
-      my $feature = Bio::EnsEMBL::EGPipeline::FileDump::SeqRegion->new($slice, $provider);
-      $serializer->print_feature($feature);
+      $slice->source($provider) if $provider;
+      $serializer->print_feature($slice);
     }
     
     foreach my $feature_type (@$feature_types) {
       my $features = $self->fetch_features($feature_type, $adaptors{$feature_type}, $logic_names, $slice);
       $serializer->print_feature_list($features);
       
-      if ($per_chromosome && $has_chromosome) {
-        my $chr_serializer = $self->chr_serializer($out_file, $oa, $slice, \%chr);
+      if ($per_chromosome && $has_chromosomes) {
+        my $chr_serializer = $self->chr_serializer($oa, $slice, \%chr);
         $chr_serializer->print_feature_list($features);
       }
     }
@@ -111,7 +114,13 @@ sub run {
     push @$out_files, $chr{$slice_name}{'file'};
   }
   
-  $self->param('out_files', $out_files)
+  foreach my $out_file (@$out_files) {
+    $self->remove_id_prefix($out_file) if $remove_id_prefix;
+    $self->relabel_transcript($out_file) if $relabel_transcript;
+    $self->remove_separators($out_file) if $remove_separators;
+  }
+  
+  $self->param('out_files', $out_files);
 }
 
 sub fetch_features {
@@ -143,100 +152,24 @@ sub fetch_features {
 sub exon_features {
   my ($self, $transcripts) = @_;
   
-  my $cds_features = EnsEMBL::REST::EnsemblModel::CDS->new_from_Transcripts($transcripts);
+  my @cds_features;
   my @exon_features;
   my @utr_features;
   
   foreach my $transcript (@$transcripts) {
-    my $exons = $transcript->get_all_Exons();
-    my $exon_features = EnsEMBL::REST::EnsemblModel::ExonTranscript->build_all_from_Exons($exons);
-    push @exon_features, @$exon_features;
-    
-    my $five_prime = $transcript->five_prime_utr_Feature;
-    if ($five_prime) {
-      my $utrs = $self->utr_features($five_prime, 'five_prime_UTR', $transcript, $exons);
-      push @utr_features, @$utrs;
-    }
-    
-    my $three_prime  = $transcript->three_prime_utr_Feature;
-    if ($three_prime) {
-      my $utrs = $self->utr_features($three_prime, 'three_prime_UTR', $transcript, $exons);
-      push @utr_features, @$utrs;
-    }
+    push @cds_features,  @{ $transcript->get_all_CDS() };
+    push @exon_features, @{ $transcript->get_all_ExonTranscripts() };
+    push @utr_features,  @{ $transcript->get_all_five_prime_UTRs() };
+    push @utr_features,  @{ $transcript->get_all_three_prime_UTRs() };
   }
   
-  return [@exon_features, @$cds_features, @utr_features];
-}
-
-sub utr_features {
-  my ($self, $utr, $utr_type, $transcript, $exons) = @_;
-  my @utrs;
-  
-  foreach my $exon (@$exons) {
-    my $strand = $exon->strand;
-    
-    my %params = (
-      slice     => $exon->slice,
-      strand    => $strand,
-      source    => $transcript->source,
-      parent_id => 'transcript:'.$transcript->stable_id,
-      utr_type  => $utr_type,
-    );
-    
-    if ($utr->start <= $exon->start && $utr->end >= $exon->end) {
-      # Whole exon is UTR
-      $params{start} = $exon->start;
-      $params{end} = $exon->end;
-      
-    } else {
-      if ($utr_type eq 'five_prime_UTR') {
-        if ($strand == -1) {
-          if (is_between($utr->start, $exon->start, $exon->end)) {
-            $params{start} = $utr->start;
-            $params{end} = $exon->end;
-          }
-        } else {
-          if (is_between($utr->end, $exon->start, $exon->end)) {
-            $params{start} = $exon->start;
-            $params{end} = $utr->end;
-          }
-        }
-      } elsif ($utr_type eq 'three_prime_UTR') {
-        if ($strand == -1) {
-          if (is_between($utr->end, $exon->start, $exon->end)) {
-            $params{start} = $exon->start;
-            $params{end} = $utr->end;
-          }
-        } else {
-          if (is_between($utr->start, $exon->start, $exon->end)) {
-            $params{start} = $utr->start;
-            $params{end} = $exon->end;
-          }
-        }
-      }
-    }
-    
-    if (defined $params{start} && defined $params{end}) {
-      my $utr = Bio::EnsEMBL::EGPipeline::FileDump::UTR->new(%params);
-      push @utrs, $utr;
-    }
-  }
-  
-  return \@utrs;
-}
-
-sub is_between {
-  my ($a, $x, $y) = @_;
-  
-  if ($a >= $x && $a <= $y) {
-    return 1;
-  } else {
-    return 0;
-  }
+  return [@exon_features, @cds_features, @utr_features];
 }
 
 sub chr_serializer {
-  my ($self, $out_file, $oa, $slice, $chr) = @_;
+  my ($self, $oa, $slice, $chr) = @_;
+  
+  my $out_file = $self->param_required('out_file');
   
   my $slice_name;
   if ($slice->karyotype_rank > 0) {
@@ -258,6 +191,37 @@ sub chr_serializer {
   }
   
   return $$chr{$slice_name}{'serializer'};
+}
+
+sub remove_id_prefix {
+  my ($self, $out_file) = @_;
+  
+  my $file = path($out_file);
+  
+  my $data = $file->slurp;
+  $data =~ s/(ID|Parent)=\w+:/$1=/gm;
+  $file->spew($data);
+}
+
+sub relabel_transcript {
+  my ($self, $out_file) = @_;
+  
+  my $file = path($out_file);
+  
+  my $data = $file->slurp;
+  $data =~ s/\ttranscript\t(.*biotype=protein_coding;)/\tmRNA\t$1/gm;
+  $data =~ s/\ttranscript\t(.*biotype=(\w*RNA\w*);)/\t$2\t$1/gm;
+  $file->spew($data);
+}
+
+sub remove_separators {
+  my ($self, $out_file) = @_;
+  
+  my $file = path($out_file);
+  
+  my $data = $file->slurp;
+  $data =~ s/^###\n//m;
+  $file->spew($data);
 }
 
 sub Bio::EnsEMBL::Gene::summary_as_hash {
@@ -292,6 +256,7 @@ sub Bio::EnsEMBL::Transcript::summary_as_hash {
   $summary{'id'}              = $self->display_id;
   $summary{'Parent'}          = $parent_gene->stable_id;
   $summary{'biotype'}         = $self->biotype;
+  $summary{'description'}     = $self->description;
   $summary{'version'}         = $self->version;
   
   # Add xrefs
@@ -300,7 +265,7 @@ sub Bio::EnsEMBL::Transcript::summary_as_hash {
   foreach my $xref (sort {$a->dbname cmp $b->dbname} @$xrefs) {
     my $dbname = $xref->dbname;
     if ($dbname eq 'GO') {
-      push @go_xrefs, "$dbname:".$xref->display_id;
+      push @go_xrefs, $xref->display_id;
     } else {
       $dbname =~ s/^RefSeq.*/RefSeq/;
       $dbname =~ s/^Uniprot.*/UniProtKB/;
@@ -324,21 +289,6 @@ sub Bio::EnsEMBL::Exon::summary_as_hash {
   $summary{'strand'}          = $self->strand;
   $summary{'id'}              = $self->display_id;
   $summary{'constitutive'}    = $self->is_constitutive;
-  
-  return \%summary;
-}
-
-sub EnsEMBL::REST::EnsemblModel::CDS::summary_as_hash {
-  my ($self) = @_;
-  my %summary;
-  
-  $summary{'seq_region_name'} = $self->seq_region_name;
-  $summary{'start'}           = $self->seq_region_start;
-  $summary{'end'}             = $self->seq_region_end;
-  $summary{'strand'}          = $self->strand;
-  $summary{'Parent'}          = $self->parent_id;
-  $summary{'phase'}           = $self->phase;
-  $summary{'source'}          = $self->source;
   
   return \%summary;
 }

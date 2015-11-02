@@ -38,7 +38,7 @@ sub run {
   my ($self) = @_;
   my $species   = $self->param_required('species');
   my $db_type   = $self->param_required('db_type');
-  my $out_fh    = $self->param_required('out_fh');
+  my $out_file  = $self->param_required('out_file');
   my $data_type = $self->param_required('data_type');
   
   my $reg = 'Bio::EnsEMBL::Registry';
@@ -47,9 +47,10 @@ sub run {
   
   my $transcripts = $ta->fetch_all();
   
+  open(my $out_fh, '>', $out_file) or $self->throw("Cannot open file $out_file: $!");
   my $serialiser = Bio::EnsEMBL::Utils::IO::FASTASerializer->new( $out_fh );
 
-  for my $t ( @$transcripts ){
+  foreach my $t (sort { $a->stable_id cmp $b->stable_id } @$transcripts) {
 
 #easiest to make the change to the header directly in the underlying Bio::PrimarySeqI object
 
@@ -87,7 +88,7 @@ sub run {
  
 }
 
-sub rename_header{
+sub rename_header {
 #generate VectorBase format fasta header
 
     my $id = shift @_;
@@ -105,8 +106,8 @@ sub rename_header{
 		      join(":" , $t->seq_region_name() , $start ) . '-' . join(':' , $end , $t->strand() ),
 		      'gene:' . $t->get_Gene->stable_id(),
 	); 
-
-    return $header;
+  
+  return $header;
 }
 
 1;
