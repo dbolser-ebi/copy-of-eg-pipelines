@@ -13,10 +13,16 @@ sub default_options {
         # inherit other stuff from the base class
         %{ $self->SUPER::default_options() },      
 
-		'registry'  	   => '',
-        'pipeline_name'    => $self->o('hive_dbname'),       
+        'registry'         => '',   
+        'pipeline_name'    => $self->o('hive_db'),       
         'output_dir'       => '/nfs/ftp/pub/databases/ensembl/projections/'.$self->o('ENV', 'USER').'/workspace/'.$self->o('pipeline_name'),     
+
 		'method_link_type' => 'ENSEMBL_ORTHOLOGUES',
+
+     	## Set to '1' for eg! run 
+        #   default => OFF (0)
+        #   
+  	    'eg' 		 => 0,
 
         # hive_capacity values for analysis
 	    'getOrthologs_capacity'  => '50',
@@ -45,7 +51,7 @@ sub default_options {
         	 -port   => $self->o('hive_port'),
         	 -user   => $self->o('hive_user'),
         	 -pass   => $self->o('hive_password'),
-	         -dbname => $self->o('hive_dbname'),
+	         -dbname => $self->o('hive_db'),
         	 -driver => 'mysql',
       	},
 		
@@ -105,8 +111,9 @@ sub pipeline_analyses {
   
     {  -logic_name    => 'GetOrthologs',
        -module        => 'Bio::EnsEMBL::EGPipeline::GetOrthologs::RunnableDB::GetOrthologs',
-       -parameters    => {	'output_dir'             => $self->o('output_dir'),
-							'method_link_type'       => $self->o('method_link_type'),
+       -parameters    => {	'eg' 			   => $self->o('eg'),
+       						'output_dir'       => $self->o('output_dir'),
+							'method_link_type' => $self->o('method_link_type'),
     	 				 },
        -batch_size    =>  1,
        -rc_name       => 'default',
