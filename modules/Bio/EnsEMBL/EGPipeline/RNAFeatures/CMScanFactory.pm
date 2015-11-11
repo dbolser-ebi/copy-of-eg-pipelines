@@ -22,7 +22,6 @@ use strict;
 use warnings;
 
 use Bio::SeqIO;
-use Path::Tiny qw(path);
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
