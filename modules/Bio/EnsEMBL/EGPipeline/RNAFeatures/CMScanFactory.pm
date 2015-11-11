@@ -22,6 +22,7 @@ use strict;
 use warnings;
 
 use Bio::SeqIO;
+use Path::Tiny qw(path);
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
@@ -49,10 +50,11 @@ sub write_output {
     $$parameters_hash{'-cm_file'} = $rfam_cm_file;
     push @logic_names, $rfam_logic_name;
   } else {
+    $$parameters_hash{'-cm_file'} = $$cm_file{$species} || $$cm_file{'all'};
+    
     if (exists $$db_name{$species} || exists $$db_name{'all'}) {
       my $name = $$db_name{$species} || $$db_name{'all'};
       $$parameters_hash{'-db_name'} = $name;
-      $$parameters_hash{'-cm_file'} = $$cm_file{$species} || $$cm_file{'all'};
     }
     
     if (exists $$logic_name{$species} || exists $$logic_name{'all'}) {

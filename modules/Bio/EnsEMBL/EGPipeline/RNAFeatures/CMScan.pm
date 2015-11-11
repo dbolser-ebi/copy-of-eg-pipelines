@@ -26,17 +26,6 @@ use File::Path qw(make_path);
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisRun');
 
-sub param_defaults {
-  my $self = shift @_;
-  
-  return {
-    %{$self->SUPER::param_defaults},
-    'rfam_trna'      => 0,
-    'rfam_rrna'      => 1,
-    'rfam_blacklist' => [],
-  };
-}
-
 sub fetch_runnable {
   my ($self) = @_;
   
@@ -96,39 +85,6 @@ sub results_by_index {
   }
   
   return %seqnames;
-}
-
-sub filter_output {
-  my ($self, $runnable) = @_;
-  
-  if ($runnable->db_name eq 'RFAM') {
-    my $rfam_trna      = $self->param_required('rfam_trna');
-    my $rfam_rrna      = $self->param_required('rfam_rrna');
-    my $rfam_blacklist = $self->param_required('rfam_blacklist');
-    my %rfam_blacklist = map { $_ => 1 } @$rfam_blacklist;
-    
-    my @filtered;
-    
-    foreach my $feature (@{$runnable->output}) {
-      my ($acc, $biotype) = $feature->extra_data =~ /Accession=([^;]+).+Biotype=([^;]+)/;
-      
-      if (exists $rfam_blacklist{$acc}) {
-        $self->warning("Skipping blacklisted accession $acc on sequence ".$runnable->query->name);
-      } else {
-        if (! $rfam_trna && $biotype eq 'tRNA') {
-          $self->warning("Skipping tRNA $acc on sequence ".$runnable->query->name);
-        } elsif (! $rfam_rrna && $biotype eq 'rRNA') {
-          $self->warning("Skipping rRNA $acc on sequence ".$runnable->query->name);
-        } else {
-          push @filtered, $feature;
-        }
-      }
-    }
-    
-    # Output is cumulative, so need to manually erase existing results.
-    # (Note that calling the runnable's 'output' method will NOT work.
-    $runnable->{'output'} = \@filtered;
-  }
 }
 
 1;

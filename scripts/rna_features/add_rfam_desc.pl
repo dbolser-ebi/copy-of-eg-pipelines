@@ -7,8 +7,8 @@ use Path::Tiny qw(path);
 
 # This script adds descriptions to the Rfam.cm file, so that they
 # appear in the results when you use the file.
-# The cm_file should be downloaded from: 
-#  ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.cm
+# The cm_file should be downloaded and unzipped from: 
+#  ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/Rfam.cm.gz
 # The family_file should be downloaded and unzipped from:
 #  ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/database_files/family.txt.gz
 #
