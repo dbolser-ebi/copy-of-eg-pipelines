@@ -56,9 +56,10 @@ return 0;
 sub write_output {
     my ($self)  = @_;
 
-    my $compara = $self->param('compara');
-    my $from_sp = $self->param('source');
-    my $ml_type = $self->param('method_link_type');
+    my $compara = $self->param_required('compara');
+    my $from_sp = $self->param_required('source');
+    my $to_sp   = $self->param('target');
+    my $ml_type = $self->param_required('method_link_type');
 
     my $mlssa     = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'MethodLinkSpeciesSet');
     my $mlss_list = $mlssa->fetch_all_by_method_link_type($ml_type);
@@ -69,12 +70,18 @@ sub write_output {
 
        my @gdb_nm;    
    
-       foreach my $gdb (@$gdbs){
-          push @gdb_nm,$gdb->name();
-       }
+       foreach my $gdb (@$gdbs){ push @gdb_nm,$gdb->name();}
  
-       # Dataflow only MLSS_ID containing the source species 
-       $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2) if(grep (/$from_sp/, @gdb_nm));         
+       # Dataflow only MLSS_ID contains source species and target species (if provided)
+       if(grep (/$from_sp/, @gdb_nm)){
+         if(defined $to_sp){
+           foreach my $sp (@$to_sp){
+             $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2) if(grep (/$sp/, @gdb_nm));         
+           }
+	 } else{
+           $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2);         
+         }
+       }
    }
 return 0;
 }
