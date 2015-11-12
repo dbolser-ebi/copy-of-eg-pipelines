@@ -56,6 +56,9 @@ sub run {
   
   path($rfam_cm_file)->copy($filtered_cm_file);
   
+  # Remove any existing indexes
+  unlink glob "$filtered_cm_file.i*";
+  
   my $cm_path = path($filtered_cm_file);
   my $cm = $cm_path->slurp;
   
