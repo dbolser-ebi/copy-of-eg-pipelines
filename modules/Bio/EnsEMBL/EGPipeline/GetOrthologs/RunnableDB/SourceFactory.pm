@@ -58,11 +58,13 @@ sub write_output {
     foreach my $pair (keys $sp_config){
        my $compara	= $sp_config->{$pair}->{'compara'};
        my $source       = $sp_config->{$pair}->{'source'};
+       my $target       = $sp_config->{$pair}->{'target'};
 
       $self->dataflow_output_id(
 		{
-		 'compara'     => $compara,
-		 'source'      => $source, 
+		 'compara' => $compara,
+		 'source'  => $source, 
+  		 'target'  => $target,
 		},2); 
       }
 
