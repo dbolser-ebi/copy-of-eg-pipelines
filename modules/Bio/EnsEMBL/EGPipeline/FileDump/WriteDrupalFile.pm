@@ -211,7 +211,7 @@ sub file_type {
 sub file_format {
   my ($self, $dump_type) = @_;
   
-  my ($file_format) = $dump_type =~ /^([a-z]+)/;
+  my ($file_format) = $dump_type =~ /^([a-z0-9]+)/;
   if ($file_format eq 'fasta') {
     $file_format = ucfirst($file_format);
   } else {
