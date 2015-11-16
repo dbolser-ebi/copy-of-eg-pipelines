@@ -243,7 +243,7 @@ sub has_ancestor {
   
   $node = $node->parent;
   while ($node) {
-    return 1 if($node->name eq $name);
+    return 1 if ($node->name eq $name);
     $node = $node->parent;
   }
   return 0;
