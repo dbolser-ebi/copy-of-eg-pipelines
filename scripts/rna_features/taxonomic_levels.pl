@@ -7,9 +7,7 @@ use File::Path qw(make_path);
 use File::Spec::Functions qw(catdir);
 use Path::Tiny qw(path);
 
-use Bio::EnsEMBL::Compara::DBSQL::DBAdaptor;
-use Bio::EnsEMBL::Registry;
-Bio::EnsEMBL::Registry->no_version_check(1);
+use Bio::EnsEMBL::DBSQL::TaxonomyDBAdaptor;
 
 # This script uses a file that maps Rfam accessions to taxon IDs, in order to
 # determine the numbers of sequences assigned to an Rfam accession at a
@@ -62,15 +60,15 @@ $user   = 'ensro'                       unless $user;
 $pass   = ''                            unless $pass;
 $dbname = 'ncbi_taxonomy'               unless $dbname;
 
-my $dba = Bio::EnsEMBL::Compara::DBSQL::DBAdaptor->new
-(
+my $tax_dba = Bio::EnsEMBL::DBSQL::TaxonomyDBAdaptor->new(
   -host   => $host,
   -port   => $port,
   -user   => $user,
   -pass   => $pass,
   -dbname => $dbname,
 );
-my $nta = $dba->get_adaptor("NCBITaxon");
+
+my $nta = $tax_dba->get_TaxonomyNodeAdaptor();
 
 my @eg_levels;
 unless (scalar @levels) {
@@ -137,7 +135,7 @@ foreach my $line (split(/\n/, $rfam2taxonomy)) {
 my @rfam_acc = sort keys %rfam2taxonomy;
 
 foreach my $taxon_id (keys %taxa) {
-  my $node = $nta->fetch_node_by_taxon_id($taxon_id);
+  my $node = $nta->fetch_by_taxon_id($taxon_id);
   
   if (! defined($node)) {
     # Because our NCBI taxonomy database is more recent than that used to
@@ -172,12 +170,14 @@ foreach my $rfam_acc (@rfam_acc) {
   foreach my $taxon_id (sort keys %{$rfam2taxonomy{$rfam_acc}}) {
     my $subtotal = $rfam2taxonomy{$rfam_acc}{$taxon_id};
     
-    my $node = $nta->fetch_node_by_taxon_id($taxon_id);
+    my $node = $nta->fetch_by_taxon_id($taxon_id);
     
     # Keep track of the last common ancestor of the species we've seen.
     if (defined $lca) {
       if (! has_ancestor($node, $lca->name)) {
-        $lca = $nta->fetch_first_shared_ancestor_indexed($lca, $node);
+        if ($node->name ne $lca->name) {
+          $lca = $nta->fetch_common_ancestor($lca, $node);
+        }
       }
     } else {
       $lca = $node;
@@ -217,7 +217,7 @@ foreach my $rfam_acc (@rfam_acc) {
   
   my $lca_name;
   if (defined $lca) {
-    $lca_name = $lca->scientific_name;
+    $lca_name = $lca->name;
   } else {
     $lca_name = "beyond root ($root)";
   }
