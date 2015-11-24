@@ -7,7 +7,7 @@ use File::Path qw(make_path);
 use File::Spec::Functions qw(catdir);
 use Path::Tiny qw(path);
 
-use Bio::EnsEMBL::DBSQL::TaxonomyDBAdaptor;
+use Bio::EnsEMBL::Taxonomy::DBSQL::TaxonomyDBAdaptor;
 
 # This script uses a file that maps Rfam accessions to taxon IDs, in order to
 # determine the numbers of sequences assigned to an Rfam accession at a
@@ -60,7 +60,7 @@ $user   = 'ensro'                       unless $user;
 $pass   = ''                            unless $pass;
 $dbname = 'ncbi_taxonomy'               unless $dbname;
 
-my $tax_dba = Bio::EnsEMBL::DBSQL::TaxonomyDBAdaptor->new(
+my $tax_dba = Bio::EnsEMBL::Taxonomy::DBSQL::TaxonomyDBAdaptor->new(
   -host   => $host,
   -port   => $port,
   -user   => $user,
