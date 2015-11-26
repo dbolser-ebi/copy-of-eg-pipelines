@@ -16,34 +16,30 @@ sub default_options {
         'registry'         => '',   
         'pipeline_name'    => $self->o('hive_db'),       
         'output_dir'       => '/nfs/ftp/pub/databases/ensembl/projections/'.$self->o('ENV', 'USER').'/workspace/'.$self->o('pipeline_name'),     
-
 		'method_link_type' => 'ENSEMBL_ORTHOLOGUES',
 
      	## Set to '1' for eg! run 
         #   default => OFF (0)
-        #   
-  	    'eg' 		 => 0,
+  	    'eg' => 0,
 
         # hive_capacity values for analysis
 	    'getOrthologs_capacity'  => '50',
 
+        # 'target' & 'exclude' are mutually exclusive
+        #  only one of those should be defined if used 
 	 	'species_config' => 
 		{ 
-	 	  '1'=>{
-	 	  		# compara database to get orthologs from
-	 	  		#  'plants', 'protists', 'fungi', 'metazoa', 'multi' 
-	 	  		'compara' => '',
-	 	  		# source species  
-	 	  		'source'  => '', # 'schizosaccharomyces_pombe'  	  		
-				# target species
-				'target'  => undef, # ['aspergillus_nidulans','puccinia_graminis']
-				}, 
-
-#	 	  '2'=>{
-#	 	  		'compara'  => '',
-#	 	  		'source'   => '',  	
-#	 	  		'target'   => undef,  	
-#	 	  	    },  		
+          '1'	=>{
+                   # compara database to get orthologs from
+                   #  'plants', 'protists', 'fungi', 'metazoa', 'multi'
+          		   'compara'  => '',   
+                   # source species to project from
+                   'source'   => '',    
+                   # target species to project to
+                   'target'   => undef, 
+                   # target species to exclude in projection
+                   'exclude'  => undef, 
+                  },   
     	},
 
        'pipeline_db' => {  
