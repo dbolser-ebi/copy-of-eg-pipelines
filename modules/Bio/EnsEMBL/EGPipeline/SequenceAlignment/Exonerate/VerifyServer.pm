@@ -16,42 +16,19 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::Common::RunnableDB::CheckOFDatabase;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::Exonerate::VerifyServer;
 
 use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-sub param_defaults {
-  return {};
-}
-
 sub run {
-  my ($self) = @_;
-  my $species = $self->param_required('species');
+  my $self = shift @_;
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'otherfeatures');
-  eval {
-    $dba->dbc->connect();
-  };
-  if ($@) {
-    if ($@ =~ /Unknown database/) {
-      $self->param('db_exists', 0);
-    } else {
-      $self->throw($@);
-    }
-  } else {
-    $self->param('db_exists', 1);
-  }
-}
-
-sub write_output {
-  my ($self) = @_;
+  my $server_file = $self->param_required('server_file');
   
-  if ($self->param('db_exists')) {
-    $self->dataflow_output_id({'db_exists' => 1}, 2);
-  } else {
-    $self->dataflow_output_id({'db_exists' => 0}, 3);
+  while (! -e $server_file) {
+    sleep 60;
   }
 }
 
