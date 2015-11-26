@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::Common::RunnableDB::CheckOFDatabase;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::Exonerate::AnalysisFactory;
 
 use strict;
 use warnings;
@@ -29,30 +29,28 @@ sub param_defaults {
 sub run {
   my ($self) = @_;
   my $species = $self->param_required('species');
+  my $analyses = $self->param_required('exonerate_analyses');
+  my $analysis_name = $self->param_required('analysis_name');
+  my $logic_name = $self->param_required('logic_name');
+  my $db_backup_file = $self->param('db_backup_file');
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'otherfeatures');
-  eval {
-    $dba->dbc->connect();
-  };
-  if ($@) {
-    if ($@ =~ /Unknown database/) {
-      $self->param('db_exists', 0);
-    } else {
-      $self->throw($@);
-    }
-  } else {
-    $self->param('db_exists', 1);
+  my $filtered_analyses = [];
+  foreach my $analysis (@{$analyses}) {
+    next unless $analysis_name eq $$analysis{'logic_name'};
+    $$analysis{'logic_name'} = $logic_name;
+    $$analysis{'species'} = $species;
+    $$analysis{'db_backup_file'} = $db_backup_file if defined $db_backup_file;
+    push @$filtered_analyses, $analysis;
   }
+  $self->param('filtered_analyses', $filtered_analyses);
+  
 }
 
 sub write_output {
   my ($self) = @_;
   
-  if ($self->param('db_exists')) {
-    $self->dataflow_output_id({'db_exists' => 1}, 2);
-  } else {
-    $self->dataflow_output_id({'db_exists' => 0}, 3);
-  }
+  $self->dataflow_output_id($self->param('filtered_analyses'), 2);
+  
 }
 
 1;

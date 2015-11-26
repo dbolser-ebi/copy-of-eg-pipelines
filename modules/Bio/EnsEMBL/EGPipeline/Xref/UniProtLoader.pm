@@ -405,34 +405,31 @@ sub get_uniprot_for_upi {
   for my $ac (@uniprot_acs) {
 	my $uniprot = {};
 	$self->{uniprot_dba}->dbc()->sql_helper()->execute_no_return(
-	  -SQL => q/
-	  SELECT d.accession,
-  d.name,
-  REPLACE(NVL(sc1.text,sc3.text),'^'),
-  d.entry_type, gn.name, cgnt.type,
-  s.version
-FROM SPTR.dbentry d
-JOIN sequence s ON (s.dbentry_id=d.dbentry_id)
-LEFT OUTER JOIN SPTR.dbentry_2_description dd
-ON (dd.dbentry_id         = d.dbentry_id
-AND dd.description_type_id=1)
-LEFT OUTER JOIN SPTR.description_category dc1
-ON (dd.dbentry_2_description_id=dc1.dbentry_2_description_id
-AND dc1.category_type_id       =1)
-LEFT OUTER JOIN SPTR.description_subcategory sc1
-ON (dc1.category_id        = sc1.category_id
-AND sc1.subcategory_type_id=1)
-LEFT OUTER JOIN SPTR.description_category dc3
-ON (dd.dbentry_2_description_id=dc3.dbentry_2_description_id
-AND dc3.category_type_id       =3)
-LEFT OUTER JOIN SPTR.description_subcategory sc3
-ON (dc3.category_id        = sc3.category_id
-AND sc3.subcategory_type_id=1)
-left join gene g on ( d.dbentry_id = g.dbentry_id)
-left join gene_name gn on (g.gene_id = gn.gene_id)
-left join cv_gene_name_type cgnt on (gn.gene_name_type_id = cgnt.gene_name_type_id )
-WHERE d.accession = ?
-	/,
+-SQL => q/select  accession, name, type, description, gene_name, type, version
+  from (
+  select  d.dbentry_id, d.accession, d.name, gn.name as gene_name, gnt.type,
+          replace(dd1.descr, '^') as description, s.version, 
+          row_number () over (partition by d.accession, s.version
+                                  order by cd1.catg_type asc nulls first) rn
+      from sptr.dbentry d 
+      join sequence s
+        on (s.dbentry_id = d.dbentry_id)
+      left outer join sptr.dbentry_2_desc dd1
+        on (dd1.dbentry_id = d.dbentry_id) 
+      left outer join cv_desc cd1
+        on (dd1.desc_id = cd1.desc_id)
+      left outer join gene g on (d.dbentry_id = g.dbentry_id)
+      left outer join gene_name gn on (gn.GENE_ID = g.GENE_ID)  
+      left outer join cv_gene_name_type gnt on (gnt.GENE_NAME_TYPE_ID = gn.GENE_NAME_TYPE_ID)  
+     where d.accession = ?
+       and (   cd1.desc_id is null
+            or ( cd1.section_type = 'Main'
+             and cd1.catg_type in ('RecName', 'SubName')
+             and cd1.subcatg_type = 'Full')
+       )
+  )
+ where rn = 1
+ order by accession, version/,
 	  -PARAMS   => [$ac],
 	  -CALLBACK => sub {
 		my ( $ac, $name, $des, $type, $gene_name, $gene_name_type,
