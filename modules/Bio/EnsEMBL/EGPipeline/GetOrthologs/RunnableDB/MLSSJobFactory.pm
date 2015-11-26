@@ -59,6 +59,7 @@ sub write_output {
     my $compara = $self->param_required('compara');
     my $from_sp = $self->param_required('source');
     my $to_sp   = $self->param('target');
+    my $ex_sp   = $self->param('exclude');
     my $ml_type = $self->param_required('method_link_type');
 
     my $mlssa     = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'MethodLinkSpeciesSet');
@@ -68,20 +69,28 @@ sub write_output {
        my $mlss_id = $mlss->dbID();
        my $gdbs    = $mlss->species_set_obj->genome_dbs();
 
-       my @gdb_nm;    
-   
-       foreach my $gdb (@$gdbs){ push @gdb_nm,$gdb->name();}
+       my @gdbs_nm;    
+
+       foreach my $gdb (@$gdbs){ push @gdbs_nm,$gdb->name();}
+
+       # Dataflow only MLSS_ID containing 
+       # the exact source species
+       if(grep (/^$from_sp$/, @gdbs_nm)){
  
-       # Dataflow only MLSS_ID contains source species and target species (if provided)
-       if(grep (/$from_sp/, @gdb_nm)){
+        # Get non-source species
+         my $ns_sp;
+         foreach my $gdb_nm (@gdbs_nm){ $ns_sp = $gdb_nm unless($from_sp =~/^$gdb_nm/); }
+  
+         # target species provided
          if(defined $to_sp){
            foreach my $sp (@$to_sp){
-             $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2) if(grep (/$sp/, @gdb_nm));         
+             $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2) if(grep (/^$sp$/, @gdbs_nm));      
            }
-	 } else{
-           $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2);         
-         }
-       }
+	 } 
+ 	 else {
+           $self->dataflow_output_id({'mlss_id' => $mlss_id, 'compara' => $compara ,'from_sp' => $from_sp }, 2) unless (grep (/^$ns_sp$/, @$ex_sp));         
+	 }
+      }
    }
 return 0;
 }
