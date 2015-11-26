@@ -84,9 +84,7 @@ sub run {
     my $from_sp = $self->param('from_sp');
     my $to_sp ; 
 
-    foreach my $gdb (@$gdbs){
-      $to_sp = $gdb->name() if($gdb->name() !~/$from_sp/)    
-    }
+    foreach my $gdb (@$gdbs){ $to_sp = $gdb->name() if($gdb->name() !~/^$from_sp$/); }
    
     # Create Core adaptors
     my $from_meta      = Bio::EnsEMBL::Registry->get_adaptor($from_sp, 'core', 'MetaContainer');
