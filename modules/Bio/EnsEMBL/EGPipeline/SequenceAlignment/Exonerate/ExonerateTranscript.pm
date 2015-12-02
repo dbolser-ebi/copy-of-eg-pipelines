@@ -45,10 +45,11 @@ sub fetch_runnable {
     %parameters = %{$self->param('parameters_hash')};
   }
   
+  my $use_exonerate_server = $self->param('use_exonerate_server'),
   my $target_file = $self->param_required('queryfile');
   my $server_file = $self->param_required('server_file');
   
-  if (-e $server_file) {
+  if ($use_exonerate_server) {
     open my $fh, $server_file or $self->throw("Failed to open $server_file");
     my $server = <$fh>;
     close $fh;
