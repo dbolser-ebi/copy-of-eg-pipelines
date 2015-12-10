@@ -77,9 +77,11 @@ sub fetch_input {
       $seq_length += $seq->length;
     }
   }
-  my $mb_length = sprintf("%.0f", $seq_length/1000000);
+  my $length = sprintf("%.0f", $seq_length/1000000);
   my $mean_length = sprintf("%.1f", $seq_length/($seq_count*1000));
-    
+  my $length_unit = $data_type eq 'protein' ? 'million amino acids' : 'Mb';
+  my $mean_length_unit = $data_type eq 'protein' ? 'amino acids' : 'Kb';
+  
   my $dba = $self->get_DBAdaptor($self->param('db_type'));
   my $dbh = $dba->dbc->db_handle();
   
@@ -94,8 +96,8 @@ sub fetch_input {
   my $text = 
     "The exonerate pipeline has completed for $species, ".
     "using the sequence file(s): $fasta_files. ".
-    "That file has $seq_count sequences and a total length of $mb_length Mb, ".
-    "giving an average sequence length of $mean_length Kb. ".
+    "That file has $seq_count sequences and a total length of $length $length_unit, ".
+    "giving an average sequence length of $mean_length $mean_length_unit. ".
     "Of that total, $unique_hits ($seq_hit_pcage%) were mapped to the genome.\n\n";
   
   if ($self->param('make_genes')) {
