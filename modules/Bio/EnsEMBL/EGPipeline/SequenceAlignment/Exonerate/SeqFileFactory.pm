@@ -40,6 +40,8 @@ sub write_output {
     push @$seq_file, $$seq_file_species{$species};
   }
   
+  my $counter = 1;
+  
   foreach my $fasta_file (@$seq_file) {
     if ($data_type eq 'est' && $trim_est) {
       $fasta_file = $self->trim_est($fasta_file);
@@ -49,7 +51,10 @@ sub write_output {
       $self->reformat_header($fasta_file);
     }
     
-    my $dataflow_output = { 'fasta_file' => $fasta_file, };
+    my $dataflow_output = {
+      'fasta_file'  => $fasta_file,
+      'out_subdir' => 'dataset_'.$counter++,
+    };
     $self->dataflow_output_id($dataflow_output, $flow);
   }
 }
