@@ -65,10 +65,11 @@ sub run {
 	    # In Ensembl, 'N' is not supported in the cigar_line, replace with 'I'
 	    $alignment->{cigar_line} =~ s/N/I/g;
       
-	    # Don't think we want to swap 'D' and 'I'?
-	    #$alignment->{cigar_line} =~ s/I/Z/g;
-	    #$alignment->{cigar_line} =~ s/[D|N]/I/g;
-	    #$alignment->{cigar_line} =~ s/Z/D/g;
+	    # Swap 'D' and 'I' because STAR reports them relative to the
+      # hit sequence but we want them relative to the genome sequence.
+	    $alignment->{cigar_line} =~ s/I/Z/g;
+	    $alignment->{cigar_line} =~ s/[D|N]/I/g;
+	    $alignment->{cigar_line} =~ s/Z/D/g;
     }
   }
   
