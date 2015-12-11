@@ -46,6 +46,7 @@ sub param_defaults {
 sub fetch_input {
     my ($self) = @_;
 
+    my $eg         = $self->param_required('eg');
     # job parameter 
     my $mlss_id    = $self->param_required('mlss_id');
     my $compara    = $self->param_required('compara');
@@ -55,6 +56,7 @@ sub fetch_input {
     my $ml_type    = $self->param_required('method_link_type');
     my $output_dir = $self->param_required('output_dir');
 
+    $self->param('eg', $eg);
     $self->param('mlss_id', $mlss_id);
     $self->param('compara', $compara);
     $self->param('from_sp', $from_sp);
@@ -82,9 +84,7 @@ sub run {
     my $from_sp = $self->param('from_sp');
     my $to_sp ; 
 
-    foreach my $gdb (@$gdbs){
-      $to_sp = $gdb->name() if($gdb->name() !~/$from_sp/)    
-    }
+    foreach my $gdb (@$gdbs){ $to_sp = $gdb->name() if($gdb->name() !~/^$from_sp$/); }
    
     # Create Core adaptors
     my $from_meta      = Bio::EnsEMBL::Registry->get_adaptor($from_sp, 'core', 'MetaContainer');
@@ -122,6 +122,8 @@ sub run {
     $self->warning("Retrieving $homologies_ct homologies of method link type $ml_type for mlss_id $mlss_id\n");
 
     foreach my $homology (@{$homologies}) {
+       if($self->param('eg')){ next unless $homology->is_tree_compliant()==1; }
+
        # 'from' member
        my $from_member      = $homology->get_Member_by_GenomeDB($from_gdb)->[0];
        my $from_perc_id     = $from_member->perc_id();

@@ -20,7 +20,7 @@ sub default_options {
 
      	## Set to '1' for eg! run 
         #   default => OFF (0)
-  	    'eg' => 0,
+  	    'eg' => 1,
 
         # hive_capacity values for analysis
 	    'getOrthologs_capacity'  => '50',
@@ -29,17 +29,37 @@ sub default_options {
         #  only one of those should be defined if used 
 	 	'species_config' => 
 		{ 
-          '1'	=>{
-                   # compara database to get orthologs from
-                   #  'plants', 'protists', 'fungi', 'metazoa', 'multi'
-          		   'compara'  => '',   
-                   # source species to project from
-                   'source'   => '',    
-                   # target species to project to
-                   'target'   => undef, 
-                   # target species to exclude in projection
-                   'exclude'  => undef, 
-                  },   
+         'EPr' =>{ 'compara'  => 'protists',
+                   'source'   => 'dictyostelium_discoideum',
+                   'target'   => ['polysphondylium_pallidum_pn500', 'entamoeba_nuttalli_p19', 'entamoeba_invadens_ip1', , 'entamoeba_histolytica', 'entamoeba_dispar_saw760', 'dictyostelium_purpureum', 'dictyostelium_fasciculatum', 'acanthamoeba_castellanii_str_neff'],
+                   # No mlss_id for these species
+                   # 'entamoeba_histolytica_ku27', 'entamoeba_histolytica_hm_3_imss', 'entamoeba_histolytica_hm_1_imss_b', 'entamoeba_histolytica_hm_1_imss_a'
+                   'exclude'  => undef, },
+
+         'EM_1'=>{ 'compara'  => 'metazoa',
+                   'source'   => 'caenorhabditis_elegans',
+                   'target'   => undef,
+                   'exclude'  => undef, },
+
+         'EM_2'=>{ 'compara'  => 'metazoa',
+                   'source'   => 'drosophila_melanogaster',
+                   'target'   => undef,
+                   'exclude'  => undef, },
+
+         'EF_1'=>{ 'compara'  => 'fungi',
+                   'source'   => 'schizosaccharomyces_pombe',
+                   'target'   => undef,
+                   'exclude'  => ['saccharomyces_cerevisiae'], },
+
+         'EF_2'=>{ 'compara'  => 'fungi',
+                   'source'   => 'saccharomyces_cerevisiae',
+                   'target'   => undef,
+                   'exclude'  => ['schizosaccharomyces_pombe'], },
+
+         'EPl_1'=>{ 'compara'  => 'plants',
+                    'source'   => 'arabidopsis_thaliana',
+                    'target'   => undef,
+                    'exclude'  => ['caenorhabditis_elegans', 'drosophila_melanogaster', 'homo_sapiens', 'ciona_savignyi'], },
     	},
 
        'pipeline_db' => {  

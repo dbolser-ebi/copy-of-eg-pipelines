@@ -59,12 +59,14 @@ sub write_output {
        my $compara	= $sp_config->{$pair}->{'compara'};
        my $source       = $sp_config->{$pair}->{'source'};
        my $target       = $sp_config->{$pair}->{'target'};
+       my $exclude      = $sp_config->{$pair}->{'exclude'};
 
       $self->dataflow_output_id(
 		{
 		 'compara' => $compara,
 		 'source'  => $source, 
   		 'target'  => $target,
+  		 'exclude' => $exclude,
 		},2); 
       }
 

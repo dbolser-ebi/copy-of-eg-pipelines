@@ -159,8 +159,11 @@ sub exon_features {
   foreach my $transcript (@$transcripts) {
     push @cds_features,  @{ $transcript->get_all_CDS() };
     push @exon_features, @{ $transcript->get_all_ExonTranscripts() };
-    push @utr_features,  @{ $transcript->get_all_five_prime_UTRs() };
-    push @utr_features,  @{ $transcript->get_all_three_prime_UTRs() };
+    
+    if (!defined $transcript->get_all_SeqEdits()) {
+      push @utr_features,  @{ $transcript->get_all_five_prime_UTRs() };
+      push @utr_features,  @{ $transcript->get_all_three_prime_UTRs() };
+    }
   }
   
   return [@exon_features, @cds_features, @utr_features];
@@ -270,11 +273,31 @@ sub Bio::EnsEMBL::Transcript::summary_as_hash {
       $dbname =~ s/^RefSeq.*/RefSeq/;
       $dbname =~ s/^Uniprot.*/UniProtKB/;
       $dbname =~ s/^protein_id.*/NCBI_GP/;
-      push @db_xrefs,"$dbname:".$xref->display_id;
+      push @db_xrefs, "$dbname:".$xref->display_id;
     }
   }
   $summary{'Dbxref'} = \@db_xrefs if scalar(@db_xrefs);
   $summary{'Ontology_term'} = \@go_xrefs if scalar(@go_xrefs);
+  
+  # Check for seq-edits
+  my $seq_edits = $self->get_all_SeqEdits();
+  my @seq_edits;
+  foreach my $seq_edit (@$seq_edits) {
+    my ($start, $end, $alt_seq) =
+      ($seq_edit->start, $seq_edit->end, $seq_edit->alt_seq);
+    
+    my $note = "This transcript's sequence has been ";
+    if ($alt_seq eq '') {
+      $note .= "annotated with a deletion between positions $start and $end";
+    } elsif ($end < $start) {
+      $note .= "annotated with an insertion before position $start: $alt_seq";
+    } else {
+      $note .= "replaced between positions $start and $end: $alt_seq";
+    }
+    
+    push @seq_edits, $note;
+  }
+  $summary{'Note'} = \@seq_edits if scalar(@seq_edits);
   
   return \%summary;
 }
