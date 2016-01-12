@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::SplitSeqFile;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::SplitSeqFile;
 
 use strict;
 use warnings;

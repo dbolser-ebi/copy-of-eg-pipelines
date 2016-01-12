@@ -17,20 +17,7 @@ limitations under the License.
 
 =cut
 
-
-=pod
-
-=head1 NAME
-
-Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::EmailBamReport
-
-=head1 Author
-
-James Allen
-
-=cut
-
-package Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::EmailBamReport;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::EmailReport;
 
 use strict;
 use warnings;

@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::CreateBigWig;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::CreateBigWig;
 
 use strict;
 use warnings;

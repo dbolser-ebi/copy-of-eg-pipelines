@@ -16,20 +16,21 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::SequenceFactory;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::SequenceFactory;
 
 use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-use File::Basename qw(fileparse);
 use Path::Tiny qw(path);
 
 sub param_defaults {
   my ($self) = @_;
   
   return {
-    'trimest_exe' => '/nfs/panda/ensemblgenomes/external/EMBOSS/bin/trimest',
+    'reformat_header' => 1,
+    'trim_est'        => 1,
+    'trimest_exe'     => '/nfs/panda/ensemblgenomes/external/EMBOSS/bin/trimest',
   };
 }
 
@@ -37,38 +38,40 @@ sub write_output {
   my ($self) = @_;
   
   my $species         = $self->param_required('species');
-  my $file            = $self->param('file');
-  my $file_species    = $self->param('file_species');
-  my $study           = $self->param('study');
+  my $files           = $self->param('seq_file');
+  my $file_species    = $self->param('seq_file_species');
+  my $studies         = $self->param('study');
   my $study_species   = $self->param('study_species');
-  my $merge_level     = lc($self->param_required('merge_level'));
+  my $merge_level     = $self->param_required('merge_level');
   my $data_type       = $self->param('data_type');
   my $reformat_header = $self->param('reformat_header');
   my $trim_est        = $self->param('trim_est');
+  my $trimest_exe     = $self->param('trimest_exe');
   
   if (exists $$file_species{$species}) {
-    push @$file, $$file_species{$species};
+    push @$files, $$file_species{$species};
   }
   
   my @all;
-  foreach my $fasta_file (@$file) {
-    push @all, fileparse($fasta_file);
+  foreach my $fasta_file (@$files) {
+    push @all, path($fasta_file)->basename;
   }
   
-  foreach my $fasta_file (@$file) {
-    if ($data_type eq 'est' && $trim_est) {
-      $fasta_file = $self->trim_est($fasta_file);
-    }
-    
-    if ($reformat_header) {
-      $self->reformat_header($fasta_file);
+  foreach my $fasta_file (@$files) {
+    if ($data_type eq 'est') {
+      if ($trim_est) {
+        $fasta_file = $self->trim_est($fasta_file);
+      }
+      if ($reformat_header) {
+        $self->reformat_header($fasta_file);
+      }
     }
     
     my $merge_id;
-    if ($merge_level eq 'file') {
-      $merge_id = fileparse($fasta_file);
+    if (lc($merge_level) eq 'file') {
+      $merge_id = path($fasta_file)->basename;
     } else {
-      $merge_id = join(',', @all);
+      $merge_id = join('_', @all);
     }
     
     my $dataflow_output = {
@@ -80,13 +83,13 @@ sub write_output {
   }
   
   if (exists $$study_species{$species}) {
-    push @$study, $$study_species{$species};
+    push @$studies, $$study_species{$species};
   }
   
-  foreach my $study_acc (@$study) {
+  foreach my $study_id (@$studies) {
     my $dataflow_output = {
-      'mode'      => 'study',
-      'study_acc' => $study_acc,
+      'mode'     => 'study',
+      'study_id' => $study_id,
     };
     
     $self->dataflow_output_id($dataflow_output, 4);

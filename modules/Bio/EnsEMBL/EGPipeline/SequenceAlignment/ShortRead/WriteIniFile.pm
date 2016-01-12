@@ -16,13 +16,12 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::DNASequenceAlignment::WriteIniFile;
+package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::WriteIniFile;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
+use base ('Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::ProcessSRA');
 
-use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor);
 use File::Spec::Functions qw(catdir);
 
 sub param_defaults {
@@ -35,11 +34,11 @@ sub param_defaults {
 }
 
 sub run {
-	my ($self) = @_;
+  my ($self) = @_;
   
   my $work_dir = $self->param_required('work_directory');
-	my $bigwig   = $self->param_required('bigwig');
-	my $ini_type = $self->param_required('ini_type');
+  my $bigwig   = $self->param_required('bigwig');
+  my $ini_type = $self->param_required('ini_type');
   my $mode     = $self->param_required('mode');
   my $merge_id = $self->param_required('merge_id');
   
@@ -91,20 +90,26 @@ sub write_output {
 sub study_ini {
   my ($self, $merge_id) = @_;
   
-  my $merge_level = ucfirst(lc($self->param_required('merge_level')));
-  my $merge_label = $self->param_required('merge_label');
-  my $study_ids   = $self->param_required('study_ids');
+  my $species       = $self->param_required('species');
+  my $merge_level   = $self->param_required('merge_level');
+  my $studies       = $self->param_required('study');
+  my $study_species = $self->param_required('study_species');
+  
+  if (exists $$study_species{$species}) {
+    push @$studies, $$study_species{$species};
+  }
+  
+  my $merge_label = $self->merge_label($merge_level, $merge_id);
+  my $study_ids   = $self->study_ids($studies, $merge_level, $merge_id);
   
   my @studies;
-  my $study_adaptor = get_adaptor('Study');
-  foreach my $study_id (@$study_ids) {
-    my ($study) = @{$study_adaptor->get_by_accession($study_id)};
-    push @studies, $self->ena_link($study_id).': '.$study->title;
+  foreach my $study_id (keys %$study_ids) {
+    push @studies, $self->ena_link($study_id) . ': ' . $$study_ids{$study_id};
   }
   
   my $name = $merge_label;
   my $caption = "$merge_level $merge_id";
-  my $description = $merge_level.' '.$self->ena_link($merge_id);
+  my $description = ucfirst(lc($merge_level)) . ' ' . $self->ena_link($merge_id);
   if ($merge_level ne 'Study') {
     if (scalar @studies == 1) {
       $description .= ' (Study: ';
