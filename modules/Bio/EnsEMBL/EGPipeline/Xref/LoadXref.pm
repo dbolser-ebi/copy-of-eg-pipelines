@@ -47,6 +47,7 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
+    'db_type'     => 'core',
     'oracle_home' => '/sw/arch/dbtools/oracle/product/11.1.0.6.2/client',
   };
 }

@@ -60,13 +60,13 @@ sub run {
     -DESCRIPTIONS => $self->param('descriptions'),
   );
   
-  my $core_dba = $self->core_dba();
-  $self->analysis_setup($core_dba);
-  $self->external_db_reset($core_dba, 'Uniprot/SPTREMBL');
-  $self->external_db_reset($core_dba, 'Uniprot/SWISSPROT');
-  $loader->add_xrefs($core_dba);
-  $self->external_db_update($core_dba, 'Uniprot/SPTREMBL');
-  $self->external_db_update($core_dba, 'Uniprot/SWISSPROT');
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  $self->analysis_setup($dba);
+  $self->external_db_reset($dba, 'Uniprot/SPTREMBL');
+  $self->external_db_reset($dba, 'Uniprot/SWISSPROT');
+  $loader->add_xrefs($dba);
+  $self->external_db_update($dba, 'Uniprot/SPTREMBL');
+  $self->external_db_update($dba, 'Uniprot/SWISSPROT');
 }
 
 1;
