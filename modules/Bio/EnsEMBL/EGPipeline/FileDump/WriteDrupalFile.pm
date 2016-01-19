@@ -265,9 +265,9 @@ sub display_version {
 sub xgrid {
   my ($self, $dump_type) = @_;
   
-  my $xgrid = 'No';
+  my $xgrid = '0';
   if ($dump_type =~ /fasta/) {
-    $xgrid = 'Yes';
+    $xgrid = '1';
   }
   return $xgrid;
 }

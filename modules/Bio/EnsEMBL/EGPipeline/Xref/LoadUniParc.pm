@@ -54,11 +54,11 @@ sub run {
     -UNIPARC_DBA => $uniparc_dba,
   );
   
-  my $core_dba = $self->core_dba();
-  $self->analysis_setup($core_dba);
-  $self->external_db_reset($core_dba, 'UniParc');
-  $loader->add_upis($core_dba);
-  $self->external_db_update($core_dba, 'UniParc');
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  $self->analysis_setup($dba);
+  $self->external_db_reset($dba, 'UniParc');
+  $loader->add_upis($dba);
+  $self->external_db_update($dba, 'UniParc');
 }
 
 1;

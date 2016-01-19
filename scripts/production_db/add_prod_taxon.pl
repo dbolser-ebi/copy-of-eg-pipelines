@@ -10,7 +10,8 @@ use Bio::EnsEMBL::DBSQL::AnalysisAdaptor;
 use DBI;
 
 my ($host, $port, $user, $pass, $dbname,
-    $mhost, $mport, $muser, $mpass, $mdbname);
+    $mhost, $mport, $muser, $mpass, $mdbname,
+    $add_to_division);
 
 GetOptions(
   "host=s", \$host,
@@ -23,6 +24,7 @@ GetOptions(
   "muser=s", \$muser,
   "mp|mpass=s", \$mpass,
   "mdbname=s", \$mdbname,
+  "add_to_division", \$add_to_division,
 );
 
 die "--host required" unless $host;
@@ -33,6 +35,8 @@ die "--mhost required" unless $mhost;
 die "--mport required" unless $mport;
 die "--muser required" unless $muser;
 die "--mpass required" unless $mpass;
+
+$add_to_division = 1 unless defined $add_to_division;
 
 $mdbname = "ensembl_production" unless $mdbname;
 
@@ -61,15 +65,16 @@ my $sth = $dbh->prepare(
 );
 
 my $meta_container = $dba->get_MetaContainer();
-print "Adding ".$meta_container->single_value_by_key('species.production_name')." to $mdbname...";
+my $prod_name = $meta_container->single_value_by_key('species.production_name');
+print "Adding $prod_name to $mdbname...";
 
 my $return = $sth->execute(
-  $meta_container->single_value_by_key('species.production_name'),
+  $prod_name,
   $meta_container->single_value_by_key('species.common_name') || $meta_container->single_value_by_key('species.production_name'),
   $meta_container->single_value_by_key('species.scientific_name'),
   $meta_container->single_value_by_key('species.taxonomy_id'),
   $meta_container->single_value_by_key('species.scientific_name'),
-  $meta_container->single_value_by_key('species.production_name'),
+  $prod_name,
   $meta_container->single_value_by_key('species.url')
 );
 
@@ -78,3 +83,25 @@ if ($return) {
 } else {
   print "Failed\n";
 }
+
+if ($add_to_division) {
+  my $div_sth = $dbh->prepare(
+    'INSERT INTO division_species (division_id, species_id) '.
+    'SELECT division.division_id, species.species_id FROM division, species '.
+    'WHERE division.name = ? AND species.production_name = ?;'
+  );
+  
+  my $div_name = $meta_container->single_value_by_key('species.division');
+  if ($div_name) {
+    print "Adding $prod_name to $div_name division...";
+  
+    my $div_return = $div_sth->execute($div_name, $prod_name);
+    
+    if ($div_return) {
+      print "Done\n";
+    } else {
+      print "Failed\n";
+    }
+  }
+}
+
