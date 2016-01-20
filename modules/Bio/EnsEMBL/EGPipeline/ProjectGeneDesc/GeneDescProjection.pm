@@ -205,6 +205,7 @@ sub project_description {
         my $to_stable_id = $to_gene->stable_id();
         my $from_species_text = ucfirst($from_gene->species());
         $from_species_text =~ s/_/ /g;
+        $from_desc = $self->scrub_description($from_gene, $from_desc);
         $from_desc =~ s/(\[Source:)/$1Projected from $from_species_text ($from_stable_id) /;
         
         $projected = 1;
@@ -219,6 +220,21 @@ sub project_description {
   }
   
   return $projected;
+}
+
+sub scrub_description {
+  my ($self, $from_gene, $from_desc) = @_;
+  
+  # Remove gene names from descriptions
+  my $gene_name = $from_gene->external_name;
+  if (defined $gene_name) {
+    $from_desc =~ s/[,\s\(]*$gene_name\)*//;
+  }
+  
+  # Remove isolated digit suffixes
+  $from_desc =~ s/\s+\d+(\s+\[Source:)/$1/;
+  
+  return $from_desc;
 }
 
 1
