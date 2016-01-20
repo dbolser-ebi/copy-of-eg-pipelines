@@ -45,16 +45,14 @@ sub write_output {
   my ($self)  = @_;
   
   my $config     = $self->param_required('config');
-  my $ordering   = $self->param_required('ordering');
+  my $flow       = $self->param_required('flow');
   my $output_dir = $self->param_required('output_dir');
   
-  foreach my $id (keys $config) {
+  foreach my $id (sort { $$flow{$a} <=> $$flow{$b} } keys %$flow) {
     my $output_ids = $$config{$id};
     $$output_ids{'projection_dir'} = catdir($output_dir, $id);
     
-    my $flow = exists($$ordering{$id}) ? ($$ordering{$id} + 1) : 2;
-    
-    $self->dataflow_output_id($output_ids, $flow);
+    $self->dataflow_output_id($output_ids, $$flow{$id});
   }
 }
 
