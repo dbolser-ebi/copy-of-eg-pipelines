@@ -40,42 +40,50 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
+use File::Spec::Functions qw(catdir);
+
 sub fetch_input {
   my ($self) = @_;
   
-  my $log_file     = $self->param_required('log_file');
-  my $store_data   = $self->param_required('store_data');
-  my $from_species = $self->param_required('source');
-  my $to_species   = $self->param_required('species');
+  my $projection_dir = $self->param_required('projection_dir');
+  my $store_data     = $self->param_required('store_data');
+  my $from_species   = $self->param_required('source');
+  my $summary        = $self->param_required('summary');
   
-  my $reports;
+  my $report;
   if (!$store_data) {
-    $reports .= "Pipeline was run with a flag to prevent storing anything in the database.\n";
-  } else {
-    $reports .= $self->description_summary($from_species, $to_species);
+    $report .= "Pipeline was run with a flag to prevent storing anything in the database.\n";
   }
-  $reports .= "Detailed log file: $log_file.\n\n";
+  $report .= "Detailed log files are available in: $projection_dir.\n";
   
-  $self->param('text', $reports);
+  my $title = "Projection summary from $from_species";
+  my $columns = ['From', 'From genes', 'To', 'To genes', 'Homologies', 'Projected'];
+  my $sorted_summary = $self->sort_summary($summary);
+  $report .= $self->format_table($title, $columns, $sorted_summary);
+  
+  my $summary_file = catdir($projection_dir, 'summary.txt');
+  open my $data, '>', $summary_file or $self->throw($!);
+  print $data $report;
+  close $data;
+  
+  $self->param('text', $report);
 }
 
-sub description_summary {
-  my ($self, $from_species, $to_species) = @_;
+sub sort_summary {
+  my ($self, $summary) = @_;
   
-  my $from_species_text = ucfirst($from_species);
-  $from_species_text =~ s/_/ /g;
-  my $desc_match = "Projected from $from_species_text";
+  my %summary;
+  foreach my $s (@$summary) {
+    my $to = $$s[2];
+    $summary{$to} = $s;
+  }
   
-  my $dbh = $self->core_dbh();
-  my $sql = 'SELECT COUNT(*) AS Total FROM gene WHERE description LIKE ?';
-  my $sth = $dbh->prepare($sql);
-  $sth->execute('%'.$desc_match.'%');
+  my @sorted_summary;
+  foreach my $to (sort keys %summary) {
+    push @sorted_summary, $summary{$to};
+  }
   
-  my $title = "Number of projected descriptions from $from_species to $to_species:";
-  my $columns = $sth->{NAME};
-  my $results = $sth->fetchall_arrayref();
-  
-  return $self->format_table($title, $columns, $results);    
+  return \@sorted_summary;
 }
 
 1;
