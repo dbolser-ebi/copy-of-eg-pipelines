@@ -88,6 +88,8 @@ sub run {
     }
   }
   
+  close $data;
+  
   my $summary =
     "From $from_species ($from_count genes) ".
     "to $to_species ($to_count genes): ".
@@ -95,7 +97,22 @@ sub run {
     "$projected projected descriptions";
   $self->warning($summary);
   
-  close($data);
+  my @summary = (
+    $from_species,
+    $from_count,
+    $to_species,
+    $to_count,
+    $homology_count,
+    $projected,
+  );
+  
+  $self->param('summary', \@summary)
+}
+
+sub write_output {
+  my ($self)  = @_;
+  
+  $self->dataflow_output_id({'summary' => $self->param('summary')}, 1);
 }
 
 sub fetch_homologies {
@@ -228,7 +245,7 @@ sub scrub_description {
   # Remove gene names from descriptions
   my $gene_name = $from_gene->external_name;
   if (defined $gene_name) {
-    $from_desc =~ s/[,\s\(]*$gene_name\)*//;
+    $from_desc =~ s/[,\s]*\($gene_name\)//;
   }
   
   # Remove isolated digit suffixes
