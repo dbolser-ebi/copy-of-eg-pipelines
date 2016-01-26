@@ -22,7 +22,7 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::Exonerate::EmailExonerateReport
+Bio::EnsEMBL::EGPipeline::SequenceAlignment::Exonerate::EmailReport
 
 =head1 DESCRIPTION
 

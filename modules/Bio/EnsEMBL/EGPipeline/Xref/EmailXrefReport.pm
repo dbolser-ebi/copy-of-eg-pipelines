@@ -40,6 +40,15 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
+sub param_defaults {
+  my ($self) = @_;
+  
+  return {
+    %{$self->SUPER::param_defaults},
+    'db_type' => 'core',
+  };
+}
+
 sub fetch_input {
   my ($self) = @_;
   my $species            = $self->param_required('species');
@@ -48,32 +57,33 @@ sub fetch_input {
   my $load_uniprot_go    = $self->param('load_uniprot_go');
   my $load_uniprot_xrefs = $self->param('load_uniprot_xrefs');
   
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  my $dbh = $dba->dbc->db_handle;
+  
   my $reports = "The xref pipeline for $species has completed.\n";
   $reports .= "Summaries are below; note that the last two include pre-existing data.\n";
   
   if ($load_uniparc) {
     $reports .= $self->xref_summary(
-      'xrefchecksum', 'UniParc xrefs assigned via checksum on sequence:');
+      $dbh, 'xrefchecksum', 'UniParc xrefs assigned via checksum on sequence:');
   }
   if ($load_uniprot) {
     $reports .= $self->xref_summary(
-      'xrefuniparc', 'UniProt xrefs assigned transitively via UniParc:');
+      $dbh, 'xrefuniparc', 'UniProt xrefs assigned transitively via UniParc:');
   }
   if ($load_uniprot_go || $load_uniprot_xrefs) {
     $reports .= $self->xref_summary(
-      'xrefuniprot', 'Xrefs assigned transitively via UniProt:');
+      $dbh, 'xrefuniprot', 'Xrefs assigned transitively via UniProt:');
   }
   
-  $reports .= $self->xref_total_summary('All xrefs, pre-existing and newly-added:');
-  $reports .= $self->xref_ontology_summary('Ontology xrefs, pre-existing and newly-added:');
+  $reports .= $self->xref_total_summary($dbh, 'All xrefs, pre-existing and newly-added:');
+  $reports .= $self->xref_ontology_summary($dbh, 'Ontology xrefs, pre-existing and newly-added:');
       
   $self->param('text', $reports);
 }
 
 sub xref_summary {
-  my ($self, $logic_name, $title) = @_;
-  
-  my $dbh = $self->core_dbh();
+  my ($self, $dbh, $logic_name, $title) = @_;
   
   my $sql = "
     SELECT
@@ -104,9 +114,7 @@ sub xref_summary {
 }
 
 sub xref_total_summary {
-  my ($self, $title) = @_;
-  
-  my $dbh = $self->core_dbh();
+  my ($self, $dbh, $title) = @_;
   
   my $sql = "
     SELECT
@@ -137,9 +145,7 @@ sub xref_total_summary {
 }
 
 sub xref_ontology_summary {
-  my ($self, $title) = @_;
-  
-  my $dbh = $self->core_dbh();
+  my ($self, $dbh, $title) = @_;
   
   my $sql = "
     SELECT
