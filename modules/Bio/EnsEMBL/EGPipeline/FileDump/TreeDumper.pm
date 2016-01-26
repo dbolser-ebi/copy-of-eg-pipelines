@@ -33,9 +33,9 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    tree_format => 'newick',
-    tree_source => 'VectorBase',
-    seq_type    => 'aa',
+    'tree_format' => 'newick',
+    'tree_source' => 'VectorBase',
+    'seq_type'    => 'aa',
   };
 }
 
