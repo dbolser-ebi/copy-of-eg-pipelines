@@ -110,7 +110,6 @@ sub retrieve_files {
     
     $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq");
     $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq");
-    return ($seq_file_1, $seq_file_2, $sam_file);
     if (-e $seq_file_2) {
       $self->warning("File '$seq_file_2' exists, and will be deleted");
       unlink $seq_file_2;
