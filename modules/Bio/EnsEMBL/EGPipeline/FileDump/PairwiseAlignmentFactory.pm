@@ -31,6 +31,7 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
+    'compara'          => 'multi',
     'skip_dumps'       => [],
     'files_per_subdir' => 500,
     'mlss_ids'         => [],
@@ -40,16 +41,19 @@ sub param_defaults {
 
 sub write_output {
   my ($self) = @_;
+  my $compara          = $self->param_required('compara');
   my $dump_types       = $self->param_required('dump_types');
+  my $dump_names       = $self->param_required('dump_names');
   my $skip_dumps       = $self->param_required('skip_dumps');
   my $results_dir      = $self->param_required('results_dir');
   my $files_per_subdir = $self->param_required('files_per_subdir');
+  my $release_date     = $self->param_required('release_date');
   my $mlss_ids         = $self->param_required('mlss_ids');
   my $method_links     = $self->param_required('method_links');
   
   my %skip_dumps = map { $_ => 1 } @$skip_dumps;
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor('Multi', 'compara');
+  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($compara, 'compara');
   
   my $mlssa = $dba->get_adaptor("MethodLinkSpeciesSet");
   
@@ -71,17 +75,22 @@ sub write_output {
   
   foreach my $flow (keys %$dump_types) {
     foreach my $dump_type (@{$$dump_types{$flow}}) {
-      if (!exists $skip_dumps{$dump_type}) {        
+      if (!exists $skip_dumps{$dump_type}) {
+        my $prefix = $$dump_names{$dump_type}."_$release_date";
+  
         foreach my $mlss (@mlss) {
-          my $mlss_id       = $mlss->dbID;
-          my ($ref, $label) = $self->generate_label($mlss, \%assemblies);
-          my $out_dir       = catdir($results_dir, $dump_type, $label);
-          path($out_dir)->mkpath;
+          my $mlss_id = $mlss->dbID;
+          
+          my ($ref, $sub_dir) = $self->sub_dir($prefix, $mlss, \%assemblies);
+          my $aln_dir         = catdir($results_dir, $sub_dir);
+          path($aln_dir)->mkpath;
           
           my %output_ids = (
             'mlss_id'     => $mlss_id,
             'ref_species' => $ref,
-            'out_dir'     => $out_dir,
+            'aln_dir'     => $aln_dir,
+            'out_dir'     => $results_dir,
+            'sub_dir'     => $sub_dir,
           );
           
           $self->dataflow_output_id(\%output_ids, $flow);
@@ -91,8 +100,8 @@ sub write_output {
   }
 }
 
-sub generate_label {
-  my ($self, $mlss, $assemblies) = @_;
+sub sub_dir {
+  my ($self, $prefix, $mlss, $assemblies) = @_;
   
   my $ref     = $mlss->get_tagvalue('reference_species');
   my $non_ref = $mlss->get_tagvalue('non_reference_species');
@@ -113,7 +122,7 @@ sub generate_label {
   $ml_name =~ s/_net$//;
   $ml_name =~ s/translated_blat/tblat/;
   
-  return ($ref_species, "$ref\_$non_ref\_$ml_name");
+  return ($ref_species, "$prefix\_$ref\_$non_ref\_$ml_name");
 }
 
 1;

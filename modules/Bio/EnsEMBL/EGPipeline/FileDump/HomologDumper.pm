@@ -33,6 +33,7 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
+    'compara'          => 'multi',
     'homolog_format'   => 'xml',
     'homolog_source'   => 'VectorBase',
     'use_gene_version' => 1,
@@ -41,17 +42,18 @@ sub param_defaults {
 
 sub run {
   my ($self) = @_;
+  my $compara          = $self->param_required('compara');
   my $homolog_format   = $self->param_required('homolog_format');
   my $homolog_source   = $self->param_required('homolog_source');
   my $use_gene_version = $self->param_required('use_gene_version');
   my $release_date     = $self->param_required('release_date');
   my $start_id         = $self->param_required('start_id');
   my $end_id           = $self->param_required('end_id');
-  my $sub_dir          = $self->param_required('sub_dir');
+  my $tree_dir         = $self->param_required('tree_dir');
   
-  path($sub_dir)->mkpath;
+  path($tree_dir)->mkpath;
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor('Multi', 'compara');
+  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($compara, 'compara');
   
   my $ha = $dba->get_adaptor("Homology");
   my $gta = $dba->get_adaptor("GeneTree");
@@ -65,11 +67,13 @@ sub run {
     $gene_sets = $self->gene_sets($dba);
   }
   
+  my @out_files;
+  
   foreach my $tree (@$trees) {
     my $homologies = $ha->fetch_all_by_tree_node_id($tree->root_id);
     
     if ($homolog_format eq 'xml') {
-      my $out_file = catdir($sub_dir, $tree->stable_id . '.xml');
+      my $out_file = catdir($tree_dir, $tree->stable_id . '.xml');
       
       my $writer = Bio::EnsEMBL::Compara::Graph::OrthoXMLWriter->new(
         -SOURCE         => $homolog_source,
@@ -78,16 +82,29 @@ sub run {
       );
       $writer->write_homologies($homologies);
       $writer->finish();
+      $writer->handle()->close();
       
       if ($use_gene_version) {
         $self->replace_gene_sets($out_file, $gene_sets);
       }
+      
+      push @out_files, $out_file;
       
     } else {
       $self->throw("Unrecognised homology format '$homolog_format'");
     }
     
     $tree->release_tree;
+  }
+  
+  $self->param('out_files', \@out_files);
+}
+
+sub write_output {
+  my ($self) = @_;
+  
+  foreach my $out_file (@{$self->param('out_files')}) {
+    $self->dataflow_output_id({out_file => $out_file}, 2);
   }
 }
 
