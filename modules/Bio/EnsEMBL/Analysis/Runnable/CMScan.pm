@@ -203,10 +203,11 @@ sub run_analysis {
   my $in_file  = $self->queryfile;
   my $out_file = $self->queryfile.'.out';
   my $aln_file = $self->queryfile.'.aln';
+  my $err_file = $self->queryfile.'.err';
   $self->resultsfile($out_file);
   
-  my $cmd = "$program $options --tblout $out_file -o $aln_file $cm_file $in_file";
-  system($cmd) == 0 or throw("Failed to run: $cmd");
+  my $cmd = "$program $options --tblout $out_file -o $aln_file $cm_file $in_file 2> $err_file";
+  system($cmd) == 0 or throw("Failed to run: $cmd\nErrors in $err_file");
   
   my $cat_cmd = "cat $aln_file >> $out_file";
   system($cat_cmd) == 0 or throw("Failed to run: $cat_cmd");
