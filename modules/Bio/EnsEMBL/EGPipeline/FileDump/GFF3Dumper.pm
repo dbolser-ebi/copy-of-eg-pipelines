@@ -160,7 +160,8 @@ sub exon_features {
     push @cds_features,  @{ $transcript->get_all_CDS() };
     push @exon_features, @{ $transcript->get_all_ExonTranscripts() };
     
-    if (!defined $transcript->get_all_SeqEdits()) {
+    my $seq_edits = $transcript->get_all_SeqEdits();
+    if (! defined $seq_edits || scalar(@$seq_edits) == 0) {
       push @utr_features,  @{ $transcript->get_all_five_prime_UTRs() };
       push @utr_features,  @{ $transcript->get_all_three_prime_UTRs() };
     }

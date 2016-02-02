@@ -30,18 +30,16 @@ sub param_defaults {
   return {
     %{$self->SUPER::param_defaults},
     'compara_files' => 0,
+    'nd_downloads_dir' => '/data/sites/drupal-pre/downloads',
+    'nd_staging_dir'   => '/data/sites/drupal-pre/staging',
   };
 }
 
 sub run {
   my ($self) = @_;
-  
-  my $results_dir   = $self->param_required('results_dir');
-  my $drupal_file   = $self->param_required('drupal_file');
-  
-  opendir(my $dh, $results_dir) || die "Failed to open '$results_dir': $!";
-  my @file_names = grep { !/.md5/ && !/^\./ && -f "$results_dir/$_" } readdir($dh);
-  closedir $dh;
+  my $new_files     = $self->param_required('new_files');
+  my $missing_files = $self->param_required('missing_files');
+  my $changed_files = $self->param_required('changed_files');
   
   my @fields = (
     'GUID', 'File', 'Organism', 'File Type', 'File Format', 'Status',
@@ -54,25 +52,21 @@ sub run {
   my %data = map { $_ => [] } @fields;
   my $guid = 1;
   
-  foreach my $file_name (sort @file_names) {
-    $self->process_file($file_name, $guid++, \%data);
+  foreach my $file (sort @$new_files) {
+    $self->process_new_file($file, $guid++, \%data);
   }
   
-  open(my $fh, '>', $drupal_file) || die "Failed to open '$drupal_file': $!";
-  
-  print $fh join(",", @fields)."\n";
-  
-  for (my $i=0; $i<($guid-1); $i++) {
-    my @row;
-    foreach my $column (@fields) {
-      push @row, '"' . $data{$column}[$i] . '"';
-    }
-    print $fh join(",", @row)."\n";
+  foreach my $file (sort @$missing_files) {
+    $self->process_missing_file($file, $guid++, \%data);
   }
+  
+  $self->drupal_bulk_update(\@fields, \%data, $guid);
+  
+  $self->drupal_shell_cmds($new_files, $changed_files);
 }
 
-sub process_file {
-  my ($self, $file_name, $guid, $data) = @_;
+sub process_new_file {
+  my ($self, $file, $guid, $data) = @_;
   
   my $staging_dir   = $self->param_required('staging_dir');
   my $release_date  = $self->param_required('release_date');
@@ -84,13 +78,13 @@ sub process_file {
   if ($compara_files) {
     $species = '';
     $organism = '';
-    ($file_type, $file_format) = $self->parse_compara_filename($file_name);
-    $description = $self->compara_description($file_name);
+    ($file_type, $file_format) = $self->parse_compara_filename($file);
+    $description = $self->compara_description($file);
     $display_version = $release_date;
     $xgrid = 0;
     
   } else {
-    ($species, $strain, $data_type, $assembly, $geneset, $dump_type) = $self->parse_filename($file_name);
+    ($species, $strain, $data_type, $assembly, $geneset, $dump_type) = $self->parse_filename($file);
     $organism = $self->organism($species);
     $file_type = $self->file_type($data_type);
     $file_format = $self->file_format($dump_type);
@@ -100,7 +94,7 @@ sub process_file {
   }
   
   push $$data{'GUID'}, $guid;
-  push $$data{'File'}, catdir($staging_dir, $file_name);
+  push $$data{'File'}, catdir($staging_dir, $file);
   push $$data{'Organism'}, $organism;
   push $$data{'File Type'}, $file_type;
   push $$data{'File Format'}, $file_format;
@@ -121,11 +115,96 @@ sub process_file {
   push $$data{'Ensembl organism name'}, $species;
 }
 
+sub process_missing_file {
+  my ($self, $file, $guid, $data) = @_;
+  
+  push $$data{'GUID'}, $guid;
+  push $$data{'File'}, $file;
+  push $$data{'Organism'}, '';
+  push $$data{'File Type'}, '';
+  push $$data{'File Format'}, '';
+  push $$data{'Status'}, 'Archived';
+  push $$data{'Description'}, '';
+  push $$data{'Latest Change'}, '';
+  push $$data{'Tags'}, '';
+  push $$data{'Release Date Start'}, '';
+  push $$data{'Release Date End'}, '';
+  push $$data{'Version'}, '';
+  push $$data{'Display Version'}, '';
+  push $$data{'Previous Version'}, '';
+  push $$data{'Xgrid_enabled'}, '';
+  push $$data{'Fasta Header Regex'}, '';
+  push $$data{'Download Count'}, '';
+  push $$data{'Title'}, '';
+  push $$data{'URL'}, '';
+  push $$data{'Ensembl organism name'}, '';
+}
+
+sub drupal_bulk_update {
+  my ($self, $fields, $data, $guid) = @_;
+  my $drupal_file = $self->param_required('drupal_file');
+  
+  open(my $fh, '>', $drupal_file) || die "Failed to open '$drupal_file': $!";
+  
+  print $fh join(",", @$fields)."\n";
+  
+  for (my $i=0; $i<($guid-1); $i++) {
+    my @row;
+    foreach my $column (@$fields) {
+      push @row, '"' . $$data{$column}[$i] . '"';
+    }
+    print $fh join(",", @row)."\n";
+  }
+  
+  close $fh;
+}
+
+sub drupal_shell_cmds {
+  my ($self, $new_files, $changed_files) = @_;
+  my $results_dir   = $self->param_required('results_dir');
+  my $copy_file     = $self->param_required('copy_file');
+  my $nd_login      = $self->param_required('nd_login');
+  my $release_date  = $self->param_required('release_date');
+  my $nd_downloads_dir = $self->param_required('nd_downloads_dir');
+  my $nd_staging_dir   = $self->param_required('nd_staging_dir');
+  
+  open(my $fh, '>', $copy_file) || die "Failed to open '$copy_file': $!";
+  
+  if (@$changed_files) {
+    print $fh "# At ND, archive changed files:\n";
+    print $fh "cd $nd_downloads_dir\n";
+    print $fh "mkdir archive/$release_date\n";
+    foreach my $file (@$changed_files) {
+      
+      print $fh "mv $file archive/$release_date\n";
+      print $fh "rm -f $file.md5\n";
+    }
+    
+    print $fh "# Then copy changed files to ND:\n";
+    foreach my $file (@$changed_files) {
+      print $fh "scp $file* $nd_login:$nd_downloads_dir\n";
+    }
+  }
+  
+  if (@$new_files) {
+    print $fh "# At ND, clear the staging directory:\n";
+    print $fh "rm -rf $nd_staging_dir/*\n";
+    
+    print $fh "# Copy new files to the staging directory:\n";
+    print $fh "cd $results_dir\n";
+    foreach my $file (@$new_files) {
+      print $fh "scp $file* $nd_login:$nd_staging_dir\n";
+    }
+  }
+  
+  close $fh;
+}
+
 sub parse_filename {
-  my ($self, $file_name) = @_;
+  my ($self, $file) = @_;
   
   my ($species, $strain, $data_type, $assembly, $geneset_version, $file_type) =
-    $file_name =~ /^(\w+\-\w+)\-([\w\-\.]+)_([A-Z0-9]+)_(\w+)(\.\d+)?\.(\w+)/;
+    $file =~ /^(\w+\-\w+)\-([\w\-\.]+)_([A-Z0-9]+)_(\w+)(\.\d+)?\.(\w+)/;
   
   my $geneset = '';
   if ($geneset_version) {
@@ -166,9 +245,9 @@ sub parse_filename {
 }
 
 sub parse_compara_filename {
-  my ($self, $file_name) = @_;
+  my ($self, $file) = @_;
   
-  my ($prefix) = $file_name =~ /^([^_]+)/;
+  my ($prefix) = $file =~ /^([^_]+)/;
   
   if ($prefix eq 'GENE-TREES-NEWICK') {
     return ('Gene trees', 'Newick (tar)');
@@ -253,14 +332,14 @@ sub description {
 }
 
 sub compara_description {
-  my ($self, $file_name) = @_;
+  my ($self, $file) = @_;
   
   my $drupal_desc = $self->param_required('drupal_desc');
-  my ($prefix) = $file_name =~ /^([^_]+)/;
+  my ($prefix) = $file =~ /^([^_]+)/;
   my $description = $$drupal_desc{$prefix};
   
   if ($prefix eq 'WG-ALIGN') {
-    $file_name =~ /^$prefix\_[\w\-]+_(\w+)\-(\w+)\-(\w+)_(\w+)\-(\w+)\-([a-zA-Z0-9]+)/;
+    $file =~ /^$prefix\_[\w\-]+_(\w+)\-(\w+)\-(\w+)_(\w+)\-(\w+)\-([a-zA-Z0-9]+)/;
     my $species1 = "$1 $2 ($3)";
     my $species2 = "$4 $5 ($6)";
     
