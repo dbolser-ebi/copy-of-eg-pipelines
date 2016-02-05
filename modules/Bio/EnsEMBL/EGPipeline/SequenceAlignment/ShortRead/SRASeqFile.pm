@@ -30,12 +30,21 @@ sub run {
   my $work_dir    = $self->param_required('work_directory');
   my $study_id    = $self->param_required('study_id');
   my $merge_level = $self->param_required('merge_level');
+  my $taxid       = $self->param('taxid');
   
   my @runs = ();
   
   my $study_adaptor = get_adaptor('Study');
   foreach my $study (@{$study_adaptor->get_by_accession($study_id)}) {
-    foreach my $run (@{$study->runs()}) {
+    RUN: foreach my $run (@{$study->runs()}) {
+
+      # Skip this run if it is not the right taxid
+      if (defined $taxid) {
+          my $sample = $run->sample();
+          my $run_taxid = $sample->taxon()->taxon_id();
+          next RUN if not $run_taxid eq $taxid;
+      }
+
       my $merge_id = $self->merge_id($merge_level, $study, $run);
       my ($seq_file_1, $seq_file_2, $sam_file) = $self->retrieve_files($work_dir, $run);
       
