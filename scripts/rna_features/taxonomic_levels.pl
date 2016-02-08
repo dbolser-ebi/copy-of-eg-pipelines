@@ -92,6 +92,9 @@ unless (scalar @levels) {
   );
 }
 
+my @lcas    = map {"LCA_$_"} @levels;
+my @eg_lcas = map {"LCA_$_"} @eg_levels;
+
 $root = 'cellular organisms' unless $root;
 
 $count_seqs = 0 unless $count_seqs;
@@ -154,18 +157,16 @@ foreach my $taxon_id (keys %taxa) {
   }
 }
 
-my @columns = ('Rfam_acc', $count_type, 'LCA', @levels, @eg_levels);
+my @columns = ('Rfam_acc', $count_type, 'LCA', @levels, @eg_levels, @lcas, @eg_lcas);
 print join("\t", @columns)."\n";
 
 foreach my $rfam_acc (@rfam_acc) {
   print STDERR "Processing $rfam_acc\n";
   
+  my %levels = map { $_ => 0 } @levels;
   my $lca;
+  my %lcas;
   my $total = 0;
-  my %levels;
-  foreach my $level (@levels) {
-    $levels{$level} = 0;
-  }
   
   foreach my $taxon_id (sort keys %{$rfam2taxonomy{$rfam_acc}}) {
     my $subtotal = $rfam2taxonomy{$rfam_acc}{$taxon_id};
@@ -190,6 +191,17 @@ foreach my $rfam_acc (@rfam_acc) {
         } else {
           $levels{$level}++;
         }
+        
+        if (exists $lcas{$level}) {
+          my $level_lca = $lcas{$level};
+          if (! has_ancestor($node, $level_lca->name)) {
+            if ($node->name ne $level_lca->name) {
+              $lcas{$level} = $nta->fetch_common_ancestor($level_lca, $node);
+            }
+          }
+        } else {
+          $lcas{$level} = $node;
+        }
       }
     }
     
@@ -200,7 +212,38 @@ foreach my $rfam_acc (@rfam_acc) {
     }
   }
   
+  my $lca_name;
+  if (defined $lca) {
+    $lca_name = $lca->name;
+  } else {
+    $lca_name = "beyond root ($root)";
+  }
+  
   my %eg_levels;
+  my %eg_lcas;
+  
+  if (scalar @eg_levels) {
+    if (exists $lcas{'Archaea'}) {
+      if (exists $lcas{'Bacteria'}) {
+        $eg_lcas{'EnsemblBacteria'} = 'cellular organisms';
+      } else {
+        $eg_lcas{'EnsemblBacteria'} = $lcas{'Archaea'}->name;
+      }
+    } elsif (exists $lcas{'Bacteria'}) {
+      $eg_lcas{'EnsemblBacteria'} = $lcas{'Bacteria'}->name;
+    } else {
+      $eg_lcas{'EnsemblBacteria'} = "outside Archaea/Bacteria";
+    }
+  }
+  
+  foreach my $level (@levels) {
+    if (exists $lcas{$level}) {
+      $lcas{$level} = $lcas{$level}->name;
+    } else {
+      $lcas{$level} = "outside $level";
+    }
+  }
+  
   if (scalar @eg_levels) {
     $eg_levels{'EnsemblBacteria'} = $levels{'Archaea'}
                                   + $levels{'Bacteria'};
@@ -213,17 +256,18 @@ foreach my $rfam_acc (@rfam_acc) {
                                   - $levels{'Metazoa'}
                                   - $levels{'Viridiplantae'};
     $eg_levels{'Ensembl'}         = $levels{'Chordata'};
-  }
-  
-  my $lca_name;
-  if (defined $lca) {
-    $lca_name = $lca->name;
-  } else {
-    $lca_name = "beyond root ($root)";
+    
+    $eg_lcas{'EnsemblFungi'}    = $lcas{'Fungi'};
+    $eg_lcas{'EnsemblMetazoa'}  = $lcas{'Metazoa'};
+    $eg_lcas{'EnsemblPlants'}   = $lcas{'Viridiplantae'};
+    $eg_lcas{'EnsemblProtists'} = $lcas{'Eukaryota'};
+    $eg_lcas{'Ensembl'}         = $lcas{'Chordata'};
   }
   
   my @level_counts    = map { $levels{$_} } @levels;
   my @eg_level_counts = map { $eg_levels{$_} } @eg_levels;
+  my @lca_names       = map { $lcas{$_} } @levels;
+  my @eg_lca_names    = map { $eg_lcas{$_} } @eg_levels;
   
   my @row = (
     $rfam_acc,
@@ -231,6 +275,8 @@ foreach my $rfam_acc (@rfam_acc) {
     $lca_name,
     @level_counts,
     @eg_level_counts,
+    @lca_names,
+    @eg_lca_names,
   );
   
   print join("\t", @row)."\n";

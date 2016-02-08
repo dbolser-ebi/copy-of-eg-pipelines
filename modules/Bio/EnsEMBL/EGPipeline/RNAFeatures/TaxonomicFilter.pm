@@ -31,9 +31,10 @@ sub param_defaults {
     'rfam_trna'           => 0,
     'rfam_blacklist'      => [],
     'taxonomic_filtering' => 1,
-    'taxonomic_strict'    => 0,
+    'taxonomic_lca'       => 0,
     'taxonomic_levels'    => [],
     'taxonomic_threshold' => 0.02,
+    'taxonomic_minimum'   => 50,
   };
 }
 
@@ -48,9 +49,10 @@ sub run {
   my $rfam_whitelist     = $self->param('rfam_whitelist');
   my $rfam_taxonomy_file = $self->param('rfam_taxonomy_file');
   my $filtering          = $self->param('taxonomic_filtering');
-  my $strict             = $self->param('taxonomic_strict');
+  my $lca                = $self->param('taxonomic_lca');
   my $levels             = $self->param('taxonomic_levels');
   my $threshold          = $self->param('taxonomic_threshold');
+  my $minimum            = $self->param('taxonomic_minimum');
   
   my $dba = $self->core_dba();
   
@@ -74,11 +76,7 @@ sub run {
   
   if ($filtering) {
     $cm = $self->filter_levels(
-      $cm, $rfam_taxonomy_file, $rfam_whitelist, $levels, $threshold, $dba);
-    
-    if ($strict) {
-      $cm = $self->filter_lca($cm, $rfam_taxonomy_file, $dba)
-    }
+      $cm, $rfam_taxonomy_file, $rfam_whitelist, $lca, $levels, $threshold, $minimum, $dba);
   }
   
   $cm_path->spew($cm);
@@ -128,7 +126,7 @@ sub filter_blacklist {
 }
 
 sub filter_levels {
-  my ($self, $cm, $file, $whitelist, $levels, $threshold, $dba) = @_;
+  my ($self, $cm, $file, $whitelist, $lca, $levels, $threshold, $minimum, $dba) = @_;
   
   my ($rows, $columns) = $self->parse_rfam_taxonomy_file($file);
   
@@ -159,34 +157,26 @@ sub filter_levels {
     if ($total > 0) {
       foreach my $level (@$levels) {
         my $level_total = $row[$$columns{$level}];
-        if (exists($whitelist{$rfam_acc}{$level})
-            || ($level_total/$total >= $threshold)) {
+        
+        if (exists($whitelist{$rfam_acc}{$level})) {
           $valid = 1;
           last;
+        } elsif (($level_total/$total >= $threshold) || ($level_total > $minimum)) {
+          if ($lca) {
+            my $lca_level = $row[$$columns{"LCA_$level"}];
+            if ($self->has_ancestor($dba, $lca_level)) {
+              $valid = 1;
+              last;
+            }
+          } else {
+            $valid = 1;
+            last;
+          }
         }
       }
     }
     
     if (!$valid) {
-      push @rfam_acc, $rfam_acc;
-    }
-  }
-  
-  return $self->filter_rfam($cm, \@rfam_acc);
-}
-
-sub filter_lca {
-  my ($self, $cm, $rfam_taxonomy_file, $dba) = @_;
-  
-  my ($rows, $columns) = $self->parse_rfam_taxonomy_file($rfam_taxonomy_file);
-  
-  my @rfam_acc;
-  foreach my $row (@$rows) {
-    my @row = split(/\t/, $row);
-    my $rfam_acc = $row[$$columns{'Rfam_acc'}];
-    my $lca = $row[$$columns{'LCA'}];
-    
-    if (!$self->has_ancestor($dba, $lca)) {
       push @rfam_acc, $rfam_acc;
     }
   }
