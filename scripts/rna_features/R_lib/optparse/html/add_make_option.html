@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Functions to enable our OptionParser to recognize specific...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for make_option {optparse}"><tr><td>make_option {optparse}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>Functions to enable our OptionParser to recognize specific command line
+options.</h2>
+
+<h3>Description</h3>
+
+<p><code>add_option</code> adds a option to a prexisting <code>OptionParser</code> instance
+whereas <code>make_option</code> is used to create a list of
+<code>OptionParserOption</code> instances that will be used in the
+<code>option_list</code> argument of the <code>OptionParser</code> function to create a
+new <code>OptionParser</code> instance.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+make_option(opt_str, action = "store", type = NULL, dest = NULL,
+  default = NULL, help = "", metavar = NULL)
+
+add_option(object, opt_str, action = "store", type = NULL, dest = NULL,
+  default = NULL, help = "", metavar = NULL)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>opt_str</code></td>
+<td>
+<p>A character vector containing the string of the desired long
+flag comprised of &ldquo;&ndash;&rdquo; followed by a letter and then a sequence of
+alphanumeric characters and optionally a string of the desired short flag
+comprised of the &ldquo;-&rdquo; followed by a letter.</p>
+</td></tr>
+<tr valign="top"><td><code>action</code></td>
+<td>
+<p>A character string that describes the action <code>optparse</code>
+should take when it encounters an option, either &ldquo;store&rdquo;,
+&ldquo;store_true&rdquo;, or &ldquo;store_false&rdquo;.  The default is &ldquo;store&rdquo;
+which signifies that <code>optparse</code> should store the specified following
+value if the option is found on the command string.  &ldquo;store_true&rdquo;
+stores <code>TRUE</code> if the option is found and &ldquo;store_false&rdquo; stores
+<code>FALSE</code> if the option is found.</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>A character string that describes specifies which data type
+should be stored, either &ldquo;logical&rdquo;, &ldquo;integer&rdquo;, &ldquo;double&rdquo;,
+&ldquo;complex&rdquo;, or &ldquo;character&rdquo;.  Default is &ldquo;logical&rdquo; if
+<code>action %in% c("store_true", store_false)</code>, <code>typeof(default)</code> if
+<code>action == "store"</code> and default is not <code>NULL</code> and
+&ldquo;character&rdquo; if <code>action == "store"</code> and default is <code>NULL</code>.
+&ldquo;numeric&rdquo; will be converted to &ldquo;double&rdquo;.</p>
+</td></tr>
+<tr valign="top"><td><code>dest</code></td>
+<td>
+<p>A character string that specifies what field in the list returned
+by <code>parse_args</code> should <code>optparse</code> store option values.  Default is
+derived from the long flag in <code>opt_str</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>default</code></td>
+<td>
+<p>The default value <code>optparse</code> should use if it does not
+find the option on the command line.  Default is derived from the long flag
+in <code>opt_str</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>help</code></td>
+<td>
+<p>A character string describing the option to be used by
+<code>print_help</code> in generating a usage message.  <code>%default</code> will be
+substituted by the value of <code>default</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>metavar</code></td>
+<td>
+<p>A character string that stands in for the option argument when
+printing help text.  Default is the value of <code>dest</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>object</code></td>
+<td>
+<p>An instance of the <code>OptionParser</code> class</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>Both <code>make_option</code> and <code>add_option</code> return instances of
+class <code>OptionParserOption</code>.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Trevor Davis.
+</p>
+
+
+<h3>References</h3>
+
+<p>Python's <code>optparse</code> library, which inspires this package,
+is described here: <a href="http://docs.python.org/library/optparse.html">http://docs.python.org/library/optparse.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="parse_args.html">parse_args</a></code> <code><a href="OptionParser.html">OptionParser</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+make_option("--longflag")
+   make_option(c("-l", "--longflag"))
+   make_option("--integer", type="integer", default=5)
+   make_option("--integer", default=as.integer(5))  # same as previous
+
+   # examples from package vignette
+   make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
+       help="Print extra output [default]")
+   make_option(c("-q", "--quietly"), action="store_false",
+     dest="verbose", help="Print little output")
+   make_option(c("-c", "--count"), type="integer", default=5,
+       help="Number of random normals to generate [default %default]",
+       metavar="number")
+   make_option("--generator", default="rnorm",
+       help = "Function to generate random deviates [default \"%default\"]")
+   make_option("--mean", default=0,
+       help="Mean if generator == \"rnorm\" [default %default]")
+   make_option("--sd", default=1, metavar="standard deviation",
+       help="Standard deviation if generator == \"rnorm\" [default %default]")
+</pre>
+
+<hr><div align="center">[Package <em>optparse</em> version 1.3.2 <a href="00Index.html">Index</a>]</div>
+</body></html>

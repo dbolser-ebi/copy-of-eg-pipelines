@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: Command line option parser</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for optparse-package {optparse}"><tr><td>optparse-package {optparse}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>Command line option parser</h2>
+
+<h3>Description</h3>
+
+<p>Goal is to create an R package of a command line parser inspired by Python's
+&ldquo;optparse&rdquo; library.
+</p>
+
+
+<h3>Details</h3>
+
+<p><code>optparse</code> is primarily intended to be used with
+&ldquo;Rscript&rdquo;. It facilitates writing &ldquo;#!&rdquo; shebang scripts that
+accept short and long flags/options. It can also be used from directly, but
+is probably less useful in this context.
+</p>
+<p>See package vignette for a more detailed example.
+</p>
+<p>Notes on naming convention in package: 1. An option is one of the shell-split
+input strings. 2. A flag is a type of option. a flag can be defined as having
+no argument (defined below), a required argument, or an optional argument. 3.
+An argument is a type of option, and is the value associated with a flag. 4.
+A long flag is a type of flag, and begins with the string &ldquo;&ndash;&rdquo;. If the
+long flag has an associated argument, it may be delimited from the long flag
+by either a trailing =, or may be the subsequent option. 5. A short flag is a
+type of flag, and begins with the string &ldquo;-&rdquo;. If a short flag has an
+associated argument, it is the subsequent option. short flags may be bundled
+together, sharing a single leading &ldquo;&quot;-&quot;&rdquo;, but only the final short
+flag is able to have a corresponding argument. 
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Trevor Davis.
+</p>
+<p>Some documentation and unit tests ported from Allen Day's getopt package.
+</p>
+<p>The documentation for Python's optparse library, which this package is based
+on, is Copyright 1990-2009, Python Software Foundation.
+</p>
+
+
+<h3>References</h3>
+
+<p>Python's <code>optparse</code> library, which this package is based on,
+is described here: <a href="http://docs.python.org/library/optparse.html">http://docs.python.org/library/optparse.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="../../getopt/html/getopt.html">getopt</a></code>
+</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+example_file &lt;- system.file("exec", "example.R", package = "optparse")
+   example_file_2 &lt;- system.file("exec", "display_file.R", package = "optparse")
+   ## Not run: 
+       readLines(example_file)
+       readLines(example_file_2)
+   
+## End(Not run)
+</pre>
+
+<hr><div align="center">[Package <em>optparse</em> version 1.3.2 <a href="00Index.html">Index</a>]</div>
+</body></html>

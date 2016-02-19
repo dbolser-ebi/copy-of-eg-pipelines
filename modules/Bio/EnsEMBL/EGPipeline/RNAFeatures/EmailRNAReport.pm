@@ -36,165 +36,125 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
-sub param_defaults {
-  my $self = shift @_;
-  
-  return {
-    %{$self->SUPER::param_defaults},
-    'db_type' => 'core',
-  };
-}
+use MIME::Lite;
 
 sub fetch_input {
   my ($self) = @_;
-  my $species      = $self->param_required('species');
-  my $run_cmscan   = $self->param_required('run_cmscan');
-  my $run_trnascan = $self->param_required('run_trnascan');
+  my $run_cmscan    = $self->param_required('run_cmscan');
+  my $run_trnascan  = $self->param_required('run_trnascan');
+  my $pipeline_dir  = $self->param_required('pipeline_dir');
+  my $evalue_levels = $self->param_required('evalue_levels');
   
-  my $dba = $self->get_DBAdaptor($self->param_required('db_type'));
-  my $dbh = $dba->dbc->db_handle();
-  
-  my $counts;
-  my @logic_names;
+  my $text = "The RNA Features pipeline has completed.\n\n";
   
   if ($run_cmscan) {
-    my $rfam_logic_name   = $self->param_required('rfam_logic_name');
-    my $cmscan_cm_file    = $self->param_required('cmscan_cm_file');
-    my $cmscan_logic_name = $self->param_required('cmscan_logic_name');
+    my @evalue_levels = keys %$evalue_levels;
+    my $cmscan_file = "$pipeline_dir/cmscan.txt";
+    $text .= "The cmscan alignments are summarised in the table below, and in the attached plots.\n";
+    $text .= $self->summarise($cmscan_file, 'E-value', \@evalue_levels);
     
-    my $logic_name;
-    if (! exists $$cmscan_cm_file{$species} && ! exists $$cmscan_cm_file{'all'}) {
-      $logic_name = $rfam_logic_name;
-    } elsif (exists $$cmscan_logic_name{$species}) {
-      $logic_name = $$cmscan_logic_name{$species};
-    } elsif (exists $$cmscan_logic_name{'all'}) {
-      $logic_name = $$cmscan_logic_name{'all'};
-    } else {
-      $logic_name = 'cmscan_custom';
-    }
-    push @logic_names, $logic_name;
-    
-    my ($unique, $low_conf, $high_conf) = $self->cmscan_counts($dbh, $logic_name);
-    
-    $counts .= 
-      "The pipeline aligned $unique distinct covariance models with cmscan ".
-      "(logic_name: $logic_name).\n\n".
-      "There are $low_conf low confidence (1e-3 >= e-value > 1e-6) alignments, ".
-      "and $high_conf high confidence (e-value <= 1e-6) alignments.\n\n";
   }
   
   if ($run_trnascan) {
-    my $logic_name = 'trnascan';
-    push @logic_names, $logic_name;
-    
-    my ($unique, $low_conf, $high_conf) = $self->trnascan_counts($dbh, $logic_name);
-    
-    $counts .= 
-      "The pipeline aligned $unique distinct tRNA models with tRNAscan-SE ".
-      "(logic_name: $logic_name).\n\n".
-      "There are $low_conf low confidence (COVE score < 40) alignments, ".
-      "and $high_conf high confidence (COVE score >= 40) alignments.\n\n";
+    my $trnascan_file = "$pipeline_dir/trnascan.txt";
+    $text .= "The trnascan alignments are summarised in the table below.\n";
+    $text .= $self->summarise($trnascan_file, 'Score', [0, 40]);
   }
-  
-  my $summary = $self->report_summary($dbh, \@logic_names);
-  my $text =
-    "The RNA Features pipeline has completed for $species.\n\n".
-    "$counts\n\n".
-    "$summary\n\n";
   
   $self->param('text', $text);
 }
 
-sub cmscan_counts {
-  my ($self, $dbh, $logic_name) = @_;
+sub run {
+  my ($self) = @_;
+  my $email         = $self->param_required('email');
+  my $subject       = $self->param_required('subject');
+  my $text          = $self->param_required('text');
+  my $pipeline_dir  = $self->param_required('pipeline_dir');
+  my $evalue_levels = $self->param_required('evalue_levels');
   
-  my $unique_sql =
-    'SELECT COUNT(distinct hit_name) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'";';
-  my ($unique) = $dbh->selectrow_array($unique_sql);
+  my $msg = MIME::Lite->new(
+    From    => $email,
+    To      => $email,
+    Subject => $subject,
+    Type    => 'multipart/mixed',
+  );
   
-  my $low_conf_sql =
-    'SELECT COUNT(*) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'" AND evalue <= 1e-3 AND evalue > 1e-6;';
-  my ($low_conf) = $dbh->selectrow_array($low_conf_sql);
+  $msg->attach(
+    Type => 'TEXT',
+    Data => $text,
+  );
   
-  my $high_conf_sql =
-    'SELECT COUNT(*) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'" AND evalue <= 1e-6;';
-  my ($high_conf) = $dbh->selectrow_array($high_conf_sql);
+  foreach my $evalue (keys %$evalue_levels) {
+    my $biotypes_file = "biotypes_$evalue.svg";
+    my $biotypes_path = "$pipeline_dir/$biotypes_file";
+    my $distinct_file = "distinct_$evalue.svg";
+    my $distinct_path = "$pipeline_dir/$distinct_file";
+    
+    if (-e $biotypes_path) {
+      $msg->attach(
+        Type        => 'image/svg+xml',
+        Path        => $biotypes_path,
+        Filename    => $biotypes_file,
+        Disposition => 'attachment',
+      );
+    }
+    
+    if (-e $distinct_path) {
+      $msg->attach(
+        Type        => 'image/svg+xml',
+        Path        => $distinct_path,
+        Filename    => $distinct_file,
+        Disposition => 'attachment',
+      );
+    }
+  }
   
-  return ($unique, $low_conf, $high_conf);
+  $msg->send;
 }
 
-sub trnascan_counts {
-  my ($self, $dbh, $logic_name) = @_;
+sub summarise {
+  my ($self, $file, $value_type, $thresholds) = @_;
   
-  my $unique_sql =
-    'SELECT COUNT(distinct hit_name) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'";';
-  my ($unique) = $dbh->selectrow_array($unique_sql);
-  
-  my $low_conf_sql =
-    'SELECT COUNT(*) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'" AND score < 40;';
-  my ($low_conf) = $dbh->selectrow_array($low_conf_sql);
-  
-  my $high_conf_sql =
-    'SELECT COUNT(*) FROM '.
-    'dna_align_feature INNER JOIN analysis USING (analysis_id) '.
-    'WHERE logic_name = "'.$logic_name.'" AND score >= 40;';
-  my ($high_conf) = $dbh->selectrow_array($high_conf_sql);
-  
-  return ($unique, $low_conf, $high_conf);
-}
+  local $/;
+  open(my $fh, '<', $file) or $self->throw("Failed to open $file: $!");
+  my @rows = split(/\n/, <$fh>);
+  close($fh);
 
-sub report_summary {
-  my ($self, $dbh, $logic_names) = @_;
+  my %summary;
+  foreach my $row (@rows) {
+    my ($value, $species, $biotype, $name) = split(/\t/, $row);
+    foreach my $threshold (@$thresholds) {
+      if ($value_type eq 'E-value') {
+        if ($value <= $threshold) {
+          $summary{$species}{$threshold}{$biotype}{$name}++;
+        }
+      } else {
+        if ($value >= $threshold) {
+          $summary{$species}{$threshold}{$biotype}{$name}++;
+        }
+      }
+    }
+  }
   
-  my $logic_name_list = "'" . join("','", @$logic_names) . "'";
+  my @columns = ('Species', $value_type, '# Biotypes', '# Models', '# Alignments');
+  my @results;
+  foreach my $species (sort keys %summary) {
+    foreach my $threshold (sort keys %{$summary{$species}}) {
+      my ($biotypes, $models, $alignments) = (0, 0, 0);
+      
+      foreach my $biotype (keys %{$summary{$species}{$threshold}}) {
+        $biotypes++;
+        foreach my $name (keys %{$summary{$species}{$threshold}{$biotype}}) {
+          $models++;
+          $alignments += $summary{$species}{$threshold}{$biotype}{$name};
+        }
+      }
+      
+      push @results, [$species, $threshold, $biotypes, $models, $alignments];
+    }
+  }
   
-  my $sql = "
-    SELECT
-      LEFT(
-        SUBSTRING(
-          external_data,
-          INSTR(
-            external_data,
-            \"'Biotype' => \"
-          )+14
-        ),
-        INSTR(
-          SUBSTRING(
-            external_data,
-            INSTR(
-              external_data,
-            \"'Biotype' => \"
-            )+14
-          ),
-          \"'\"
-        )-1
-      ) AS biotype,
-      COUNT(*) AS count_of_alignments
-    FROM dna_align_feature
-    INNER JOIN analysis USING (analysis_id)
-    WHERE logic_name in ($logic_name_list)
-    GROUP BY biotype
-    ORDER BY biotype
-  ;";
-  
-  my $sth = $dbh->prepare($sql);
-  $sth->execute();
-  
-  my $title = "Summary of RNA gene biotypes:";
-  my $columns = $sth->{NAME};
-  my $results = $sth->fetchall_arrayref();
-  
-  return $self->format_table($title, $columns, $results);
+  return $self->format_table('', \@columns, \@results);
 }
 
 1;

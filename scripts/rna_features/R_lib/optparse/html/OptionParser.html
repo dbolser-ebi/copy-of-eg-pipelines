@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>R: A function to create an instance of a parser object</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body>
+
+<table width="100%" summary="page for OptionParser {optparse}"><tr><td>OptionParser {optparse}</td><td align="right">R Documentation</td></tr></table>
+
+<h2>A function to create an instance of a parser object</h2>
+
+<h3>Description</h3>
+
+<p>This function is used to create an instance of a parser object
+which when combined with the <code>parse_args</code>, <code>make_option</code>, and <code>add_option</code>
+methods is very useful for parsing options from the command line.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+OptionParser(usage = "usage: %prog [options]", option_list = list(),
+  add_help_option = TRUE, prog = NULL, description = "", epilogue = "")
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>usage</code></td>
+<td>
+<p>The program usage message that will printed out if
+<code>parse_args</code> finds a help option, <code>%prog</code> is substituted with the
+value of the <code>prog</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>option_list</code></td>
+<td>
+<p>A list of of <code>OptionParserOption</code> instances that will
+define how <code>parse_args</code> reacts to command line options.
+<code>OptionParserOption</code> instances are usually created by <code>make_option</code>
+and can also be added to an existing <code>OptionParser</code> instance via the
+<code>add_option</code> function.</p>
+</td></tr>
+<tr valign="top"><td><code>add_help_option</code></td>
+<td>
+<p>Whether a standard help option should be automatically
+added to the <code>OptionParser</code> instance.</p>
+</td></tr>
+<tr valign="top"><td><code>prog</code></td>
+<td>
+<p>Program name to be substituted for <code>%prog</code> in the usage
+message (including description and epilogue if present),
+the default is to use the actual Rscript file name if called by an
+Rscript file and otherwise keep <code>%prog</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>description</code></td>
+<td>
+<p>Additional text for <code>print_help</code> to print out between
+usage statement and options statement</p>
+</td></tr>
+<tr valign="top"><td><code>epilogue</code></td>
+<td>
+<p>Additional text for <code>print_help</code> to print out after
+the options statement</p>
+</td></tr>
+</table>
+
+
+<h3>Value</h3>
+
+<p>An instance of the <code>OptionParser</code> class.
+</p>
+
+
+<h3>Author(s)</h3>
+
+<p>Trevor Davis.
+</p>
+
+
+<h3>References</h3>
+
+<p>Python's <code>optparse</code> library, which inspired this package,
+is described here: <a href="http://docs.python.org/library/optparse.html">http://docs.python.org/library/optparse.html</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="parse_args.html">parse_args</a></code> <code><a href="add_make_option.html">make_option</a></code>
+<code><a href="add_make_option.html">add_option</a></code>
+</p>
+
+<hr><div align="center">[Package <em>optparse</em> version 1.3.2 <a href="00Index.html">Index</a>]</div>
+</body></html>
