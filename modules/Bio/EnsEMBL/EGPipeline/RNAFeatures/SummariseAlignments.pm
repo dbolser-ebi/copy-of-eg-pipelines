@@ -55,19 +55,22 @@ sub run {
 
 sub write_output {
   my ($self) = @_;
+  my $run_cmscan   = $self->param_required('run_cmscan');
   my $pipeline_dir  = $self->param_required('pipeline_dir');
   my $evalue_levels = $self->param_required('evalue_levels');
   
-  foreach my $evalue (keys %$evalue_levels) {
-    my $output_ids = {
-      'cmscanfile'   => "$pipeline_dir/cmscan.txt",
-      'evalue'       => $evalue,
-      'biotypesfile' => "$pipeline_dir/biotypes_$evalue.svg",
-      'distinctfile' => "$pipeline_dir/distinct_$evalue.svg",
-      'plotcolour'   => $$evalue_levels{$evalue},
-    };
-    
-    $self->dataflow_output_id($output_ids, 2);
+  if ($run_cmscan) {
+    foreach my $evalue (keys %$evalue_levels) {
+      my $output_ids = {
+        'cmscanfile'   => "$pipeline_dir/cmscan.txt",
+        'evalue'       => $evalue,
+        'biotypesfile' => "$pipeline_dir/biotypes_$evalue.svg",
+        'distinctfile' => "$pipeline_dir/distinct_$evalue.svg",
+        'plotcolour'   => $$evalue_levels{$evalue},
+      };
+      
+      $self->dataflow_output_id($output_ids, 2);
+    }
   }
 }
 

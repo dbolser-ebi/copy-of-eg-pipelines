@@ -45,19 +45,19 @@ sub fetch_input {
   my $pipeline_dir  = $self->param_required('pipeline_dir');
   my $evalue_levels = $self->param_required('evalue_levels');
   
-  my $text = "The RNA Features pipeline has completed.\n\n";
+  my $text = "The RNA Features pipeline has completed.\n";
   
   if ($run_cmscan) {
     my @evalue_levels = keys %$evalue_levels;
     my $cmscan_file = "$pipeline_dir/cmscan.txt";
-    $text .= "The cmscan alignments are summarised in the table below, and in the attached plots.\n";
+    $text .= "\nThe cmscan alignments are summarised in the table below, and in the attached plots.";
     $text .= $self->summarise($cmscan_file, 'E-value', \@evalue_levels);
     
   }
   
   if ($run_trnascan) {
     my $trnascan_file = "$pipeline_dir/trnascan.txt";
-    $text .= "The trnascan alignments are summarised in the table below.\n";
+    $text .= "\nThe trnascan alignments are summarised in the table below.";
     $text .= $self->summarise($trnascan_file, 'Score', [0, 40]);
   }
   
