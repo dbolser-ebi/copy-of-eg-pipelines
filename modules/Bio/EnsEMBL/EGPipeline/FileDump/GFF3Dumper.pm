@@ -337,4 +337,23 @@ sub Bio::EnsEMBL::RepeatFeature::summary_as_hash {
   return \%summary;
 }
 
+sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
+  my $self = shift;
+  my %summary;
+  
+  $summary{'source'}              = $self->analysis->gff_source || $self->slice->source;
+  $summary{'seq_region_name'}     = $self->seq_region_name;
+  $summary{'start'}               = $self->seq_region_start;
+  $summary{'end'}                 = $self->seq_region_end;
+  $summary{'strand'}              = $self->strand;
+  $summary{'id'}                  = undef;
+  $summary{'Name'}                = $self->display_id;
+  $summary{'description'}         = $self->analysis->description;
+  $summary{'score'}               = $self->score;
+  $summary{'evalue'}              = $self->p_value;
+  $summary{'percentage_identity'} = $self->percent_id;
+  
+  return \%summary;
+}
+
 1;
