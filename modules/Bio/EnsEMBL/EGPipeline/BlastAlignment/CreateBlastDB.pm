@@ -113,22 +113,25 @@ sub run {
 sub write_output {
   my ($self) = @_;
   my $db_fasta_file     = $self->param_required('db_fasta_file');
+  my $proteome_source   = $self->param_required('proteome_source');
   my $logic_name_prefix = $self->param_required('logic_name_prefix');
   my $species           = $self->param('source_species');
   
   if ($logic_name_prefix eq 'file') {
     my ($name, undef, undef) = fileparse($db_fasta_file, qr/\.[^.]*/);
-    ($logic_name_prefix) = $name =~ /.*(\w+)$/;
-  } elsif ($logic_name_prefix eq 'database') {
+    ($logic_name_prefix) = $name =~ /(\w+)$/;
+  }
+  if ($proteome_source eq 'database') {
     if ($species) {
       $species =~ /^(\w).*_(\w+)/;
       $logic_name_prefix = "$1$2";
     }
   }
+  $logic_name_prefix =~ s/\s+/_/g;
   
   my $output_ids = {
     'blast_db'          => $self->param_required('blast_db'),
-    'logic_name_prefix' => $logic_name_prefix,
+    'logic_name_prefix' => lc($logic_name_prefix),
   };
   
   $self->dataflow_output_id($output_ids, 1);
