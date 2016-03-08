@@ -48,8 +48,8 @@ use URI;
 sub param_defaults {
   return {
     'ftp_uri'          => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions',
-    'taxonomic_levels' => [qw(fungi invertebrates plants)],
-    'uniprot_sources'  => [qw(sprot trembl)],
+    'taxonomic_levels' => ['invertebrates'],
+    'uniprot_sources'  => ['sprot'],
   };
 }
 
