@@ -132,11 +132,13 @@ sub remove_overlapping {
   my @non_overlapping = ();
   foreach my $feature (@$features) {
     if ($self->hit_overlap($best_hit, $feature)) {
-      if ($adaptor->isa('Bio::EnsEMBL::DBSQL::ProteinFeatureAdaptor')) {
-        my $sth = $adaptor->prepare("DELETE FROM protein_feature WHERE protein_feature_id = ?");
-        $sth->execute($feature->dbID);
-      } else {
-        $adaptor->remove($feature);
+      if !($best_hit->p_value == $feature->p_value && $best_hit->score == $feature->score) {      
+        if ($adaptor->isa('Bio::EnsEMBL::DBSQL::ProteinFeatureAdaptor')) {
+          my $sth = $adaptor->prepare("DELETE FROM protein_feature WHERE protein_feature_id = ?");
+          $sth->execute($feature->dbID);
+        } else {
+          $adaptor->remove($feature);
+        }
       }
     } else {
       push @non_overlapping, $feature;
