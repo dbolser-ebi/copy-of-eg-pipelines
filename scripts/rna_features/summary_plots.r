@@ -49,7 +49,9 @@ distinct_names = count(aln_filtered, vars = c("Species", "Name"))
 distinct_names$freq = NULL
 name_freqs = count(distinct_names, vars = c("Species"))
 
-svg(options$distinctfile, width=nrow(name_freqs)/3, height=6)
+plot_width = 2 + nrow(name_freqs)/3
+
+svg(options$distinctfile, width=plot_width, height=6)
 par(las=2)
 par(mar=c(12, 5, 2, 2)+ 0.1)
 max_y = (ceiling(max(name_freqs$freq)/50))*50
