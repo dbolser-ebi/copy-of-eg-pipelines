@@ -55,11 +55,11 @@ sub run {
     -REPLACE_ALL => $self->param('replace_all'),
   );
   
-  my $core_dba = $self->core_dba();
-  $self->analysis_setup($core_dba);
-  $self->external_db_reset($core_dba, 'GO');
-  $loader->load_go_terms($core_dba);
-  $self->external_db_update($core_dba, 'GO');
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  $self->analysis_setup($dba);
+  $self->external_db_reset($dba, 'GO');
+  $loader->load_go_terms($dba);
+  $self->external_db_update($dba, 'GO');
 }
 
 1;

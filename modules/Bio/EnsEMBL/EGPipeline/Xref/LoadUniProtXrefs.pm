@@ -55,14 +55,14 @@ sub run {
     -DBNAMES     => $self->param('xref_source'),
   );
   
-  my $core_dba = $self->core_dba();
-  $self->analysis_setup($core_dba);
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  $self->analysis_setup($dba);
   foreach my $db_name (@{$self->param('xref_source')}) {
-    $self->external_db_reset($core_dba, $db_name);
+    $self->external_db_reset($dba, $db_name);
   }
-  $loader->load_xrefs($core_dba);
+  $loader->load_xrefs($dba);
   foreach my $db_name (@{$self->param('xref_source')}) {
-    $self->external_db_update($core_dba, $db_name);
+    $self->external_db_update($dba, $db_name);
   }
 }
 
