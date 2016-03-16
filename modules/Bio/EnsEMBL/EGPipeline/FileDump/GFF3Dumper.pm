@@ -160,7 +160,8 @@ sub exon_features {
     push @cds_features,  @{ $transcript->get_all_CDS() };
     push @exon_features, @{ $transcript->get_all_ExonTranscripts() };
     
-    if (!defined $transcript->get_all_SeqEdits()) {
+    my $seq_edits = $transcript->get_all_SeqEdits();
+    if (! defined $seq_edits || scalar(@$seq_edits) == 0) {
       push @utr_features,  @{ $transcript->get_all_five_prime_UTRs() };
       push @utr_features,  @{ $transcript->get_all_three_prime_UTRs() };
     }
@@ -332,6 +333,25 @@ sub Bio::EnsEMBL::RepeatFeature::summary_as_hash {
   if ($rc->repeat_consensus =~ /^[^N]\S*/) {
     $summary{'repeat_consensus'} = $rc->repeat_consensus;
   }
+  
+  return \%summary;
+}
+
+sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
+  my $self = shift;
+  my %summary;
+  
+  $summary{'source'}              = $self->analysis->gff_source || $self->slice->source;
+  $summary{'seq_region_name'}     = $self->seq_region_name;
+  $summary{'start'}               = $self->seq_region_start;
+  $summary{'end'}                 = $self->seq_region_end;
+  $summary{'strand'}              = $self->strand;
+  $summary{'id'}                  = undef;
+  $summary{'Name'}                = $self->display_id;
+  $summary{'description'}         = $self->analysis->description;
+  $summary{'score'}               = $self->score;
+  $summary{'evalue'}              = $self->p_value;
+  $summary{'percentage_identity'} = $self->percent_id;
   
   return \%summary;
 }

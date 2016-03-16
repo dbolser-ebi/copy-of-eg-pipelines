@@ -31,6 +31,7 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
+    'compara'          => 'multi',
     'skip_dumps'       => [],
     'files_per_subdir' => 500,
   };
@@ -38,6 +39,7 @@ sub param_defaults {
 
 sub write_output {
   my ($self) = @_;
+  my $compara          = $self->param_required('compara');
   my $dump_types       = $self->param_required('dump_types');
   my $skip_dumps       = $self->param_required('skip_dumps');
   my $results_dir      = $self->param_required('results_dir');
@@ -45,7 +47,7 @@ sub write_output {
   
   my %skip_dumps = map { $_ => 1 } @$skip_dumps;
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor('Multi', 'compara');
+  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($compara, 'compara');
   
   my $gta = $dba->get_adaptor("GeneTree");
   my $all_trees = $gta->fetch_all(
@@ -81,20 +83,20 @@ sub write_output {
   foreach my $flow (keys %$dump_types) {
     foreach my $dump_type (@{$$dump_types{$flow}}) {
       if (!exists $skip_dumps{$dump_type}) {
-        my $out_dir = catdir($results_dir, $dump_type);
-        path($out_dir)->mkpath;
+        my $sub_dir = $self->sub_dir($dump_type);
         
         foreach my $tree_group (@tree_groups) {
           my %output_ids = %$tree_group;
           
-          my $sub_dir = catdir($out_dir, $$tree_group{'id_range'});
-          path($sub_dir)->mkpath;
-          $output_ids{'sub_dir'} = $sub_dir;
+          my $tree_dir = catdir($results_dir, $sub_dir, $$tree_group{'id_range'});
+          path($tree_dir)->mkpath;
+          $output_ids{'tree_dir'} = $tree_dir;
           
           $self->dataflow_output_id(\%output_ids, $flow);
         }
         
-        $self->dataflow_output_id({ out_dir => $out_dir }, 1);
+        $self->dataflow_output_id(
+          { out_dir => $results_dir , sub_dir => $sub_dir }, 1);
       }
     }
   }
@@ -120,6 +122,13 @@ sub id_range {
   }
   
   return join('', @range);
+}
+
+sub sub_dir {
+  my ($self, $dump_type) = @_;
+  my $dump_names   = $self->param_required('dump_names');
+  my $release_date = $self->param_required('release_date');
+  return $$dump_names{$dump_type}."_$release_date";
 }
 
 1;

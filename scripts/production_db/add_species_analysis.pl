@@ -74,7 +74,7 @@ unless ($species_id) {
 }
 
 $sth = $dbh->prepare(
-  'SELECT logic_name, analysis_description_id, default_web_data_id '.
+  'SELECT logic_name, analysis_description_id, default_web_data_id, default_displayable '.
   'FROM analysis_description '.
   'WHERE is_current = 1;'
 );
@@ -83,7 +83,8 @@ $sth->execute();
 $sth->bind_columns(\(
   $logic_name,
   $properties{'analysis_description_id'},
-  $properties{'web_data_id'}
+  $properties{'web_data_id'},
+  $properties{'displayable'}
 ));
 
 while ( $sth->fetch() ) {
@@ -92,7 +93,7 @@ while ( $sth->fetch() ) {
 
 $sth = $dbh->prepare(
   'INSERT IGNORE INTO analysis_web_data '.
-  '(analysis_description_id, web_data_id, species_id, db_type, displayable, created_at, modified_at) '.
+  '(analysis_description_id, web_data_id, displayable, species_id, db_type, created_at, modified_at) '.
   'VALUES (?, ?, ?, ?, ?, NOW(), NOW());'
 );
 
@@ -106,9 +107,10 @@ foreach my $analysis ( @{ $analysis_adaptor->fetch_all() } ) {
       my $return = $sth->execute(
         $mdata{$logic_name}{'analysis_description_id'},
         $mdata{$logic_name}{'web_data_id'},
+        $mdata{$logic_name}{'displayable'},
         $species_id,
         $type,
-        $analysis->displayable());
+      );
 
       if ($return) {
         print "Done\n";
