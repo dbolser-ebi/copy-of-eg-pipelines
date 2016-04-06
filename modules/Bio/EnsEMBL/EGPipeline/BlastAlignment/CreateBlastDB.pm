@@ -117,6 +117,8 @@ sub write_output {
   my $logic_name_prefix = $self->param_required('logic_name_prefix');
   my $species           = $self->param('source_species');
   
+  my $db_version;
+  
   if ($logic_name_prefix eq 'file') {
     my ($name, undef, undef) = fileparse($db_fasta_file, qr/\.[^.]*/);
     ($logic_name_prefix) = $name =~ /(\w+)$/;
@@ -125,12 +127,14 @@ sub write_output {
     if ($species) {
       $species =~ /^(\w).*_(\w+)/;
       $logic_name_prefix = "$1$2";
+      $db_version = $self->core_dba->get_MetaContainer()->single_value_by_key('genebuild.version');
     }
   }
   $logic_name_prefix =~ s/\s+/_/g;
   
   my $output_ids = {
     'blast_db'          => $self->param_required('blast_db'),
+    'db_version'        => $self->param_required('db_version'),
     'logic_name_prefix' => lc($logic_name_prefix),
   };
   

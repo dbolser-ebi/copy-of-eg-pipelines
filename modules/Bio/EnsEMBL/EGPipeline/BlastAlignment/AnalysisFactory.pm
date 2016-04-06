@@ -31,6 +31,7 @@ sub run {
   my $analyses          = $self->param_required('analyses');
   my $logic_name_prefix = $self->param_required('logic_name_prefix');
   my $db_file           = $self->param_required('db_fasta_file');
+  my $db_version        = $self->param('db_version');
   my $blastp            = $self->param_required('blastp');
   my $blastx            = $self->param_required('blastx');
   
@@ -40,6 +41,9 @@ sub run {
   foreach my $analysis (@{$analyses}) {
     $$analysis{'logic_name'} = $logic_name_prefix.'_'.$$analysis{'logic_name'};
     $$analysis{'db_file'} = $db_file;
+    if ($db_version) {
+      $$analysis{'db_version'} = $db_version;
+    }
     
     if ($$analysis{'logic_name'} =~ /blastp$/ && $blastp) {
       push @$proteomic_analyses, $analysis;
