@@ -20,9 +20,12 @@ Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneNamesProjectionSourceFact
 
 =head1 DESCRIPTION
 
+This analysis take the GeneNames or GeneDescription projection hash in, if parallel_GeneNames_projections is set, the pipeline will dataflow all the Gene Name or description projections.
+If parallel_GeneNames_projections is not defined then the pipeline will dataflow each projections sequentially to avoid projecting dependant species at the same time.
+
 =head1 AUTHOR
 
-ckong
+ckong and maurel
 
 =cut
 package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::GeneNamesProjectionSourceFactory;
@@ -32,27 +35,43 @@ use Data::Dumper;
 use Bio::EnsEMBL::Registry;
 use base ('Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::Base');
 
-sub write_output {
+sub run {
     my ($self)  = @_;
+    my $self = shift @_;
+    my $projection_list = $self->param('projection_list');
+    my $g_config = $self->param_required('g_config') || die "'g_config' is an obligatory parameter";
+    my $parallel_GeneNames_projections = $self->param('parallel_GeneNames_projections');
+    my $final_projection_list;
 
-    my $g_config = $self->param_required('g_config');
+    if ($projection_list)
+    {
+      $final_projection_list=$projection_list;
+    }
+    else
+    {
+      $final_projection_list=$g_config;
+    }
+    # Making sure that the projection hash is not empty
+    if (keys $final_projection_list){
+      foreach my $pair (sort (keys $final_projection_list)){
+         my $source                 = $final_projection_list->{$pair}->{'source'};
+         my $species                = $final_projection_list->{$pair}->{'species'};
+         my $antispecies            = $final_projection_list->{$pair}->{'antispecies'};
+         my $division               = $final_projection_list->{$pair}->{'division'};
+         my $run_all                = $final_projection_list->{$pair}->{'run_all'};       
+         my $method_link_type       = $final_projection_list->{$pair}->{'method_link_type'};  
+         my $homology_types_allowed = $final_projection_list->{$pair}->{'homology_types_allowed'};
+         my $percent_id_filter      = $final_projection_list->{$pair}->{'percent_id_filter'};
+         my $percent_cov_filter     = $final_projection_list->{$pair}->{'percent_cov_filter'};
+         my $taxon_filter           = $final_projection_list->{$pair}->{'taxon_filter'};
+         my $geneName_source        = $final_projection_list->{$pair}->{'geneName_source'};
+         my $geneDesc_rules         = $final_projection_list->{$pair}->{'geneDesc_rules'};
+         my $geneDesc_rules_target  = $final_projection_list->{$pair}->{'geneDesc_rules_target'};
 
-    foreach my $pair (keys $g_config){
-       my $source                 = $g_config->{$pair}->{'source'};
-       my $species                = $g_config->{$pair}->{'species'};
-       my $antispecies            = $g_config->{$pair}->{'antispecies'};
-       my $division               = $g_config->{$pair}->{'division'};
-       my $run_all                = $g_config->{$pair}->{'run_all'};       
-       my $method_link_type       = $g_config->{$pair}->{'method_link_type'};  
-       my $homology_types_allowed = $g_config->{$pair}->{'homology_types_allowed'};
-       my $percent_id_filter      = $g_config->{$pair}->{'percent_id_filter'};
-       my $percent_cov_filter     = $g_config->{$pair}->{'percent_cov_filter'};
-       my $taxon_filter           = $g_config->{$pair}->{'taxon_filter'};
-       my $geneName_source        = $g_config->{$pair}->{'geneName_source'};
-       my $geneDesc_rules         = $g_config->{$pair}->{'geneDesc_rules'};
-       my $geneDesc_rules_target  = $g_config->{$pair}->{'geneDesc_rules_target'};
-
-       $self->dataflow_output_id(
+         # Remove source/target species from the hash
+         delete $final_projection_list->{$pair};
+         $self->param('projection_list', $final_projection_list);
+         $self->dataflow_output_id(
 		{'source'      		  => $source, 
 		 'species'     		  => $species, 
 		 'antispecies' 		  => $antispecies, 
@@ -66,17 +85,33 @@ sub write_output {
 		 'geneName_source'	  => $geneName_source,
 		 'geneDesc_rules'	  => $geneDesc_rules,
 		 'geneDesc_rules_target'  => $geneDesc_rules_target
-		},2); 
-      }
+		},2);
+                # If parallel_GeneNames_projections is defined, we run all the projections at the same time in parallel
+          if ($parallel_GeneNames_projections){
+            $self->dataflow_output_id({'projection_list'  => {},
+                                 'species'                => $species,
+                                 'source'                 => $source},1);
+          }
+          # else, we run the projections sequentially, one set of projection at the time
+          else{
+          # Making sure that the projection hash is not empty
+          if (keys $final_projection_list){
+            $self->dataflow_output_id({'projection_list'       => $self->param('projection_list'),
+                                 'species'                => $species,
+                                 'source'                 => $source},1);
+          }
+           # If we only run one set of projection then behave like parallel projections
+          else{
+            $self->dataflow_output_id({'projection_list'  => {},
+                                 'species'                => $species,
+                                 'source'                 => $source},1);
+          }
+          last;
+          }
+       } 
+    }
 return 0;
 }
-
-sub run {
-    my ($self)  = @_;
-
-return 0;
-}
-
 
 1;
 

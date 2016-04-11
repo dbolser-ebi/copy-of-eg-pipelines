@@ -47,7 +47,6 @@ sub fetch_input {
     my $flag_go_check     = $self->param_required('flag_go_check');
     my $flag_store_proj   = $self->param_required('flag_store_projections');
     my $flag_full_stats   = $self->param_required('flag_full_stats');
-    my $flag_del_go_terms = $self->param_required('flag_delete_go_terms');
     my $to_species      = $self->param_required('species');
     my $from_species    = $self->param_required('source');
     my $compara         = $self->param_required('compara');
@@ -62,11 +61,12 @@ sub fetch_input {
     my $evidence_codes         = $self->param_required('evidence_codes');
     my $goa_webservice         = $self->param_required('goa_webservice');
     my $goa_params             = $self->param_required('goa_params');
+    my $taxon_params           = $self->param_required('taxon_params');
+    my $is_tree_compliant     = $self->param_required('is_tree_compliant');
 
     $self->param('flag_go_check', $flag_go_check);
     $self->param('flag_store_proj', $flag_store_proj);
     $self->param('flag_full_stats', $flag_full_stats);
-    $self->param('flag_del_go_terms', $flag_del_go_terms);
     $self->param('to_species', $to_species);
     $self->param('from_species', $from_species);
     $self->param('compara', $compara);
@@ -81,6 +81,8 @@ sub fetch_input {
     $self->param('evidence_codes', $evidence_codes);
     $self->param('goa_webservice', $goa_webservice);
     $self->param('goa_params', $goa_params);
+    $self->param('taxon_params', $taxon_params);
+    $self->param('is_tree_compliant', $is_tree_compliant);
 
     make_path($outfile);
 
@@ -95,13 +97,19 @@ return;
 sub run {
     my ($self) = @_;
 
-    # Connection to Oracle DB for taxon constraint 
+    # Connection to Oracle DB for taxon constraint if available. If Oracle is not available use webservice.
     my $dsn_goapro = 'DBI:Oracle:host=ora-vm-026.ebi.ac.uk;sid=goapro;port=1531';
     my $user       = 'goselect';
     my $pass       = 'selectgo';
-    my $hDb        = DBI->connect($dsn_goapro, $user, $pass, {PrintError => 1, RaiseError => 1}) or die "Cannot connect to server: " . DBI->errstr;
-    my $sql        = "select go.goa_validation.taxon_check_term_taxon(?,?) from dual";
-
+    my $hDb;
+    my $sql;
+    eval{
+      $hDb        = DBI->connect($dsn_goapro, $user, $pass, {PrintError => 1, RaiseError => 1});
+      $sql        = "select go.goa_validation.taxon_check_term_taxon(?,?) from dual";
+    }
+    or do{
+      print "Cannot connect to server ".DBI->errstr." pipeline will use taxon webservice";
+    };
     # Creating adaptors
     my $to_species   = $self->param('to_species');
     my $from_species = $self->param('from_species');
@@ -120,11 +128,17 @@ sub run {
     my $forbidden_terms  = \%forbidden_terms;
     $self->param('forbidden_terms', $forbidden_terms);
 
-    # Getting ancestry taxon_ids
-    my $to_latin_species = ucfirst(Bio::EnsEMBL::Registry->get_alias($to_species));
-    my $meta_container   = Bio::EnsEMBL::Registry->get_adaptor($to_latin_species,'core','MetaContainer');
-    my ($to_taxon_id)    = @{ $meta_container->list_value_by_key('species.taxonomy_id')};
-
+    # Get Compara adaptors - use the one specified on the command line
+    my $compara = $self->param('compara');
+    my $to_latin_species;
+    my $meta_container;
+    my ($to_taxon_id);
+    if ($compara ne "Multi"){
+       # Getting ancestry taxon_ids only for Ensembl Genomes species
+       $to_latin_species = ucfirst(Bio::EnsEMBL::Registry->get_alias($to_species));
+       $meta_container   = Bio::EnsEMBL::Registry->get_adaptor($to_latin_species,'core','MetaContainer');
+       ($to_taxon_id)    = @{ $meta_container->list_value_by_key('species.taxonomy_id')};
+    }
 =pod
     Bio::EnsEMBL::Registry->load_registry_from_db(
             -host       => 'mysql-eg-mirror.ebi.ac.uk',
@@ -135,21 +149,23 @@ sub run {
    );
 =cut
 
-    # Get Compara adaptors - use the one specified on the command line
-    my $compara = $self->param('compara');
-
     my $mlssa = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'MethodLinkSpeciesSet');
     my $ha    = Bio::EnsEMBL::Registry->get_adaptor($compara, 'compara', 'Homology');
     my $gdba  = Bio::EnsEMBL::Registry->get_adaptor($compara, "compara", "GenomeDB");
     die "Can't connect to Compara database specified by $compara - check command-line and registry file settings" if (!$mlssa || !$ha ||!$gdba);
-
+    my $constrained_terms;
+    if (!defined($hDb) and !defined($sql)){
+      # If Pipeline couldn't use the Oracle database, use Constrained terms via the GOA webservice
+      my %constrained_terms = get_taxon_forbidden_terms($to_species, $gdba, $self->param('goa_webservice'), $self->param('taxon_params'));
+      $constrained_terms  = \%constrained_terms;
+      $self->param('constrained_terms', $constrained_terms);
+    }
     # Write projection info metadata
     my $log = $self->param('log');
     print $log "\n\tProjection log :\n";
     print $log "\t\tsoftware release:".$self->param('release')."\n";
     print $log "\t\tfrom :".$from_ga->dbc()->dbname()." to :".$to_ga->dbc()->dbname()."\n";
 
-    $self->delete_go_terms($to_ga) if($self->param('flag_del_go_terms')==1);
 
     # build Compara GenomeDB objects
     my $method_link_type = $self->param('method_link_type');
@@ -162,7 +178,7 @@ sub run {
     
     # get homologies from compara - comes back as a hash of arrays
     print $log "\n\tRetrieving homologies of method link type $method_link_type for mlss_id $mlss_id \n";
-    my $homologies    = $self->fetch_homologies($ha, $mlss, $from_species, $log, $gdba, $self->param('homology_types_allowed'), $self->param('percent_id_filter'), '1');
+    my $homologies    = $self->fetch_homologies($ha, $mlss, $from_species, $log, $gdba, $self->param('homology_types_allowed'), $self->param('is_tree_compliant'), $self->param('percent_id_filter'), '1');
    
     print $log "\n\tProjecting GO Terms from $from_species to $to_species\n";
     print $log "\t\t$to_species, before projection, "; 
@@ -182,8 +198,7 @@ sub run {
        foreach my $to_stable_id (@to_genes) {
          my $to_gene  = $to_ga->fetch_by_stable_id($to_stable_id);
          next if (!$to_gene);
-         project_go_terms($self, $from_species, $compara, $to_ga, $to_dbea, $from_gene, $to_gene,$to_taxon_id, $self->param('ensemblObj_type'), $self->param('ensemblObj_type_target'), $self->param('evidence_codes'), $hDb, $sql, $log);
-
+         $self->project_go_terms($from_species, $compara, $to_ga, $to_dbea, $from_gene, $to_gene, $self->param('ensemblObj_type'), $self->param('ensemblObj_type_target'), $self->param('evidence_codes'), $log, $hDb, $sql, $to_taxon_id, $constrained_terms);
          $i++;
        }
     }
@@ -194,14 +209,20 @@ sub run {
     print $log Dumper %projections_stats;
  
     close($log);
-  
+
+    #Disconnecting from the registry
+    $from_ga->dbc->disconnect_if_idle();
+    $to_ga->dbc->disconnect_if_idle();
+    $to_ta->dbc->disconnect_if_idle();
+    $to_dbea->dbc->disconnect_if_idle();
+    $mlssa->dbc->disconnect_if_idle();
+    $ha->dbc->disconnect_if_idle();
+    $gdba->dbc->disconnect_if_idle(); 
 return;
 }
 
 sub write_output {
     my ($self) = @_;
-
-
 }
 
 ######################
@@ -253,8 +274,86 @@ sub get_GOA_forbidden_terms {
        }
        # and return the list
    }
+   $meta_container->dbc->disconnect_if_idle();  
 return %terms;
 }
+
+sub get_taxon_forbidden_terms {
+    my ($species, $gdba,$goa_webservice, $taxon_params) = @_;
+
+    # Translate species into taxonID
+    my $meta_container = Bio::EnsEMBL::Registry->get_adaptor($species,'core','MetaContainer');
+    my $species_name = $meta_container->single_value_by_key('species.production_name');
+
+    # hit the web service with a request, build up a hash of all forbidden terms for this species
+    my $user_agent = LWP::UserAgent->new();
+    $user_agent->env_proxy;
+    my $response;
+    $response = $user_agent->get($goa_webservice.$taxon_params);
+    # Retry until web service comes back?
+    my $retries = 0;
+    while (! $response->is_success ) {
+        if ($retries > 5) {
+            throw( "Failed to contact GOA webservice 6 times in a row. Dying ungracefully.");
+        }
+
+        warning( "Failed to contact GOA webservice, retrying on ".$goa_webservice.$taxon_params.
+            "\n LWP error was: ".$response->code
+        );
+        $retries++;
+        $response = $user_agent->get($goa_webservice.$taxon_params);
+        sleep(10);
+    }
+
+    my $constraint = from_json($response->content);
+    my @constraint_pairs = @{ $constraint->{'constraints'} };
+
+    my %blacklisted_terms;
+    my @blacklisted_go;
+
+    foreach my $taxon_constraint (@constraint_pairs) {
+      my %constraint_elements = %{$taxon_constraint};
+      # %constraint_elements is ("ruleId" : "GOTAX:0000134","constraint" : "only_in_taxon","taxa" : ["33090"],"goId" : "GO:0009541")
+
+      my $constraint = $constraint_elements{'constraint'};
+      my @taxa = @{$constraint_elements{'taxa'}};
+      my @affected_species;
+      foreach my $taxon (@taxa) {
+        push @affected_species, @{$gdba->fetch_all_by_ancestral_taxon_id($taxon)};
+      }
+      my $found_species = 0;
+      my $is_blacklisted = 0;
+      foreach my $affected_species (@affected_species) {
+        if ($affected_species->name() eq $species_name) {
+          $found_species = 1;
+          last;
+        }
+      }
+      if ($constraint eq 'only_in_taxon') {
+      # If GO term only in taxon, blacklist if species is not in taxon
+        if (!$found_species) {
+          $is_blacklisted = 1;
+        }
+      } elsif ($constraint eq 'never_in_taxon') {
+      # If GO term never in taxon, blacklist if species in taxon
+        if ($found_species) {
+          $is_blacklisted = 1;
+        }
+      } else {
+# Currently, GO constraints match only_in_taxon or never_in_taxon
+      # We want to be warned if a new constraint type appears
+        throw("unexpected $constraint, please update projection code");
+      }
+
+      if ($is_blacklisted) {
+        push @blacklisted_go, $constraint_elements{'goId'};
+      }
+    }
+
+    %blacklisted_terms = get_ontology_terms(@blacklisted_go);
+return %blacklisted_terms;
+}
+
 
 sub get_ontology_terms {
     my @starter_terms    = @_;
@@ -274,9 +373,10 @@ sub get_ontology_terms {
     die "Can't get OntologyTerm Adaptor - check that database exist in the server specified" if (!$ontology_adaptor);
  
     foreach my $text_term (@starter_terms) {
+        $terms{$text_term} = 1;
        	my $ont_term     = $ontology_adaptor->fetch_by_accession($text_term);
-       	my $term_list    = $ontology_adaptor->fetch_all_by_ancestor_term($ont_term);
-
+        next if (!$ont_term);
+        my $term_list    = $ontology_adaptor->fetch_all_by_ancestor_term($ont_term);
        	foreach my $term (@{$term_list}) {
 		$terms{$term->accession} = 1;
        	}
@@ -309,7 +409,7 @@ return 0;
 #   + unwanted_go_term {
 #   + go_xref_exists {
 sub project_go_terms {
-    my ($self, $from_species, $compara, $to_ga, $to_dbea, $from_gene, $to_gene,$to_taxon_id, $ensemblObj_type, $ensemblObj_type_target, $evidence_codes, $hDb, $sql, $log) = @_;
+    my ($self, $from_species, $compara, $to_ga, $to_dbea, $from_gene, $to_gene, $ensemblObj_type, $ensemblObj_type_target, $evidence_codes, $log, $hDb, $sql, $to_taxon_id, $constrained_terms) = @_;
 
     # GO xrefs are linked to translations, not genes
     # Project GO terms between the translations of the canonical transcripts of each gene
@@ -328,36 +428,46 @@ sub project_go_terms {
        $from_translation   = $from_gene->canonical_transcript();
        $to_translation     = get_canonical_translation($to_gene); 
     }
-    
+
     return if (!$from_translation || !$to_translation);
 
     my $from_latin_species = ucfirst(Bio::EnsEMBL::Registry->get_alias($from_species));
-    my $to_go_xrefs        = $to_translation->get_all_DBEntries("GO");
+    my $to_go_xrefs        = $to_translation->get_all_DBEntries("GO") if $self->param('flag_go_check') ==1;
    
     DBENTRY: foreach my $dbEntry (@{$from_translation->get_all_DBEntries("GO")}) { 
+      
       $projections_stats{'total'}++;
      
       # Check dbEntry dbname
       next if (!$dbEntry || $dbEntry->dbname() ne "GO" || ref($dbEntry) ne "Bio::EnsEMBL::OntologyXref");
 
+      # Keep the whole dbEntry if at least one of the evidence codes matches the whitelist
       # Check if dbEntry evidence codes isn't in the whitelist 
+      my $match_et = 0;
       foreach my $et (@{$dbEntry->get_all_linkage_types}){
         $projections_stats{'missing_ec'}++ if(!grep(/$et/,@$evidence_codes));
-        next DBENTRY if (!grep(/$et/, @$evidence_codes));
+        if (grep(/$et/, @$evidence_codes)) {
+          $match_et = 1;
+          last;
+        }
       }
-
+      next DBENTRY if !$match_et;
       # Check GO term against GOA blacklist
       next DBENTRY if (unwanted_go_term($to_translation->stable_id,$dbEntry->primary_id, $self->param('forbidden_terms')));
-
       # Check GO term against taxon constraints
-      my $go_term    = $dbEntry->primary_id;   
-      my $hStmt      = $hDb->prepare("$sql") or die "Couldn't prepare statement: " . $hDb->errstr;
-      $hStmt->execute($go_term,$to_taxon_id);
-
-      while (my($result) = $hStmt->fetchrow_array()) {
-         $projections_stats{'taxon_constraint'}++ if($result !~/OK/);
-         next DBENTRY if($result !~/OK/);
+      my $go_term    = $dbEntry->primary_id;
+      # Use Oracle database or Webservice
+      if (defined($constrained_terms)){
+        next DBENTRY if ($$constrained_terms{$dbEntry->primary_id});
       }
+      elsif (defined($sql) and defined($hDb) and defined($to_taxon_id)){
+        my $hStmt = $hDb->prepare("$sql") or die "Couldn't prepare statement: " . $hDb->errstr;
+        $hStmt->execute($go_term,$to_taxon_id);
+        while (my($result) = $hStmt->fetchrow_array()) {
+          $projections_stats{'taxon_constraint'}++ if($result !~/OK/);
+          next DBENTRY if($result !~/OK/);
+        }
+       }
 
       # Check GO term isn't already projected
       next if ($self->param('flag_go_check') ==1 && go_xref_exists($dbEntry, $to_go_xrefs));
@@ -377,20 +487,20 @@ sub project_go_terms {
       # in the target database (to use as the 'source' of the
       # entry). This is actually the transcript ID we project from,
       # i.e. an Arabidopsis thaliana transcript.
-      my $source_dbEntry = Bio::EnsEMBL::DBEntry->
+      # This code is not working for the e! databases 
+      if ($compara ne "Multi"){
+        my $source_dbEntry = Bio::EnsEMBL::DBEntry->
           new( -primary_id   => $from_translation->stable_id,
                 # NB: dbname (external_db) should already exists!
                 # Note, $compara is 'division' on the command line.
                -dbname       => 'Ensembl_'.ucfirst($compara),
                -display_id   => $from_translation->stable_id,
           );
-
       $dbEntry->add_linkage_type("IEA", $source_dbEntry);
       # These fields are actually 'bugs' in the current XRef schema,
       # so we leave them 'NULL' here...
       $dbEntry->info_type("PROJECTION");
       $dbEntry->info_text('');
-
       my $analysis = Bio::EnsEMBL::Analysis->
           new( -logic_name      => 'go_projection',
                -db              => $dbEntry->dbname,
@@ -399,12 +509,19 @@ sub project_go_terms {
                -description     => 'The Gene Ontology XRef projection pipeline',
                -display_label   => 'GO projected xrefs',
           );
+      $dbEntry->analysis($analysis);
+      }
+      # For e! databases 
+      else{
+      $dbEntry->add_linkage_type("IEA");
+      my $txt = "from $from_latin_species translation " . $from_translation->stable_id();
+      $dbEntry->info_type("PROJECTION");
+      $dbEntry->info_text($txt);
+      }
 
       $projections_stats{'to_be_proj'}++;
 
       delete $dbEntry->{associated_xref} if(defined $dbEntry->{associated_xref});
-
-      $dbEntry->analysis($analysis);
       $to_translation->add_DBEntry($dbEntry);
       $to_dbea->store($dbEntry, $to_translation->dbID(), $ensemblObj_type_target, 1) if ($self->param('flag_store_proj')==1);
       
