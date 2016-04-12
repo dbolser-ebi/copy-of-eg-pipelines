@@ -78,6 +78,7 @@ sub fetch_homologies {
     my $data         = shift;
     my $gdba         = shift;
     my $homology_types_allowed = shift;
+    my $is_tree_compliant     = shift;
     my $percent_id_filter      = shift;
     my $percent_cov_filter     = shift;
     my $go_flag                = shift;
@@ -90,12 +91,12 @@ sub fetch_homologies {
 
     foreach my $homology (@{$homologies}) {
        next if (!homology_type_allowed($homology->description, $homology_types_allowed));
-       next if $homology->is_tree_compliant() !=1;
-
+       if ($is_tree_compliant == 1){
+         next if $homology->is_tree_compliant() !=1;
+       }
        my ($from_stable_id, @to_stable_ids, @perc_id, @perc_cov);
        my $members = $homology->get_all_GeneMembers();
        my $mems    = $homology->get_all_Members();
-   
        foreach my $mem (@{$mems}){
           push @perc_id,$mem->perc_id();
        }
@@ -220,25 +221,6 @@ sub backup {
 return 0;
 }
 
-=head2 delete_go_terms
-
-=cut
-sub delete_go_terms {
-    my $self  = shift;
-    my $to_ga = shift;
-
-    print STDERR "Delete existing projected GO terms in core\n";
-
-    my $sql_del_terms = "DELETE x, ox, gx FROM xref x, external_db e, object_xref ox, ontology_xref gx WHERE x.xref_id=ox.xref_id AND x.external_db_id=e.external_db_id AND ox.object_xref_id=gx.object_xref_id AND e.db_name='GO' AND x.info_type='PROJECTION'";
-
-    my $helper = Bio::EnsEMBL::Utils::SqlHelper->new( -DB_CONNECTION => $to_ga->dbc());
-    $helper->execute_update(-SQL => $sql_del_terms);
-
-    # note don't need to delete synonyms as GO terms don't have any
-    # Also no effect on descriptions or status
-
-return 0;
-}
 
 =head2 print_GOstats
 
@@ -382,8 +364,6 @@ return 0;
 sub store_gene_attrib {
     my ($id, $species, $score1, $score2) = @_; 
 
-    Bio::EnsEMBL::Registry->set_disconnect_when_inactive(1);
-
     my $gene_adaptor   = Bio::EnsEMBL::Registry->get_adaptor($species, 'core', 'Gene');
     my $db_adaptor     = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'core');
     my $attrib_adaptor = $db_adaptor->get_AttributeAdaptor();
@@ -426,7 +406,8 @@ sub store_gene_attrib {
 
     $attrib_adaptor->store_on_Gene($gene, \@attribs);
     #print STDERR "$id\t$species\tscore1:$score1\tscore2:$score2\n";
-
+$gene_adaptor->dbc->disconnect_if_idle(); 
+$db_adaptor->dbc->disconnect_if_idle();
 return 0;
 }
 
