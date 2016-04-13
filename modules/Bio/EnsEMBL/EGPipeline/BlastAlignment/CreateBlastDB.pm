@@ -115,15 +115,16 @@ sub write_output {
   my $db_fasta_file     = $self->param_required('db_fasta_file');
   my $proteome_source   = $self->param_required('proteome_source');
   my $logic_name_prefix = $self->param_required('logic_name_prefix');
-  my $species           = $self->param('source_species');
+  my $source_species    = $self->param('source_species');
   
   if ($logic_name_prefix eq 'file') {
     my ($name, undef, undef) = fileparse($db_fasta_file, qr/\.[^.]*/);
     ($logic_name_prefix) = $name =~ /(\w+)$/;
   }
+  
   if ($proteome_source eq 'database') {
-    if ($species) {
-      $species =~ /^(\w).*_(\w+)/;
+    if ($source_species) {
+      $source_species =~ /^(\w).*_(\w+)/;
       $logic_name_prefix = "$1$2";
     }
   }

@@ -147,7 +147,7 @@ sub convert_to_fasta {
   my ($self, $files) = @_;
   
   my $seq_out = Bio::SeqIO->new(
-    -file   => '>'.$self->param('uniprot_fasta_file'),
+    -file   => '>'.$self->param('db_fasta_file'),
     -format => 'fasta',
   );
   
