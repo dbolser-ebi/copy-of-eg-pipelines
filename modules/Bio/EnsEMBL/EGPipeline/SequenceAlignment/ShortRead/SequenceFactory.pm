@@ -42,6 +42,7 @@ sub write_output {
   my $file_species    = $self->param('seq_file_species');
   my $studies         = $self->param('study');
   my $study_species   = $self->param('study_species');
+  my $taxids          = $self->param('taxids');
   my $merge_level     = $self->param_required('merge_level');
   my $data_type       = $self->param('data_type');
   my $reformat_header = $self->param('reformat_header');
@@ -86,11 +87,19 @@ sub write_output {
     push @$studies, $$study_species{$species};
   }
   
+  my $taxid;
+  if (exists $$taxids{$species}) {
+    $taxid = $$taxids{$species};
+  }
+  
   foreach my $study_id (@$studies) {
     my $dataflow_output = {
       'mode'     => 'study',
       'study_id' => $study_id,
     };
+    if (defined $taxid) {
+      $dataflow_output->{taxid} = $taxid;
+    }
     
     $self->dataflow_output_id($dataflow_output, 4);
   }

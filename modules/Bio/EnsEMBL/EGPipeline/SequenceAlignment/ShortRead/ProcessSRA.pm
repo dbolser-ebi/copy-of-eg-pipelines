@@ -22,7 +22,7 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor taxonomy_adaptor);
+use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor);
 use File::Spec::Functions qw(catdir);
 
 sub merge_id {
@@ -67,7 +67,7 @@ sub merge_label {
     if ($merge_id eq 'unknown') {
       $merge_label = 'unknown species';
     } else {
-      my $taxonomy_adaptor = taxonomy_adaptor();
+      my $taxonomy_adaptor = get_adaptor('taxonomy');
       my $node_adaptor = $taxonomy_adaptor->get_TaxonomyNodeAdaptor();
       my $node = $node_adaptor->fetch_by_taxon_id($merge_id);
       $merge_label = $node->name;
@@ -110,7 +110,6 @@ sub retrieve_files {
     
     $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq");
     $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq");
-    return ($seq_file_1, $seq_file_2, $sam_file);
     if (-e $seq_file_2) {
       $self->warning("File '$seq_file_2' exists, and will be deleted");
       unlink $seq_file_2;
