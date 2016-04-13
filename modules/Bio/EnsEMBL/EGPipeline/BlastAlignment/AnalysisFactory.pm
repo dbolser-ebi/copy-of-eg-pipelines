@@ -31,9 +31,10 @@ sub run {
   my $analyses          = $self->param_required('analyses');
   my $logic_name_prefix = $self->param_required('logic_name_prefix');
   my $db_file           = $self->param_required('db_fasta_file');
-  my $db_version        = $self->param('db_version');
   my $blastp            = $self->param_required('blastp');
   my $blastx            = $self->param_required('blastx');
+  my $filter_top_x      = $self->param_required('filter_top_x');
+  my $source_species    = $self->param('source_species');
   
   my $proteomic_analyses = [];
   my $genomic_analyses = [];
@@ -41,8 +42,32 @@ sub run {
   foreach my $analysis (@{$analyses}) {
     $$analysis{'logic_name'} = $logic_name_prefix.'_'.$$analysis{'logic_name'};
     $$analysis{'db_file'} = $db_file;
-    if ($db_version) {
+    
+    if ($source_species) {
+      $self->param('species', $source_species);
+      my $mc = $self->core_dba->get_MetaContainer();
+      my $db_version   = $mc->single_value_by_key('genebuild.version');
+      my $species_name = $mc->single_value_by_key('species.scientific_name');
+      
       $$analysis{'db_version'} = $db_version;
+      $$analysis{'description'} .= " Source database: <em>$species_name</em> proteome (version $db_version).";
+    } else {
+      $db_file =~ s!.*/([^/]+)$!$1!;
+      $$analysis{'description'} .= " Source database: $db_file.";
+    }
+    
+    if ($filter_top_x) {
+      my $top_x;
+      if ($$analysis{'logic_name'} =~ /blastp$/) {
+        $top_x = $self->param_required('blastp_top_x');
+      } elsif ($$analysis{'logic_name'} =~ /blastx$/) {
+        $top_x = $self->param_required('blastx_top_x');
+      }
+      if ($top_x eq 1) {
+        $$analysis{'description'} .= " Results are filtered to show the best unique hit, based on E-value.";
+      } else {
+        $$analysis{'description'} .= " Results are filtered to show the top $top_x unique hits, based on E-value.";
+      }
     }
     
     if ($$analysis{'logic_name'} =~ /blastp$/ && $blastp) {

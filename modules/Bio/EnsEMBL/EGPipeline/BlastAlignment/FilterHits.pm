@@ -134,13 +134,13 @@ sub best_in_proteome {
         push @{$pfs{$pf->hseqname}}, $pf;
       }
     }
-  }
-  
-  foreach my $hit_name (keys %pfs) {
-    my @pfs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pfs{$hit_name}};    
-    my @groups = ();
-    $self->group_features(\@pfs, \@groups);
-    push @{$grouped_features{$hit_name}}, @groups;
+    
+    foreach my $hit_name (keys %pfs) {
+      my @pfs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pfs{$hit_name}};    
+      my @groups = ();
+      $self->group_features(\@pfs, \@groups);
+      push @{$grouped_features{$hit_name}}, @groups;
+    }
   }
   
   $self->remove_features($top_x, $pfa, \%grouped_features);
