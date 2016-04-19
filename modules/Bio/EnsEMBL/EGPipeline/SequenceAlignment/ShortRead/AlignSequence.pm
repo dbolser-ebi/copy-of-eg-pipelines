@@ -72,16 +72,15 @@ sub run {
   my $genome_file = $self->param_required('genome_file');
   my $seq_file_1  = $self->param_required('seq_file_1');
   my $seq_file_2  = $self->param('seq_file_2');
-  my $sam_file    = $self->param_required('sam_file');
   my $clean_up    = $self->param_required('clean_up');
   
+  my $sam_file = "$seq_file_1.sam";
   $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
   my $bam_file = $aligner->sam_to_bam($sam_file);
   unlink $sam_file if $clean_up;
   
   $self->param('bam_file', $bam_file);
 }
-
 
 sub write_output {
   my ($self) = @_;

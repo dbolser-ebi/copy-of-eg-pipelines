@@ -23,6 +23,8 @@ use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use Bio::EnsEMBL::EGPipeline::Common::Aligner;
+
+use File::Path qw(make_path);
 use File::Spec::Functions qw(catdir);
 
 sub param_defaults {
@@ -39,80 +41,73 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   
-  my $merge_ids = $self->param_required('merge_ids');
-  # Invert the hash and gather old keys into a new value list.
-  my %merge_bam;
-  foreach my $bam_file (keys %$merge_ids) {
-    my $merge_id = $$merge_ids{$bam_file};
-    push @{$merge_bam{$merge_id}}, $bam_file;
-  }
+  my $results_dir = $self->param_required('results_dir');
+  make_path($results_dir) unless -e $results_dir;
   
-  $self->param('merge_bam', \%merge_bam);
+  my $dba = $self->core_dba;
+  my $assembly = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
+  $self->param('assembly', $assembly);
 }
 
 sub run {
   my ($self) = @_;
   
-  my $work_dir     = $self->param_required('work_directory');
-  my $samtools_dir = $self->param_required('samtools_dir');
-  my $vcf          = $self->param_required("vcf");
-  my $use_csi      = $self->param_required("use_csi");
-  my $clean_up     = $self->param_required('clean_up');
-  my $merge_bam    = $self->param_required('merge_bam');
+  my $results_dir = $self->param_required('results_dir');
+  my $merges      = $self->param_required('merges');
+  my $assembly    = $self->param('assembly');
   
-  my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
-    -samtools_dir => $samtools_dir,
-  );
-  
-  my %merged_bam_files;
-  
-  my $dba = $self->core_dba;
-  my $assembly = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
-
-  foreach my $merge_id (keys %$merge_bam) {
-    my $merged_bam_file = catdir($work_dir, "$merge_id\_$assembly.bam");
-    my @bam_files = @{$$merge_bam{$merge_id}};
-    my $size = scalar @bam_files;
+  foreach my $merge (@$merges) {
+    my $merge_id = $$merge{'merge_id'};
+    my $merged_bam_file = catdir($results_dir, "$merge_id\_$assembly.bam");
+    $$merge{'merged_bam_file'} = $merged_bam_file;
     
-    if ($size == 1) {
-      my ($bam_file) = $bam_files[0];
-      rename $bam_file, $merged_bam_file;
-    } else {
-      $aligner->merge_bam(\@bam_files, $merged_bam_file);
-      if ($clean_up) {
-        map { unlink $_ } @bam_files;
-			}
-		}
-    
-    my $sorted_bam = $aligner->sort_bam($merged_bam_file);
-    rename $sorted_bam, $merged_bam_file;
-    $aligner->index_bam($merged_bam_file, $use_csi);
-    if ($vcf) {
-      $aligner->generate_vcf($merged_bam_file);
-    }
-    
-    $merged_bam_files{$merge_id} = $merged_bam_file;
+    $self->merge_bam($merge_id, $merged_bam_file);
   }
-  
-  $self->param('merged_bam_files', \%merged_bam_files);
 }
 
 sub write_output {
   my ($self) = @_;
   
-  my $bigwig = $self->param_required('bigwig');
-  my $flow = $bigwig ? 4 : 3;
+  foreach my $merge (@{$self->param_required('merges')}) {
+    $self->dataflow_output_id($merge, 1);
+  }
+}
+
+sub merge_bam {
+  my ($self, $merge_id, $merged_bam_file) = @_;
   
-  my %merged_bam_files = %{$self->param('merged_bam_files')};
+  my $samtools_dir = $self->param_required('samtools_dir');
+  my $vcf          = $self->param_required("vcf");
+  my $use_csi      = $self->param_required("use_csi");
+  my $clean_up     = $self->param_required('clean_up');
   
-  foreach my $merge_id (keys %merged_bam_files) {
-    $self->dataflow_output_id(
-      {
-        'merge_id' => $merge_id,
-        'merged_bam_file' => $merged_bam_files{$merge_id},
-      },
-      $flow
-    );
+  my $sql = "SELECT bam_file FROM merge_bam WHERE merge_id = ?;";
+  my $sth = $self->hive_dbh->prepare($sql);
+  $sth->execute($merge_id);
+  my @bam_files;
+  while (my $results = $sth->fetch) {
+    push @bam_files, $$results[0];
+  }
+  
+  my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
+    -samtools_dir => $samtools_dir,
+  );
+  
+  if (scalar(@bam_files) == 1) {
+    my ($bam_file) = $bam_files[0];
+    rename $bam_file, $merged_bam_file;
+  } else {
+    $aligner->merge_bam(\@bam_files, $merged_bam_file);
+    if ($clean_up) {
+      map { unlink $_ } @bam_files;
+    }
+  }
+  
+  my $sorted_bam = $aligner->sort_bam($merged_bam_file);
+  rename $sorted_bam, $merged_bam_file;
+  $aligner->index_bam($merged_bam_file, $use_csi);
+  if ($vcf) {
+    $aligner->generate_vcf($merged_bam_file);
   }
 }
 

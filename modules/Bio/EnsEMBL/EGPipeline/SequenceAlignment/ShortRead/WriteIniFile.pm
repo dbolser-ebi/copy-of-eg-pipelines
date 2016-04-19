@@ -20,7 +20,7 @@ package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::WriteIniFile;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::ProcessSRA');
+use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use File::Spec::Functions qw(catdir);
 
@@ -36,20 +36,19 @@ sub param_defaults {
 sub run {
   my ($self) = @_;
   
-  my $work_dir = $self->param_required('work_directory');
-  my $bigwig   = $self->param_required('bigwig');
-  my $ini_type = $self->param_required('ini_type');
-  my $mode     = $self->param_required('mode');
-  my $merge_id = $self->param_required('merge_id');
+  my $species     = $self->param_required('species');
+  my $results_dir = $self->param_required('results_dir');
+  my $bigwig      = $self->param_required('bigwig');
+  my $ini_type    = $self->param_required('ini_type');
+  my $merge_level = $self->param_required('merge_level');
+  my $merge_id    = $self->param_required('merge_id');
+  my $merge_label = $self->param_required('merge_label');
+  my $run_ids     = $self->param_required('run_ids');
   
-  my ($name, $caption, $description);
+  my ($name, $caption, $description) = ($merge_label, '', '');
   
-  if ($mode eq 'file') {
-    ($name, $caption, $description) = ($merge_id, '', '');
-  } elsif ($mode eq 'study') {
-    ($name, $caption, $description) = $self->study_ini($merge_id);
-  } else {
-    $self->throw("Unrecognised mode of operation, '$mode'");
+  if (length($run_ids) > 0) {
+    ($caption, $description) = $self->sra_desc($merge_id, $merge_label, $run_ids);
   }
   
   my ($header, $data_file, $source_type);
@@ -73,7 +72,7 @@ sub run {
     "source_type = $source_type\n".
     "display     = off\n";
   
-  my $ini_file = catdir($work_dir, "/$merge_id.ini");
+  my $ini_file = catdir($results_dir, "/$merge_id.ini");
   open (my $fh, '>', $ini_file) or die "Failed to open file '$ini_file'";
 	print $fh "$header\n$body\n";
   close($fh);
@@ -87,39 +86,25 @@ sub write_output {
   $self->dataflow_output_id({'ini_file' => $self->param('ini_file')}, 1);
 }
 
-sub study_ini {
-  my ($self, $merge_id) = @_;
+sub sra_desc {
+  my ($self, $merge_id, $merge_level, $run_ids) = @_;
   
-  my $species       = $self->param_required('species');
-  my $merge_level   = $self->param_required('merge_level');
-  my $studies       = $self->param_required('study');
-  my $study_species = $self->param_required('study_species');
-  
-  if (exists $$study_species{$species}) {
-    push @$studies, $$study_species{$species};
-  }
-  
-  my $merge_label = $self->merge_label($merge_level, $merge_id);
-  my $study_ids   = $self->study_ids($studies, $merge_level, $merge_id);
-  
-  my @studies;
-  foreach my $study_id (keys %$study_ids) {
-    push @studies, $self->ena_link($study_id) . ': ' . $$study_ids{$study_id};
-  }
-  
-  my $name = $merge_label;
   my $caption = "$merge_level $merge_id";
   my $description = ucfirst(lc($merge_level)) . ' ' . $self->ena_link($merge_id);
-  if ($merge_level ne 'Study') {
-    if (scalar @studies == 1) {
-      $description .= ' (Study: ';
+  
+  if ($merge_level ne 'Run') {
+    my @run_ids = split(/,/, $run_ids);
+    my @run_links = map { $self->ena_link($_) } @run_ids;
+    
+    if (scalar @run_ids == 1) {
+      $description .= ' (Run: ';
     } else {
-      $description .= ' (Studies: ';
+      $description .= ' (Runs: ';
     }
-    $description .= join('; ', @studies).')';
+    $description .= join(', ', @run_links).')';
   }
   
-  return ($name, $caption, $description);
+  return ($caption, $description);
 }
 
 sub ena_link {
