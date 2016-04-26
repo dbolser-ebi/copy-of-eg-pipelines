@@ -31,6 +31,7 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
+    'skip_file_match' => [],
   };
 }
 
@@ -59,8 +60,9 @@ sub write_output {
 
 sub create_checking_dir {
   my ($self) = @_;
-  my $results_dir   = $self->param_required('results_dir');
-  my $checksum_dir  = $self->param_required('checksum_dir');
+  my $results_dir     = $self->param_required('results_dir');
+  my $checksum_dir    = $self->param_required('checksum_dir');
+  my $skip_file_match = $self->param_required('skip_file_match');
   
   # Create empty dir for comparing new files and old checksums
   my $checking_dir = catdir($checksum_dir, 'checking');
@@ -72,7 +74,10 @@ sub create_checking_dir {
   my @file_names = grep { !/.md5/ && !/^\./ && -f "$results_dir/$_" } readdir($dh);
   closedir $dh;
   
-  foreach my $file_name (@file_names) {
+  FILE: foreach my $file_name (@file_names) {
+    foreach my $match (@$skip_file_match) {
+      next FILE if $match =~ /\Q$match\E/;
+    }
     symlink "$results_dir/$file_name", "$checking_dir/$file_name" or die $!;
   }
   
