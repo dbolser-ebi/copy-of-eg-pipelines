@@ -404,32 +404,29 @@ sub get_uniprot_for_upi {
 
   for my $ac (@uniprot_acs) {
         my $uniprot = {};
-        $self->{uniprot_dba}->dbc()->sql_helper()->execute_no_return(
--SQL => q/select  accession, name, type, description, gene_name, type, version
-  from (
-  select  d.dbentry_id, d.accession, d.name, gn.name as gene_name, gnt.type,
-          replace(dd1.descr, '^') as description, s.version, 
-          row_number () over (partition by d.accession, s.version
-                                  order by cd1.catg_type asc nulls first) rn
-      from sptr.dbentry d 
-      join sequence s
-        on (s.dbentry_id = d.dbentry_id)
-      left outer join sptr.dbentry_2_desc dd1
-        on (dd1.dbentry_id = d.dbentry_id) 
-      left outer join cv_desc cd1
-        on (dd1.desc_id = cd1.desc_id)
-      left outer join gene g on (d.dbentry_id = g.dbentry_id)
-      left outer join gene_name gn on (gn.GENE_ID = g.GENE_ID)  
-      left outer join cv_gene_name_type gnt on (gnt.GENE_NAME_TYPE_ID = gn.GENE_NAME_TYPE_ID)  
-     where d.accession = ?
-       and (   cd1.desc_id is null
-            or ( cd1.section_type = 'Main'
-             and cd1.catg_type in ('RecName', 'SubName')
-             and cd1.subcatg_type = 'Full')
-       )
-  )
- where rn = 1
- order by accession, version/,
+	$self->{uniprot_dba}->dbc()->sql_helper()->execute_no_return(
+          -SQL => q/
+      SELECT d.accession, d.name, REPLACE(dd1.descr, '^') AS description,
+          d.entry_type, gn.name AS gene_name, gnt.type AS gene_name_type, s.version
+      FROM sptr.dbentry d
+      JOIN sequence s
+        ON (s.dbentry_id = d.dbentry_id)
+      LEFT OUTER JOIN sptr.dbentry_2_desc dd1
+        ON (dd1.dbentry_id = d.dbentry_id)
+      LEFT OUTER JOIN cv_desc cd1
+        ON (dd1.desc_id = cd1.desc_id)
+      LEFT OUTER JOIN gene g
+        ON (d.dbentry_id = g.dbentry_id)
+      LEFT OUTER JOIN gene_name gn
+        ON (gn.GENE_ID = g.GENE_ID)
+      LEFT OUTER JOIN cv_gene_name_type gnt
+        ON (gnt.GENE_NAME_TYPE_ID = gn.GENE_NAME_TYPE_ID)
+     WHERE d.accession = ?
+       AND ( cd1.desc_id IS NULL
+            OR ( cd1.section_type = 'Main'
+             AND cd1.catg_type IN ('RecName', 'SubName')
+             AND cd1.subcatg_type = 'Full')
+           )/,
           -PARAMS   => [$ac],
           -CALLBACK => sub {
                 my ( $ac, $name, $des, $type, $gene_name, $gene_name_type,
