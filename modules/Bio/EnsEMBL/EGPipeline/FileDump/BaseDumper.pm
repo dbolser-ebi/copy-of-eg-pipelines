@@ -133,6 +133,8 @@ sub generate_vb_filename {
   }
   my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$version.$file_type";
   
+  $dba->dbc && $dba->dbc->disconnect_if_idle();
+  
   return $filename;
 }
 
