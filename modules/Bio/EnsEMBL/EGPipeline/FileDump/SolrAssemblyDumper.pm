@@ -97,11 +97,9 @@ sub run{
 # use a unique combination of object values converted to a digest
 
 	my $id_string =  join(':',  $scientific_name,  $insdc, $current_assembly, $t->seq_region_name )  ;
-	my $digest= sha1_base64( $id_string ) ;
 
 	my $top_seq = {
-#	    'id' => "Genome/assembly/sequence/$digest",
-	    'id' => "$digest",
+	    'id' => sha1_base64( $id_string ),
 	    'site' => 'Genome', #required field
 	    'bundle_name' => 'Genomic sequence assembly', #required field
 	    'label' => $t->seq_region_name, #required field
@@ -140,8 +138,13 @@ sub run{
 		    my $child_descr = join(" ", $l->coord_system_name ,  $l->seq_region_name, '('. $l->length . ' bp)' ,  $scientific_name, 'assembly' , $insdc );
 		    my $child_url = '/' . $species_url . "/Location/View?r=" . $l->seq_region_name . ':' . 1 . '-' . $l->length ;
 
+# need to guarantee the id is unique as the index is generated in parallel over many species
+# use a unique combination of object values converted to a digest
+
+		    my $id_string =  join(':',  $scientific_name,  $insdc, $current_assembly, $l->seq_region_name )  ;
+
 		    my $child_obj = {
-			'id' => 'Genome/assembly/sequence/' . $l->seq_region_name,
+			'id' => sha1_base64( $id_string ) ,
 			'site' => 'Genome', #required field
 			'bundle_name' => 'Genomic sequence assembly', #required field
 			'label' => $l->seq_region_name, #required field
@@ -153,9 +156,9 @@ sub run{
 			'parent_seq_end' => $p->from_end,
 			'seq_region_name' => $l->seq_region_name,
 			'seq_type' => $l->coord_system_name,
-			'id' => $l->seq_region_name,
 			'seq_length' => $l->length , 
 			'species' => $scientific_name,
+			'strain' => $strain,
 			'accession_insdc' => $insdc,
 			'assembly_version' => $current_assembly,
 		    };
