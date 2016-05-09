@@ -9,6 +9,7 @@ use base ('Bio::EnsEMBL::EGPipeline::FileDump::SolrDumper');
 use IO::File;
 use XML::Simple;
 use XML::LibXML;
+use Digest::SHA qw (sha1_base64 );
 
 sub param_defaults {
   my ($self) = @_;
@@ -53,6 +54,13 @@ sub run{
 	$insdc = 'unknown'; 
     }
  
+#need to allow for the possibility that the strain value has not been added to the database
+
+    my $strain =  $meta_container->single_value_by_key('species.strain') ;
+    unless( $strain ){ 
+	warn "strain missing for $scientific_name - will enter value \'unknown\'";
+	$strain = 'unknown'; 
+    }
     my $csa = Bio::EnsEMBL::Registry->get_adaptor( $species, "core", "coordsystem" );
 
     my $coord_sys_names = [];
@@ -85,8 +93,13 @@ sub run{
 
 	my $url = '/' . $species_url . "/Location/View?r=" . $t->seq_region_name . ':' . 1 . '-' . $t->length ;
 
+# need to guarantee the id is unique as the index is generated in parallel over many species
+# use a unique combination of object values converted to a digest
+
+	my $id_string =  join(':',  $scientific_name,  $insdc, $current_assembly, $t->seq_region_name )  ;
+
 	my $top_seq = {
-	    'id' => 'Genome/assembly/sequence/' . $t->seq_region_name,
+	    'id' => sha1_base64( $id_string ),
 	    'site' => 'Genome', #required field
 	    'bundle_name' => 'Genomic sequence assembly', #required field
 	    'label' => $t->seq_region_name, #required field
@@ -97,6 +110,7 @@ sub run{
 	    'seq_length' => $t->length,
 	    'seq_region_name' => $t->seq_region_name,
 	    'accession_insdc' => $insdc,
+	    'strain' => $strain,
 	    'assembly_version' => $current_assembly,
 	} ;
 
@@ -124,8 +138,13 @@ sub run{
 		    my $child_descr = join(" ", $l->coord_system_name ,  $l->seq_region_name, '('. $l->length . ' bp)' ,  $scientific_name, 'assembly' , $insdc );
 		    my $child_url = '/' . $species_url . "/Location/View?r=" . $l->seq_region_name . ':' . 1 . '-' . $l->length ;
 
+# need to guarantee the id is unique as the index is generated in parallel over many species
+# use a unique combination of object values converted to a digest
+
+		    my $id_string =  join(':',  $scientific_name,  $insdc, $current_assembly, $l->seq_region_name )  ;
+
 		    my $child_obj = {
-			'id' => 'Genome/assembly/sequence/' . $l->seq_region_name,
+			'id' => sha1_base64( $id_string ) ,
 			'site' => 'Genome', #required field
 			'bundle_name' => 'Genomic sequence assembly', #required field
 			'label' => $l->seq_region_name, #required field
@@ -137,9 +156,9 @@ sub run{
 			'parent_seq_end' => $p->from_end,
 			'seq_region_name' => $l->seq_region_name,
 			'seq_type' => $l->coord_system_name,
-			'id' => $l->seq_region_name,
 			'seq_length' => $l->length , 
 			'species' => $scientific_name,
+			'strain' => $strain,
 			'accession_insdc' => $insdc,
 			'assembly_version' => $current_assembly,
 		    };
