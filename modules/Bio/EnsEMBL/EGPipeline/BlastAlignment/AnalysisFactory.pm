@@ -51,7 +51,7 @@ sub run {
       
       $$analysis{'db_version'} = $db_version;
       $$analysis{'description'} .= " Source database: <em>$species_name</em> proteome (version $db_version).";
-      $$analysis{'display_label'} = "$db_version proteins.";
+      $$analysis{'display_label'} = "$db_version proteins";
     } else {
       $db_file =~ s!.*/([^/]+)$!$1!;
       $$analysis{'description'} .= " Source database: $db_file.";
