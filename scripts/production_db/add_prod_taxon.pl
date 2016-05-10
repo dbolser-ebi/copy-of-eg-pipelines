@@ -24,7 +24,7 @@ GetOptions(
   "muser=s", \$muser,
   "mp|mpass=s", \$mpass,
   "mdbname=s", \$mdbname,
-  "add_to_division", \$add_to_division,
+  "add_to_division=i", \$add_to_division,
 );
 
 die "--host required" unless $host;
