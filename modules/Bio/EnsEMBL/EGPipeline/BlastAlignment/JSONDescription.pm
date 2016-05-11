@@ -35,7 +35,7 @@ sub run {
   my ($self) = @_;
   my $species     = $self->param_required('species');
   my $db_type     = $self->param_required('db_type');
-  my $logic_name  = $self->param_required('logic_name');
+  my $logic_name  = $self->param_required('logic_name')->[0];
   my $results_dir = $self->param_required('results_dir');
   
   my $dba = $self->get_DBAdaptor($db_type);
