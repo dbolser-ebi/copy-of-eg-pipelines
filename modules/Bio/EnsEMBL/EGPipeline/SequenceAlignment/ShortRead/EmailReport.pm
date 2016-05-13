@@ -41,6 +41,7 @@ sub fetch_input {
   my $bam_file     = $self->param_required('merged_bam_file');
   my $bw_file      = $self->param('bw_file');
   my $ini_file     = $self->param_required('ini_file');
+  my $cmds_file    = $self->param_required('cmds_file');
   
   my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
     -samtools_dir => $samtools_dir,
@@ -57,6 +58,8 @@ sub fetch_input {
   
   $text .= 
     "and an accompanying INI file ($ini_file).\n\n".
+    "The commands for generating these results are ".
+    "stored in a JSON file ($cmds_file)\n\n".
     "BAM statistics:\n$stats\n\n";
   
   $self->param('text', $text);

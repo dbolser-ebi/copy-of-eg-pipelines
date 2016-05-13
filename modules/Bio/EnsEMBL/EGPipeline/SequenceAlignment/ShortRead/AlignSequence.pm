@@ -79,7 +79,13 @@ sub run {
   my $bam_file = $aligner->sam_to_bam($sam_file);
   unlink $sam_file if $clean_up;
   
+  my $index_cmds = $self->param('index_cmds') || [];
+  my $align_cmds = $aligner->align_cmds;
+  my $version    = $aligner->version;
+  
   $self->param('bam_file', $bam_file);
+  $self->param('cmds', join("; ", (@$index_cmds, @$align_cmds)));
+  $self->param('version', $version);
 }
 
 sub write_output {
@@ -87,6 +93,8 @@ sub write_output {
   
   my $dataflow_output = {
     'bam_file' => $self->param('bam_file'),
+    'cmds'     => $self->param('cmds'),
+    'version'  => $self->param('version'),
   };
   
   $self->dataflow_output_id($dataflow_output, 1);

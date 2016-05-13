@@ -58,10 +58,12 @@ sub run {
   
   foreach my $merge (@$merges) {
     my $merge_id = $$merge{'merge_id'};
+    
     my $merged_bam_file = catdir($results_dir, "$merge_id\_$assembly.bam");
     $$merge{'merged_bam_file'} = $merged_bam_file;
     
-    $self->merge_bam($merge_id, $merged_bam_file);
+    my $cmds = $self->merge_bam($merge_id, $merged_bam_file);
+    $$merge{'cmds'} = join("; ", @$cmds);
   }
 }
 
@@ -69,7 +71,7 @@ sub write_output {
   my ($self) = @_;
   
   foreach my $merge (@{$self->param_required('merges')}) {
-    $self->dataflow_output_id($merge, 1);
+    $self->dataflow_output_id($merge, 2);
   }
 }
 
@@ -109,6 +111,8 @@ sub merge_bam {
   if ($vcf) {
     $aligner->generate_vcf($merged_bam_file);
   }
+  
+  return $aligner->align_cmds;
 }
 
 1;

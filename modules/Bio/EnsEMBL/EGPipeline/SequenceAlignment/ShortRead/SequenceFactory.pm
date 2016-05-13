@@ -46,10 +46,11 @@ sub write_output {
   my $run_ids     = $self->param('run');
   my $study_ids   = $self->param('study');
   my $merge_level = $self->param_required('merge_level');
+  my $merge_id    = $self->param('merge_id');
   
   $self->param('merge_ids', {});
   
-  my @file_output = $self->files($files, $merge_level);
+  my @file_output = $self->files($files, $merge_level, $merge_id);
   foreach my $file_output (@file_output) {
     if ($data_type eq 'est') {
       $self->dataflow_output_id($file_output, 5);
@@ -58,7 +59,7 @@ sub write_output {
     }
   }
   
-  my @paired_file_output = $self->file_pairs($file_pairs, $merge_level);
+  my @paired_file_output = $self->file_pairs($file_pairs, $merge_level, $merge_id);
   foreach my $paired_file_output (@paired_file_output) {
     $self->dataflow_output_id($paired_file_output, 3);
   }
@@ -84,7 +85,7 @@ sub write_output {
 }
 
 sub files {
-  my ($self, $files, $merge_level) = @_;
+  my ($self, $files, $merge_level, $merge_id) = @_;
   
   my $data_type       = $self->param('data_type');
   my $reformat_header = $self->param('reformat_header');
@@ -112,11 +113,12 @@ sub files {
       }
     }
     
-    my $merge_id;
     if (lc($merge_level) eq 'file') {
       $merge_id = path($file)->basename;
     } else {
-      $merge_id = join('_', @all);
+      if (!defined $merge_id) {
+        $merge_id = join('_', @all);
+      }
     }
     
     $self->param('merge_ids')->{$merge_id}{'label'} = $merge_id;
@@ -133,13 +135,13 @@ sub files {
 }
 
 sub file_pairs {
-  my ($self, $file_pairs, $merge_level) = @_;
+  my ($self, $file_pairs, $merge_level, $merge_id) = @_;
   
   my @all;
   foreach my $file_pair (@$file_pairs) {
     my @file_pair = split(/\s*,\s*/, $file_pair);
     if (scalar(@file_pair) == 2) {
-      (my $merge_id = path($file_pair[0])->basename) =~ s/_1\.\w+$//;
+      ($merge_id = path($file_pair[0])->basename) =~ s/_1\.\w+$//;
       push @all, $merge_id;
     } else {
       $self->throw("File pair does not contain a comma-separated pair of files: '$file_pair'");
@@ -151,11 +153,12 @@ sub file_pairs {
   foreach my $file_pair (@$file_pairs) {
     my ($seq_file_1, $seq_file_2) = split(/\s*,\s*/, $file_pair);
     
-    my $merge_id;
     if (lc($merge_level) eq 'file') {
       ($merge_id = path($seq_file_1)->basename) =~ s/_1\.\w+$//;
     } else {
-      $merge_id = join('_', @all);
+      if (!defined $merge_id) {
+        $merge_id = join('_', @all);
+      }
     }
     
     $self->param('merge_ids')->{$merge_id}{'label'} = $merge_id;
@@ -251,14 +254,15 @@ sub sra_merge_id {
     
   } elsif ($merge_level =~ /taxon/i) {
     my $taxon = $run->sample->taxon;
+    $merge_id = $self->param('merge_id');
+    
     if ($taxon) {
-      $merge_id = $taxon->taxon_id;
-      my $taxonomy_adaptor = get_adaptor('taxonomy');
-      my $node_adaptor = $taxonomy_adaptor->get_TaxonomyNodeAdaptor();
-      my $node = $node_adaptor->fetch_by_taxon_id($merge_id);
+      $merge_id ||= $taxon->taxon_id;
+      my $taxonomy_adaptor = Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor->new->taxonomy_adaptor();
+      my $node = $taxonomy_adaptor->fetch_by_taxon_id($taxon->taxon_id);
       $merge_label = $node->name;
     } else {
-      $merge_id = 'unknown';
+      $merge_id ||= 'unknown';
       $merge_label = 'unknown species';
     }
     

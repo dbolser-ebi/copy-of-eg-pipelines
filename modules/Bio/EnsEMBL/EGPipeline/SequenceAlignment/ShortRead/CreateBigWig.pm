@@ -68,6 +68,7 @@ sub run {
   }
   
   $self->param('bw_file', $bw_file);
+  $self->param('cmds',    "$wig_cmd; $bw_cmd");
 }
 
 sub write_output {
@@ -75,6 +76,7 @@ sub write_output {
   
   my $dataflow_output = {
     'bw_file' => $self->param('bw_file'),
+    'cmds'    => $self->param('cmds'),
   };
   
   $self->dataflow_output_id($dataflow_output, 1);
