@@ -141,8 +141,8 @@ sub file_pairs {
   foreach my $file_pair (@$file_pairs) {
     my @file_pair = split(/\s*,\s*/, $file_pair);
     if (scalar(@file_pair) == 2) {
-      ($merge_id = path($file_pair[0])->basename) =~ s/_1\.\w+$//;
-      push @all, $merge_id;
+      (my $file_name = path($file_pair[0])->basename) =~ s/_1\.\w+$//;
+      push @all, $file_name;
     } else {
       $self->throw("File pair does not contain a comma-separated pair of files: '$file_pair'");
     }
