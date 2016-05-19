@@ -23,6 +23,8 @@ use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor);
+
+use File::Path qw(make_path);
 use File::Spec::Functions qw(catdir);
 
 sub run {
@@ -30,6 +32,8 @@ sub run {
   
   my $work_dir = $self->param_required('work_dir');
   my $run_id   = $self->param_required('run_id');
+  
+  make_path($work_dir) unless -e $work_dir;
   
   my $run_adaptor = get_adaptor('Run');
   my @runs = @{$run_adaptor->get_by_accession($run_id)};
