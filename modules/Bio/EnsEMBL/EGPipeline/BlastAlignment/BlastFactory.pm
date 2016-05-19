@@ -48,9 +48,6 @@ sub write_output {
         $total_length += $seq->length;
       }
       if ($total_length > $max_seq_length) {
-        my $dba = $self->get_DBAdaptor($self->param('db_type'));
-        my $slice_adaptor = $dba->get_adaptor('Slice');
-        
         $fasta = Bio::SeqIO->new(-format => 'Fasta', -file => $queryfile);
         while (my $seq = $fasta->next_seq) {
           my $seq_length = $seq->length;
