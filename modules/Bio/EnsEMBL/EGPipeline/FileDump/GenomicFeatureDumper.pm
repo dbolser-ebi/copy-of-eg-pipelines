@@ -353,9 +353,20 @@ sub create_cds_feature {
 sub add_cds_tags {
   my ($self, $transcript, $cds_feature) = @_;
   
+  my $protein_name;
+  my $desc = $transcript->get_Gene->description;
+  if ($desc) {
+    if ($desc !~ /(projected|hypothetical|putative|uncharacterized|predicted)/i) {
+      ($protein_name = $desc) =~ s/\s+\[Source.*//;
+    }
+  }
+  
   $cds_feature->add_tag_value('gene', $transcript->get_Gene->stable_id);
   $cds_feature->add_tag_value('note', 'transcript_id='.$transcript->stable_id);
   $cds_feature->add_tag_value('protein_id', $transcript->translation->stable_id);
+  if ($protein_name) {
+    $cds_feature->add_tag_value('product', $protein_name);
+  }
   $cds_feature->add_tag_value('translation', $transcript->translate->seq);
 }
 
