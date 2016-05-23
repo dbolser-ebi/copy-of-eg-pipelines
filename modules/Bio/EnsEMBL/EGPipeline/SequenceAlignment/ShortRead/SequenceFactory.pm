@@ -113,12 +113,12 @@ sub files {
       }
     }
     
-    if (lc($merge_level) eq 'file') {
-      $merge_id = path($file)->basename;
-    } else {
+    if (lc($merge_level) eq 'all') {
       if (!defined $merge_id) {
         $merge_id = join('_', @all);
       }
+    } else {
+      $merge_id = path($file)->basename;
     }
     
     $self->param('merge_ids')->{$merge_id}{'label'} = $merge_id;
@@ -153,12 +153,12 @@ sub file_pairs {
   foreach my $file_pair (@$file_pairs) {
     my ($seq_file_1, $seq_file_2) = split(/\s*,\s*/, $file_pair);
     
-    if (lc($merge_level) eq 'file') {
-      ($merge_id = path($seq_file_1)->basename) =~ s/_1\.\w+$//;
-    } else {
+    if (lc($merge_level) eq 'all') {
       if (!defined $merge_id) {
         $merge_id = join('_', @all);
       }
+    } else {
+      ($merge_id = path($seq_file_1)->basename) =~ s/_1\.\w+$//;
     }
     
     $self->param('merge_ids')->{$merge_id}{'label'} = $merge_id;
