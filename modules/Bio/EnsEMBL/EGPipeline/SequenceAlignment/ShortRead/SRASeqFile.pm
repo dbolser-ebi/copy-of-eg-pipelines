@@ -74,6 +74,7 @@ sub retrieve_files {
   my ($seq_file_1, $seq_file_2);
   my $sam_file = catdir($work_dir, "$run_acc.sam");
   
+  # Prepare files names
   if ($paired) {
     if (scalar(@files) != 2) {
 	    $self->throw("A paired read experiment can only have 2 files");
@@ -81,26 +82,19 @@ sub retrieve_files {
     
     $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq");
     $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq");
-    if (-e $seq_file_2) {
-      $self->warning("File '$seq_file_2' exists, and will be deleted");
-      unlink $seq_file_2;
-    }
   } else {
     $seq_file_1 = catdir($work_dir, "$run_acc\_all.fastq");
   }
   
-  if (-e $seq_file_1) {
-    $self->warning("File '$seq_file_1' exists, and will be deleted");
-    unlink $seq_file_1;
-  }
-  
-  for my $file (@files) {
+  # Retrieve each file
+  FILE: for my $file (@files) {
     my $file_name = $file->file_name();
     
+    # Decide the file name to use
     if (index($file_name, '.fastq') != -1) {
-      my $fq = $file->retrieve($work_dir);
       my $seq_file = $seq_file_1;
       
+      # Choose a name for a pair
       if ($paired) {
         if (index($file_name, '_1.fastq') != -1) {
           $seq_file = $seq_file_1;
@@ -111,15 +105,47 @@ sub retrieve_files {
         }
       }
       
-      my $cmd = "zcat $fq >> $seq_file";
-      system($cmd) == 0 || $self->throw("Cannot execute $cmd");
-      unlink $fq;
+      # Reuse files if possible
+      my $fastq = $seq_file;
+      my $fastq_gz = $file->file_name;
+      
+      if (-s $fastq_gz) {
+        if (-s $fastq) {
+          # Interrupted unzip
+          unlink $fastq;
+        } else {
+          # Interrupted download
+          unlink $fastq_gz;
+          $file->retrieve($work_dir);
+        }
+        $self->_unzip($fastq_gz, $fastq);
+      } else {
+        if (-s $fastq) {
+          # Finished: can reuse
+          next FILE;
+        } else {
+          # All new
+          $file->retrieve($work_dir);
+          $self->_unzip($fastq_gz, $fastq);
+        }
+      }
     } else {
       $self->throw("Cannot process file '$file_name'");
     }
   }
   
   return ($seq_file_1, $seq_file_2, $sam_file);
+}
+
+sub _unzip {
+  my $self = shift;
+  my ($fastq_gz, $fastq) = @_;
+
+  my $cmd = "zcat $fastq_gz >> $fastq";
+  system($cmd) == 0 || $self->throw("Cannot execute $cmd");
+  unlink $fastq_gz;
+  
+  return $fastq;
 }
 
 1;
