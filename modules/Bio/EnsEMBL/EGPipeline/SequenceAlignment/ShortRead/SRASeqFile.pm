@@ -107,10 +107,12 @@ sub retrieve_files {
       
       # Reuse files if possible
       my $fastq = $seq_file;
-      my $fastq_gz = $file->file_name;
+      my $fastq_gz = $fastq;
+      $fastq_gz =~ s/[SED]RR\w+\.fastq$/$file_name/;
+      $self->throw("Warning: can't differenciate fastq and fastq.gz files ($fastq)") if $fastq eq $fastq_gz;
       
       if (-s $fastq_gz) {
-        if (-s $fastq) {
+        if (-e $fastq) {
           # Interrupted unzip
           unlink $fastq;
         } else {
