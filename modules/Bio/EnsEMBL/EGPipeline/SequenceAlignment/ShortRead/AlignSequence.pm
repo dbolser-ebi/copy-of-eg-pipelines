@@ -75,7 +75,7 @@ sub run {
   my $clean_up    = $self->param_required('clean_up');
   
   my $sam_file   = "$seq_file_1.sam";
-  my $bam_file   = "$seq_file_1.sam";
+  my $bam_file   = "$seq_file_1.bam";
   my $bam_exists = -s $bam_file;
   my $sam_exists = -s $sam_file;
   
