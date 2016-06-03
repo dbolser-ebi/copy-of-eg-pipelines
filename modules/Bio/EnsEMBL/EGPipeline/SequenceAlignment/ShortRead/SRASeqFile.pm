@@ -143,9 +143,17 @@ sub _unzip {
   my $self = shift;
   my ($fastq_gz, $fastq) = @_;
 
-  my $cmd = "zcat $fastq_gz >> $fastq";
-  system($cmd) == 0 || $self->throw("Cannot execute $cmd");
-  unlink $fastq_gz;
+  # Check that the file is indeed a .gz file
+  if ($fastq_gz =~ /\.fastq\.gz$/) {
+    my $cmd = "zcat $fastq_gz >> $fastq";
+    system($cmd) == 0 || $self->throw("Cannot execute $cmd");
+    unlink $fastq_gz;
+  # Not a fastq.gz, just a fastq: rename
+  } elsif ($fastq_gz =~ /\.fastq$/ and $fastq_gz ne $fastq) {
+    rename $fastq_gz, $fastq;
+  } else {
+    $self->throw("Can't unzip file '$fastq_gz' to '$fastq' (uncompatible format)");
+  }
   
   return $fastq;
 }

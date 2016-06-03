@@ -80,18 +80,15 @@ sub run {
   my $sam_exists = -s $sam_file;
   
   # Can we reuse some files?
-  if (not $bam_exists) {
-    unlink $sam_file if -s $sam_file;
-    $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
-  } elsif ($sam_exists) {
-    unlink $bam_file;
+  if ($bam_exists and not $sam_exists) {
+    $aligner->dummy(1);
   }
   
-  # In all cases except for when we already had a bam file: convert the sam to bam
-  if (not $bam_exists or $sam_exists) {
-    my $bam_file = $aligner->sam_to_bam($sam_file);
-    unlink $sam_file if $clean_up;
-  }
+  # Align and convert
+  $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
+  $aligner->sam_to_bam($sam_file);
+  unlink $sam_file if $clean_up;
+  $aligner->dummy(0);
   
   my $index_cmds = $self->param('index_cmds') || [];
   my $align_cmds = $aligner->align_cmds;

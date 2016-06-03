@@ -94,19 +94,24 @@ sub merge_bam {
   my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
     -samtools_dir => $samtools_dir,
   );
+  $aligner->dummy(1) if -s $merged_bam_file;
+  my $unsorted_bam = $merged_bam_file . '.unsorted';
   
   if (scalar(@bam_files) == 1) {
     my ($bam_file) = $bam_files[0];
-    rename $bam_file, $merged_bam_file;
+    rename $bam_file, $unsorted_bam if not -s $merged_bam_file;
   } else {
-    $aligner->merge_bam(\@bam_files, $merged_bam_file);
+    $aligner->merge_bam(\@bam_files, $unsorted_bam);
     if ($clean_up) {
-      map { unlink $_ } @bam_files;
+      if (-s $unsorted_bam) {
+        unlink @bam_files;
+      }
     }
   }
   
-  my $sorted_bam = $aligner->sort_bam($merged_bam_file);
-  rename $sorted_bam, $merged_bam_file;
+  my $sorted_bam = $aligner->sort_bam($unsorted_bam);
+  unlink $unsorted_bam if -s $unsorted_bam;
+  rename $sorted_bam, $merged_bam_file unless -s $merged_bam_file;
   $aligner->index_bam($merged_bam_file, $use_csi);
   if ($vcf) {
     $aligner->generate_vcf($merged_bam_file);
