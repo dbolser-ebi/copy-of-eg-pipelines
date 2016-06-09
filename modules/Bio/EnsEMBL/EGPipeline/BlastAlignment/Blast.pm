@@ -54,7 +54,7 @@ sub param_defaults {
   return {
     %{$self->SUPER::param_defaults},
     'blast_type'       => 'ncbi',
-    'output_regex'     => '^\s*(\w+)',
+    'output_regex'     => '^\s*([\w\-]+)',
     'query_type'       => 'dna',
     'database_type'    => 'pep',
     'pvalue_threshold' => 0.01,

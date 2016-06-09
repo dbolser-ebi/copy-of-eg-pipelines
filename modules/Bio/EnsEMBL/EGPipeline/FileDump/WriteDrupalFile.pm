@@ -30,8 +30,6 @@ sub param_defaults {
   return {
     %{$self->SUPER::param_defaults},
     'compara_files' => 0,
-    'nd_downloads_dir' => '/data/sites/drupal-pre/downloads',
-    'nd_staging_dir'   => '/data/sites/drupal-pre/staging',
   };
 }
 
@@ -42,31 +40,30 @@ sub run {
   my $changed_files = $self->param_required('changed_files');
   
   my @fields = (
-    'GUID', 'File', 'Organism', 'File Type', 'File Format', 'Status',
+    'Title', 'File', 'Organism', 'File Type', 'File Format', 'Status',
     'Description', 'Latest Change', 'Tags', 'Release Date Start',
     'Release Date End', 'Version', 'Display Version', 'Previous Version',
     'Xgrid_enabled', 'Fasta Header Regex', 'Download Count',
-    'Title', 'URL', 'Ensembl organism name'
+    'URL', 'Ensembl organism name', 'md5'
   );
   
-  my %data = map { $_ => [] } @fields;
-  my $guid = 1;
-  
+  my %new = map { $_ => [] } @fields;
   foreach my $file (sort @$new_files) {
-    $self->process_new_file($file, $guid++, \%data);
+    $self->process_new_file($file, \%new);
   }
+  $self->drupal_bulk_update(\@fields, \%new);
   
+  my %missing;
   foreach my $file (sort @$missing_files) {
-    $self->process_missing_file($file, $guid++, \%data);
+    $self->process_missing_file($file, \%missing);
   }
-  
-  $self->drupal_bulk_update(\@fields, \%data, $guid);
+  $self->drupal_manual_update(\%missing);
   
   $self->drupal_shell_cmds($new_files, $changed_files);
 }
 
 sub process_new_file {
-  my ($self, $file, $guid, $data) = @_;
+  my ($self, $file, $data) = @_;
   
   my $staging_dir   = $self->param_required('staging_dir');
   my $release_date  = $self->param_required('release_date');
@@ -93,7 +90,7 @@ sub process_new_file {
     $xgrid = $self->xgrid($dump_type);
   }
   
-  push $$data{'GUID'}, $guid;
+  push $$data{'Title'}, $file;
   push $$data{'File'}, catdir($staging_dir, $file);
   push $$data{'Organism'}, $organism;
   push $$data{'File Type'}, $file_type;
@@ -110,45 +107,22 @@ sub process_new_file {
   push $$data{'Xgrid_enabled'}, $xgrid;
   push $$data{'Fasta Header Regex'}, '(.*?)\s';
   push $$data{'Download Count'}, '0';
-  push $$data{'Title'}, '';
   push $$data{'URL'}, '';
   push $$data{'Ensembl organism name'}, $species;
-}
-
-sub process_missing_file {
-  my ($self, $file, $guid, $data) = @_;
-  
-  push $$data{'GUID'}, $guid;
-  push $$data{'File'}, $file;
-  push $$data{'Organism'}, '';
-  push $$data{'File Type'}, '';
-  push $$data{'File Format'}, '';
-  push $$data{'Status'}, 'Archived';
-  push $$data{'Description'}, '';
-  push $$data{'Latest Change'}, '';
-  push $$data{'Tags'}, '';
-  push $$data{'Release Date Start'}, '';
-  push $$data{'Release Date End'}, '';
-  push $$data{'Version'}, '';
-  push $$data{'Display Version'}, '';
-  push $$data{'Previous Version'}, '';
-  push $$data{'Xgrid_enabled'}, '';
-  push $$data{'Fasta Header Regex'}, '';
-  push $$data{'Download Count'}, '';
-  push $$data{'Title'}, '';
-  push $$data{'URL'}, '';
-  push $$data{'Ensembl organism name'}, '';
+  push $$data{'md5'}, catdir($staging_dir, "$file.md5");
 }
 
 sub drupal_bulk_update {
-  my ($self, $fields, $data, $guid) = @_;
+  my ($self, $fields, $data) = @_;
   my $drupal_file = $self->param_required('drupal_file');
   
   open(my $fh, '>', $drupal_file) || die "Failed to open '$drupal_file': $!";
   
   print $fh join(",", @$fields)."\n";
   
-  for (my $i=0; $i<($guid-1); $i++) {
+  my $rows = scalar(@{$$data{'Title'}});
+  
+  for (my $i=0; $i<=$rows; $i++) {
     my @row;
     foreach my $column (@$fields) {
       push @row, '"' . $$data{$column}[$i] . '"';
@@ -159,45 +133,83 @@ sub drupal_bulk_update {
   close $fh;
 }
 
-sub drupal_shell_cmds {
-  my ($self, $new_files, $changed_files) = @_;
-  my $results_dir   = $self->param_required('results_dir');
-  my $copy_file     = $self->param_required('copy_file');
-  my $nd_login      = $self->param_required('nd_login');
-  my $release_date  = $self->param_required('release_date');
-  my $nd_downloads_dir = $self->param_required('nd_downloads_dir');
-  my $nd_staging_dir   = $self->param_required('nd_staging_dir');
+sub process_missing_file {
+  my ($self, $file, $data) = @_;
   
-  open(my $fh, '>', $copy_file) || die "Failed to open '$copy_file': $!";
+  push @{$$data{$file}}, ['Status', 'Archived'];
+}
+
+sub drupal_manual_update {
+  my ($self, $data) = @_;
+  my $manual_file = $self->param_required('manual_file');
   
-  if (@$changed_files) {
-    print $fh "# At ND, archive changed files:\n";
-    print $fh "cd $nd_downloads_dir\n";
-    print $fh "mkdir archive/$release_date\n";
-    foreach my $file (@$changed_files) {
-      
-      print $fh "mv $file archive/$release_date\n";
-      print $fh "rm -f $file.md5\n";
-    }
-    
-    print $fh "# Then copy changed files to ND:\n";
-    foreach my $file (@$changed_files) {
-      print $fh "scp $file* $nd_login:$nd_downloads_dir\n";
-    }
-  }
+  open(my $fh, '>', $manual_file) || die "Failed to open '$manual_file': $!";
   
-  if (@$new_files) {
-    print $fh "# At ND, clear the staging directory:\n";
-    print $fh "rm -rf $nd_staging_dir/*\n";
-    
-    print $fh "# Copy new files to the staging directory:\n";
-    print $fh "cd $results_dir\n";
-    foreach my $file (@$new_files) {
-      print $fh "scp $file* $nd_login:$nd_staging_dir\n";
+  print $fh "Manual updates to the following pages are required:\n";
+  
+  foreach my $title (keys %$data) {
+    print $fh "$title\n";
+    foreach my $field_value (@{$$data{$title}}) {
+      print $fh "\t".join(": ", @$field_value)."\n";
     }
   }
   
   close $fh;
+}
+
+sub drupal_shell_cmds {
+  my ($self, $new_files, $changed_files) = @_;
+  my $results_dir      = $self->param_required('results_dir');
+  my $sh_ebi_file      = $self->param_required('sh_ebi_file');
+  my $sh_nd_file       = $self->param_required('sh_nd_file');
+  my $nd_login         = $self->param_required('nd_login');
+  my $nd_downloads_dir = $self->param_required('nd_downloads_dir');
+  my $nd_staging_dir   = $self->param_required('nd_staging_dir');
+  my $release_date     = $self->param_required('release_date');
+  
+  open(my $ebi, '>', $sh_ebi_file) || die "Failed to open '$sh_ebi_file': $!";
+  open(my $nd, '>', $sh_nd_file) || die "Failed to open '$sh_nd_file': $!";
+  
+  if (@$changed_files) {
+    print $nd "# Archive changed files:\n";
+    print $nd "cd $nd_downloads_dir\n";
+    print $nd "mkdir archive/$release_date\n";
+    foreach my $file (@$changed_files) {
+      
+      print $nd "mv $file archive/$release_date\n";
+      print $nd "rm -f $file.md5\n";
+    }
+    
+    my $changed_dir = "$results_dir/changed";
+    mkdir $changed_dir;
+    
+    print $ebi "# Copy changed files to the downloads directory at ND:\n";
+    print $ebi "cd $changed_dir\n";
+    foreach my $file (@$changed_files) {
+      print $ebi "ln -s ../$file";
+      print $ebi "ln -s ../$file.md5";
+    }
+    print $ebi "scp $changed_dir/* $nd_login:$nd_downloads_dir\n";
+  }
+  
+  if (@$new_files) {
+    print $nd "# Clear the staging directory:\n";
+    print $nd "rm -rf $nd_staging_dir/*\n";
+    
+    my $new_dir = "$results_dir/new";
+    mkdir $new_dir;
+    
+    print $ebi "# Copy new files to the staging directory at ND:\n";
+    print $ebi "cd $new_dir\n";
+    foreach my $file (@$new_files) {
+      print $ebi "ln -s ../$file";
+      print $ebi "ln -s ../$file.md5";
+    }
+    print $ebi "scp $new_dir/* $nd_login:$nd_staging_dir\n";
+  }
+  
+  close $ebi;
+  close $nd;
 }
 
 sub parse_filename {

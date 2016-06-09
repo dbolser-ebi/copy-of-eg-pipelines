@@ -16,30 +16,28 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::DumpTables;
+Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::RestoreBackups;
 
 =head1 DESCRIPTION
 
-This analysis will backup database tables specified in $table to directory specify in $output_dir.
-The analysis checks the $output_dir first to make sure we don't overwrite backups. This is necessary as we can backup the same species multiple time for each projections
+Module to automatically restore backups
 
-=head1 AUTHOR 
+=head1 AUTHOR
 
-ckong and maurel
+Thomas Maurel
 
 =cut
-package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::DumpTables; 
+package Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::RestoreBackups;
 
 use strict;
 use Data::Dumper;
 use Bio::EnsEMBL::Registry;
 use base ('Bio::EnsEMBL::EGPipeline::PostCompara::RunnableDB::Base');
+use Bio::EnsEMBL::Utils::SqlHelper;
 
-=head2 fetch_input
 
-=cut
 sub fetch_input {
-    my ($self) 	= @_;
+    my ($self)  = @_;
 
     my $core_dbh   = $self->core_dbh;
     my $output_dir = $self->param_required('output_dir');
@@ -53,26 +51,13 @@ sub fetch_input {
 return 0;
 }
 
-=head2 write_output 
 
-=cut
 sub write_output {
     my ($self)  = @_;
-
-    $self->dataflow_output_id({}, 1 );
 
 return 0;
 }
 
-=head2 run
-
-  Arg[1]     : -none-
-  Example    : $self->run;
-  Function   : 
-  Returns    : 1 on successful completion
-  Exceptions : dies if runnable throws an unexpected error
-
-=cut
 sub run {
     my ($self)       = @_;
 
@@ -82,28 +67,43 @@ sub run {
     my $user         = $dbc->username();
     my $pass         = $dbc->password();
     my $dbname       = $dbc->dbname();
-    my $mysql_binary = 'mysqldump';
+    my $mysql_binary = 'mysql';
+    my $output_dir   = $self->param('output_dir');
     my $tables       = $self->param_required('dump_tables');
-    my $output_dir   = $self->param('output_dir'); 
 
-    #Checking if all the table for a given species has already been backed up
-    foreach my $table (@$tables) {
-      if (-e $output_dir."/".$dbname.".".$table.".sql.gz"){
-        1;
-      }
-      else {
-        unless (system("$mysql_binary -h$host -P$port -u$user -p$pass $dbname $table | gzip -c -6 > $output_dir/$dbname.$table.sql.gz") == 0) {
-          $self->warning("Can't dump the original $table table from $dbname for backup because $!\n");
-          exit 1;
-       } else {
-          $self->warning("Original $table table backed up in $dbname.$table.sql\n");
-       }
-      }
-    }
+    $self->check_directory($output_dir);
+
+   #Checking if all the table for a given species has already been backed up
+   foreach my $table (@$tables) {
+     unless (system("set -o pipefail; zcat $output_dir/$dbname.$table.sql.gz | $mysql_binary -h$host -P$port -u$user -p$pass $dbname") == 0) {
+       $self->warning("Can't restore the $table table for $dbname because $!\n");
+     }
+   }
+   $dbc->disconnect_if_idle();
+
 return 0;
 }
 
+=head2 check_directory
+
+  Arg[1]     : -none-
+  Example    : $self->check_directory;
+  Function   : Check if the directory exists
+  Returns    : None
+  Exceptions : dies if directory don't exist
+
+=cut
+sub check_directory {
+    my ($self,$dir) = @_;
+
+    unless (-e $dir) {
+        die "$dir doesn't exists, can't restore backups\n";
+    }
+
+return;
+}
+
+
+
 
 1;
-
-

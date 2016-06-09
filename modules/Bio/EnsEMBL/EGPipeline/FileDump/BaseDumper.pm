@@ -31,6 +31,7 @@ sub param_defaults {
     'gene_centric'       => 0,
     'eg_dir_structure'   => 0,
     'eg_filename_format' => 0,
+    'file_varname'       => 'out_file',
   };
 }
 
@@ -62,9 +63,10 @@ sub fetch_input {
 
 sub write_output {
   my ($self) = @_;
+  my $file_varname = $self->param_required('file_varname');
   
   foreach my $out_file (@{$self->param('out_files')}) {
-    $self->dataflow_output_id({out_file => $out_file}, 1);
+    $self->dataflow_output_id({$file_varname => $out_file}, 1);
   }
 }
 
@@ -132,6 +134,8 @@ sub generate_vb_filename {
     $version = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
   }
   my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$version.$file_type";
+  
+  $dba->dbc && $dba->dbc->disconnect_if_idle();
   
   return $filename;
 }

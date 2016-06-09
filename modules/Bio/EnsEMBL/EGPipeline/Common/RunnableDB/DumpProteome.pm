@@ -36,6 +36,7 @@ sub param_defaults {
     'chunk_factor'      => 1000,
     'line_width'        => 80,
     'allow_stop_codons' => 0,
+    'is_canonical'      => undef,
     'file_varname'      => 'proteome_file',
   };
   
@@ -81,7 +82,24 @@ sub run {
   my $chunk_factor      = $self->param('chunk_factor');
   my $line_width        = $self->param('line_width');
   my $allow_stop_codons = $self->param('allow_stop_codons');
+  my $is_canonical      = $self->param('is_canonical');
   
+  # Use the ensembl_production database to retrieve the biotypes
+  # associated with the coding group, if possible.
+  my $biotypes;
+  my $biotype_groups = ['coding'];
+  my $pdba;
+  # Check if the production database is in the registry
+  eval{
+    $pdba = $self->get_DBAdaptor('production');
+  };
+  if (defined $pdba) {
+    my $biotype_manager = $pdba->get_biotype_manager();
+    map { push @{$biotypes}, @{ $biotype_manager->group_members($_)} } @{$biotype_groups};
+  } else {
+    push @{$biotypes}, 'protein_coding';
+  }
+
   open(my $fh, '>', $proteome_file) or $self->throw("Cannot open file $proteome_file: $!");
   my $serializer = Bio::EnsEMBL::Utils::IO::FASTASerializer->new(
     $fh,
@@ -92,9 +110,13 @@ sub run {
   
   my $dba = $self->core_dba();
   my $tra = $dba->get_adaptor('Transcript');
-  my $transcripts = $tra->fetch_all_by_biotype('protein_coding');
+  my $transcripts = $tra->fetch_all_by_biotype($biotypes);
   
   foreach my $transcript (sort { $a->stable_id cmp $b->stable_id } @{$transcripts}) {
+    if (defined $is_canonical) {
+      next if $is_canonical != $transcript->is_canonical;
+    }
+    
     my $seq_obj = $transcript->translate();
     
     if ($header_style ne 'default') {

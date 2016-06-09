@@ -43,7 +43,6 @@ sub fetch_input {
     my $flag_GeneNames         = $self->param('flag_GeneNames');
     my $flag_GeneDescr         = $self->param('flag_GeneDescr');
     my $species                = $self->param_required('species');
-
     my $reports;
 
     foreach my $sp (@$species){
@@ -56,10 +55,6 @@ sub fetch_input {
        else {
          $reports .= $self->info_type_summary($dbh, $sp) if($flag_GeneNames);
          $reports .= $self->geneDesc_summary($dbh, $sp)  if($flag_GeneDescr);
-	 #if(!$flag_GeneDesc){
-	 #   $reports .= $self->info_type_summary($dbh, $sp);
-	 #}
-	 #   $reports .= $self->geneDesc_summary($dbh, $sp);
       }
    }
 
@@ -89,7 +84,7 @@ return $self->format_table($title, $columns, $results);
 sub geneDesc_summary {
     my ($self, $dbh, $sp) = @_;
 
-    my $sql = 'SELECT count(*) AS Total FROM gene WHERE description rlike "projected" OR description rlike "Projected"';
+    my $sql = 'SELECT count(*) FROM gene LEFT JOIN xref ON display_xref_id = xref_id LEFT JOIN external_db USING(external_db_id) WHERE xref.info_type = "PROJECTION" and gene.description is not null';
 
     my $sth = $dbh->prepare($sql);
     $sth->execute();
@@ -101,6 +96,20 @@ sub geneDesc_summary {
     my $results = $sth->fetchall_arrayref();
 
 return $self->format_table($title, $columns, $results);
+}
+
+sub write_output {
+    my $self = shift @_;
+
+    my $projection_list = $self->param('projection_list');
+
+    if (keys %{$projection_list}){
+      1;
+    }
+    else
+    {
+      $self->input_job->autoflow(0);
+    }
 }
 
 

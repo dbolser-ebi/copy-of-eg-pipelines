@@ -48,6 +48,7 @@ sub write_output {
   my $results_dir      = $self->param_required('results_dir');
   my $files_per_subdir = $self->param_required('files_per_subdir');
   my $release_date     = $self->param_required('release_date');
+  my $ensembl_release  = $self->param_required('ensembl_release');
   my $mlss_ids         = $self->param_required('mlss_ids');
   my $method_links     = $self->param_required('method_links');
   
@@ -73,6 +74,9 @@ sub write_output {
     }
   }
   
+  
+  # Check first_release of mlss, if < current release, don't export.
+  
   foreach my $flow (keys %$dump_types) {
     foreach my $dump_type (@{$$dump_types{$flow}}) {
       if (!exists $skip_dumps{$dump_type}) {
@@ -81,19 +85,23 @@ sub write_output {
         foreach my $mlss (@mlss) {
           my $mlss_id = $mlss->dbID;
           
-          my ($ref, $sub_dir) = $self->sub_dir($prefix, $mlss, \%assemblies);
-          my $aln_dir         = catdir($results_dir, $sub_dir);
-          path($aln_dir)->mkpath;
-          
-          my %output_ids = (
-            'mlss_id'     => $mlss_id,
-            'ref_species' => $ref,
-            'aln_dir'     => $aln_dir,
-            'out_dir'     => $results_dir,
-            'sub_dir'     => $sub_dir,
-          );
-          
-          $self->dataflow_output_id(\%output_ids, $flow);
+          if ($mlss->first_release < $ensembl_release) {
+            $self->warning("WGA with MLSS ID $mlss_id should already exist, so dumps will not be generated.");
+          } else {
+            my ($ref, $sub_dir) = $self->sub_dir($prefix, $mlss, \%assemblies);
+            my $aln_dir         = catdir($results_dir, $sub_dir);
+            path($aln_dir)->mkpath;
+            
+            my %output_ids = (
+              'mlss_id'     => $mlss_id,
+              'ref_species' => $ref,
+              'aln_dir'     => $aln_dir,
+              'out_dir'     => $results_dir,
+              'sub_dir'     => $sub_dir,
+            );
+            
+            $self->dataflow_output_id(\%output_ids, $flow);
+          }
         }
       }
     }
