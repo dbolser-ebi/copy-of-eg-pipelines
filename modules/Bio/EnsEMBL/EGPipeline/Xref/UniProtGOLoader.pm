@@ -227,7 +227,7 @@ join xref sx on (sx.xref_id=oox.source_xref_id)
 join external_db sd on (sd.external_db_id=sx.external_db_id)
 where cs.species_id=? 
 and d.db_name='GO'
-and sd.db_name in ('Uniprot\/SWISSPROT','Uniprot\/TREMBL')/;
+and sd.db_name in ('Uniprot\/SWISSPROT','Uniprot\/SPTREMBL')/;
   $dba->dbc()->sql_helper()
 	->execute_update(-SQL => $sql, -PARAMS => [$dba->species_id()]);
   return;
