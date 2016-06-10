@@ -29,8 +29,8 @@ sub param_defaults {
   my ($self) = @_;
   
   my $param_defaults = {
-    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
     %{$self->Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpGenome::param_defaults},
+    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
     'dump_level' => 'toplevel',
     'data_type'  => 'scaffolds',
     'file_type'  => 'fa',
