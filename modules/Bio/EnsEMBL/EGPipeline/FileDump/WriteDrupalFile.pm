@@ -122,7 +122,7 @@ sub drupal_bulk_update {
   
   my $rows = scalar(@{$$data{'Title'}});
   
-  for (my $i=0; $i<=$rows; $i++) {
+  for (my $i=0; $i<$rows; $i++) {
     my @row;
     foreach my $column (@$fields) {
       push @row, '"' . $$data{$column}[$i] . '"';
@@ -186,8 +186,8 @@ sub drupal_shell_cmds {
     print $ebi "# Copy changed files to the downloads directory at ND:\n";
     print $ebi "cd $changed_dir\n";
     foreach my $file (@$changed_files) {
-      print $ebi "ln -s ../$file";
-      print $ebi "ln -s ../$file.md5";
+      print $ebi "ln -s ../$file\n";
+      print $ebi "ln -s ../$file.md5\n";
     }
     print $ebi "scp $changed_dir/* $nd_login:$nd_downloads_dir\n";
   }
@@ -202,8 +202,8 @@ sub drupal_shell_cmds {
     print $ebi "# Copy new files to the staging directory at ND:\n";
     print $ebi "cd $new_dir\n";
     foreach my $file (@$new_files) {
-      print $ebi "ln -s ../$file";
-      print $ebi "ln -s ../$file.md5";
+      print $ebi "ln -s ../$file\n";
+      print $ebi "ln -s ../$file.md5\n";
     }
     print $ebi "scp $new_dir/* $nd_login:$nd_staging_dir\n";
   }
