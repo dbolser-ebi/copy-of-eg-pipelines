@@ -44,7 +44,7 @@ sub run {
     'Description', 'Latest Change', 'Tags', 'Release Date Start',
     'Release Date End', 'Version', 'Display Version', 'Previous Version',
     'Xgrid_enabled', 'Fasta Header Regex', 'Download Count',
-    'URL', 'Ensembl organism name', 'md5'
+    'Ensembl organism name', 'md5'
   );
   
   my %new = map { $_ => [] } @fields;
@@ -107,7 +107,6 @@ sub process_new_file {
   push $$data{'Xgrid_enabled'}, $xgrid;
   push $$data{'Fasta Header Regex'}, '(.*?)\s';
   push $$data{'Download Count'}, '0';
-  push $$data{'URL'}, '';
   push $$data{'Ensembl organism name'}, $species;
   push $$data{'md5'}, catdir($staging_dir, "$file.md5");
 }
