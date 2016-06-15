@@ -79,6 +79,7 @@ sub merge_bam {
   my ($self, $merge_id, $merged_bam_file) = @_;
   
   my $samtools_dir = $self->param_required('samtools_dir');
+  my $threads      = $self->param_required("threads");
   my $vcf          = $self->param_required("vcf");
   my $use_csi      = $self->param_required("use_csi");
   my $clean_up     = $self->param_required('clean_up');
@@ -93,25 +94,22 @@ sub merge_bam {
   
   my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
     -samtools_dir => $samtools_dir,
+    -threads      => $threads,
   );
   $aligner->dummy(1) if -s $merged_bam_file;
-  my $unsorted_bam = $merged_bam_file . '.unsorted';
   
   if (scalar(@bam_files) == 1) {
     my ($bam_file) = $bam_files[0];
-    rename $bam_file, $unsorted_bam if not -s $merged_bam_file;
+    rename $bam_file, $merged_bam_file if -s $bam_file;
   } else {
-    $aligner->merge_bam(\@bam_files, $unsorted_bam);
+    $aligner->merge_bam(\@bam_files, $merged_bam_file);
     if ($clean_up) {
-      if (-s $unsorted_bam) {
+      if (-s $merged_bam_file) {
         unlink @bam_files;
       }
     }
   }
   
-  my $sorted_bam = $aligner->sort_bam($unsorted_bam);
-  unlink $unsorted_bam if -s $unsorted_bam;
-  rename $sorted_bam, $merged_bam_file unless -s $merged_bam_file;
   $aligner->index_bam($merged_bam_file, $use_csi);
   if ($vcf) {
     $aligner->generate_vcf($merged_bam_file);
