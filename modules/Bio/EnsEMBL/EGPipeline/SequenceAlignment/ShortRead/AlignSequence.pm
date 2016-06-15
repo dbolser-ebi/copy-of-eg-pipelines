@@ -84,17 +84,15 @@ sub run {
     $aligner->dummy(1);
   }
   
-  # Align and convert
+  # Align to create a SAM file
   $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
-  $aligner->sam_to_bam($sam_file);
-  unlink $sam_file if $clean_up;
   $aligner->dummy(0);
+  $self->param('sam_file', $sam_file);
   
   my $index_cmds = $self->param('index_cmds') || [];
   my $align_cmds = $aligner->align_cmds;
   my $version    = $aligner->version;
   
-  $self->param('bam_file', $bam_file);
   $self->param('cmds', join("; ", (@$index_cmds, @$align_cmds)));
   $self->param('version', $version);
 }
@@ -103,7 +101,7 @@ sub write_output {
   my ($self) = @_;
   
   my $dataflow_output = {
-    'bam_file' => $self->param('bam_file'),
+    'sam_file' => $self->param('sam_file'),
     'cmds'     => $self->param('cmds'),
     'version'  => $self->param('version'),
   };
