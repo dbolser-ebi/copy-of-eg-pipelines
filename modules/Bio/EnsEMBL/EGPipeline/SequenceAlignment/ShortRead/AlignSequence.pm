@@ -26,9 +26,10 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    'threads'   => 4,
-    'read_type' => 'default',
-    'clean_up'  => 1,
+    'threads'  => 4,
+    'run_mode' => 'default',
+    'gtf_file' => undef,
+    'clean_up' => 1,
   };
 }
 
@@ -45,12 +46,11 @@ sub fetch_input {
   my $aligner_dir   = $self->param_required('aligner_dir');
   my $samtools_dir  = $self->param_required('samtools_dir');
   my $threads       = $self->param_required('threads');
-  my $read_type     = $self->param_required('read_type');
+  my $run_mode      = $self->param_required('run_mode');
+  my $max_intron    = $self->param('max_intron');
+  my $gtf_file      = $self->param('gtf_file');
   
-  my $max_intron_length;
-  if ($aligner_class =~ /StarAligner/) {
-    $max_intron_length = $self->max_intron_length();
-  }
+  my $max_intron_length = $self->max_intron_length() if $max_intron;
   
   eval "require $aligner_class";
   
@@ -58,7 +58,8 @@ sub fetch_input {
     -aligner_dir       => $aligner_dir,
     -samtools_dir      => $samtools_dir,
     -threads           => $threads,
-    -read_type         => $read_type,
+    -run_mode          => $run_mode,
+    -gtf_file          => $gtf_file,
     -max_intron_length => $max_intron_length,
   );
   

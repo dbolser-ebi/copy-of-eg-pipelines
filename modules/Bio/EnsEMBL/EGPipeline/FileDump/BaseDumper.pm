@@ -31,6 +31,7 @@ sub param_defaults {
     'gene_centric'       => 0,
     'eg_dir_structure'   => 0,
     'eg_filename_format' => 0,
+    'file_varname'       => 'out_file',
   };
 }
 
@@ -62,9 +63,10 @@ sub fetch_input {
 
 sub write_output {
   my ($self) = @_;
+  my $file_varname = $self->param_required('file_varname');
   
   foreach my $out_file (@{$self->param('out_files')}) {
-    $self->dataflow_output_id({out_file => $out_file}, 1);
+    $self->dataflow_output_id({$file_varname => $out_file}, 1);
   }
 }
 
@@ -121,7 +123,7 @@ sub generate_vb_filename {
   my $gene_centric = $self->param('gene_centric');
   
   $species =~ s/_/-/;
-  $species =~ s/[A-Z]$//;
+  $species =~ s/[A-Z]+$//;
   my $dba = $self->core_dba;
   my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/\s+/\-/g;
