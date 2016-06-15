@@ -123,7 +123,7 @@ sub generate_vb_filename {
   my $gene_centric = $self->param('gene_centric');
   
   $species =~ s/_/-/;
-  $species =~ s/[A-Z]$//;
+  $species =~ s/[A-Z]+$//;
   my $dba = $self->core_dba;
   my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/\s+/\-/g;

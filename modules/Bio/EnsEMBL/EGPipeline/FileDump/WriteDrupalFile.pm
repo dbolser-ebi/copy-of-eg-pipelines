@@ -44,7 +44,7 @@ sub run {
     'Description', 'Latest Change', 'Tags', 'Release Date Start',
     'Release Date End', 'Version', 'Display Version', 'Previous Version',
     'Xgrid_enabled', 'Fasta Header Regex', 'Download Count',
-    'URL', 'Ensembl organism name', 'md5'
+    'Ensembl organism name', 'md5'
   );
   
   my %new = map { $_ => [] } @fields;
@@ -107,7 +107,6 @@ sub process_new_file {
   push $$data{'Xgrid_enabled'}, $xgrid;
   push $$data{'Fasta Header Regex'}, '(.*?)\s';
   push $$data{'Download Count'}, '0';
-  push $$data{'URL'}, '';
   push $$data{'Ensembl organism name'}, $species;
   push $$data{'md5'}, catdir($staging_dir, "$file.md5");
 }
@@ -122,7 +121,7 @@ sub drupal_bulk_update {
   
   my $rows = scalar(@{$$data{'Title'}});
   
-  for (my $i=0; $i<=$rows; $i++) {
+  for (my $i=0; $i<$rows; $i++) {
     my @row;
     foreach my $column (@$fields) {
       push @row, '"' . $$data{$column}[$i] . '"';
@@ -186,8 +185,8 @@ sub drupal_shell_cmds {
     print $ebi "# Copy changed files to the downloads directory at ND:\n";
     print $ebi "cd $changed_dir\n";
     foreach my $file (@$changed_files) {
-      print $ebi "ln -s ../$file";
-      print $ebi "ln -s ../$file.md5";
+      print $ebi "ln -s ../$file\n";
+      print $ebi "ln -s ../$file.md5\n";
     }
     print $ebi "scp $changed_dir/* $nd_login:$nd_downloads_dir\n";
   }
@@ -202,8 +201,8 @@ sub drupal_shell_cmds {
     print $ebi "# Copy new files to the staging directory at ND:\n";
     print $ebi "cd $new_dir\n";
     foreach my $file (@$new_files) {
-      print $ebi "ln -s ../$file";
-      print $ebi "ln -s ../$file.md5";
+      print $ebi "ln -s ../$file\n";
+      print $ebi "ln -s ../$file.md5\n";
     }
     print $ebi "scp $new_dir/* $nd_login:$nd_staging_dir\n";
   }
