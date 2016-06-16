@@ -26,6 +26,7 @@ use Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor qw(get_adaptor);
 
 use File::Path qw(make_path);
 use File::Spec::Functions qw(catdir);
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
 
 sub run {
   my ($self) = @_;
@@ -111,25 +112,13 @@ sub retrieve_files {
       $fastq_gz =~ s/[SED]RR\w+\.fastq$/$file_name/;
       $self->throw("Warning: can't differenciate fastq and fastq.gz files ($fastq)") if $fastq eq $fastq_gz;
       
-      if (-s $fastq_gz) {
-        if (-e $fastq) {
-          # Interrupted unzip
-          unlink $fastq;
-        } else {
-          # Interrupted download
-          unlink $fastq_gz;
-          $file->retrieve($work_dir);
-        }
-        $self->_unzip($fastq_gz, $fastq);
+      # Reuse fastq file if it was succesfully unzipped
+      if (-s $fastq and not -s $fastq_gz) {
+        next FILE;
       } else {
-        if (-s $fastq) {
-          # Finished: can reuse
-          next FILE;
-        } else {
-          # All new
-          $file->retrieve($work_dir);
-          $self->_unzip($fastq_gz, $fastq);
-        }
+        unlink ($fastq_gz, $fastq);
+        $file->retrieve($work_dir);
+        $self->_unzip($fastq_gz, $fastq);
       }
     } else {
       $self->throw("Cannot process file '$file_name'");
@@ -145,8 +134,7 @@ sub _unzip {
 
   # Check that the file is indeed a .gz file
   if ($fastq_gz =~ /\.fastq\.gz$/) {
-    my $cmd = "zcat $fastq_gz >> $fastq";
-    system($cmd) == 0 || $self->throw("Cannot execute $cmd");
+    gunzip $fastq_gz => $fastq or $self->throw("gunzip failed: $GunzipError\n");
     unlink $fastq_gz;
   # Not a fastq.gz, just a fastq: rename
   } elsif ($fastq_gz =~ /\.fastq$/ and $fastq_gz ne $fastq) {
