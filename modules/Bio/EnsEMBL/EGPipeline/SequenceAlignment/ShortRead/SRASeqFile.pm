@@ -119,6 +119,14 @@ sub retrieve_files {
         unlink ($fastq_gz, $fastq);
         $file->retrieve($work_dir);
         $self->_unzip($fastq_gz, $fastq);
+        
+        if (not -s $fastq) {
+          if (-e $fastq) {
+            $self->throw("Uncompressed file is empty '$fastq'");
+          } else {
+            $self->throw("Cannot get file file '$fastq'");
+          }
+        }
       }
     } else {
       $self->throw("Cannot process file '$file_name'");
