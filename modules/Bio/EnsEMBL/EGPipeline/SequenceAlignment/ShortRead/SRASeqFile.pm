@@ -124,7 +124,7 @@ sub retrieve_files {
           if (-e $fastq) {
             $self->throw("Uncompressed file is empty '$fastq'");
           } else {
-            $self->throw("Cannot get file file '$fastq'");
+            $self->throw("Cannot get file '$fastq'");
           }
         }
       }

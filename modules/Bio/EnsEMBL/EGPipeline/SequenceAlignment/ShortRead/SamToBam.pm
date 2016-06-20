@@ -81,12 +81,16 @@ sub run {
 sub write_output {
   my ($self) = @_;
   
-  my $dataflow_output = {
+  my $dataflow_output_to_table = {
     'bam_file' => $self->param('bam_file'),
     'cmds'     => $self->param('cmds'),
   };
+  my $dataflow_output_to_next = {
+    'bam_file' => $self->param('bam_file'),
+  };
   
-  $self->dataflow_output_id($dataflow_output, 1);
+  $self->dataflow_output_id($dataflow_output_to_next,  1);
+  $self->dataflow_output_id($dataflow_output_to_table, 2);
 }
 
 1;

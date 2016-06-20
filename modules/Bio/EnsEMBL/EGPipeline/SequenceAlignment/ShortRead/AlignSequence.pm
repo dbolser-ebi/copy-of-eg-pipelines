@@ -80,7 +80,7 @@ sub run {
   my $bam_exists = -s $bam_file;
   my $sam_exists = -s $sam_file;
   
-  # Can we reuse some files?
+  # Can we reuse some files? Only if we have a bam file (which means that the sam file was converted succesfully)
   if ($bam_exists and not $sam_exists) {
     $aligner->dummy(1);
   }
@@ -101,13 +101,17 @@ sub run {
 sub write_output {
   my ($self) = @_;
   
-  my $dataflow_output = {
+  my $dataflow_output_to_table = {
     'sam_file' => $self->param('sam_file'),
     'cmds'     => $self->param('cmds'),
     'version'  => $self->param('version'),
   };
+  my $dataflow_output_to_next = {
+    'sam_file' => $self->param('sam_file'),
+  };
   
-  $self->dataflow_output_id($dataflow_output, 1);
+  $self->dataflow_output_id($dataflow_output_to_next,  1);
+  $self->dataflow_output_id($dataflow_output_to_table, 2);
 }
 
 sub max_intron_length {
