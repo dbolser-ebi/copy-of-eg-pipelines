@@ -20,6 +20,7 @@ package Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::CreateBigWig;
 
 use strict;
 use warnings;
+use Capture::Tiny ':all';
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
@@ -54,14 +55,14 @@ sub run {
     " -bg ".
     " -split ".
     " > $wig_file ";
-  system($wig_cmd) == 0 || $self->throw("Cannot execute $wig_cmd");
+  $self->_execute($wig_cmd);
   
   my $bw_cmd =
     "$ucscutils_dir/wigToBigWig ".
     " $wig_file ".
     " $length_file ".
     " $bw_file ";
-  system($bw_cmd) == 0 || $self->throw("Cannot execute $bw_cmd");
+  $self->_execute($bw_cmd);
 
   if ($clean_up) {
     unlink $wig_file;
@@ -80,6 +81,19 @@ sub write_output {
   };
   
   $self->dataflow_output_id($dataflow_output, 1);
+}
+
+sub _execute {
+  my $self = shift;
+  my ($cmd) = @_;
+  
+  
+  my ($stdout, $stderr, $exit) = capture {
+    system($cmd);
+  };
+  if ($exit) {
+    $self->throw("Cannot execute $cmd:\n$stderr");
+  }
 }
 
 1;
