@@ -257,18 +257,18 @@ sub sra_merge_id {
     $merge_id = $self->param('merge_id');
     
     if ($taxon) {
-      $merge_id ||= $taxon->taxon_id;
+      $merge_id //= $taxon->taxon_id;
       my $taxonomy_adaptor = Bio::EnsEMBL::ENA::SRA::BaseSraAdaptor->new->taxonomy_adaptor();
       my $node = $taxonomy_adaptor->fetch_by_taxon_id($taxon->taxon_id);
       $merge_label = $node->name;
     } else {
-      $merge_id ||= 'unknown';
+      $merge_id //= 'unknown';
       $merge_label = 'unknown species';
     }
     
   } elsif ($merge_level =~ /sample/i) {
     $merge_id = $run->sample->accession;
-    $merge_label = $run->sample->title || $run->sample->description;
+    $merge_label = $run->sample->title // $run->sample->description // '';
     
   } elsif ($merge_level =~ /experiment/i) {
     $merge_id = $run->experiment->accession;
