@@ -55,17 +55,20 @@ sub run {
     " -bg ".
     " -split ".
     " > $wig_file ";
-  $self->_execute($wig_cmd);
-  
   my $bw_cmd =
     "$ucscutils_dir/wigToBigWig ".
     " $wig_file ".
     " $length_file ".
     " $bw_file ";
-  $self->_execute($bw_cmd);
+    
+  # Reuse precalculated bigwig if it was finished
+  if (not -s $bw_file or -s $wig_file) {
+    $self->_execute($wig_cmd);
+    $self->_execute($bw_cmd);
 
-  if ($clean_up) {
-    unlink $wig_file;
+    if ($clean_up) {
+      unlink $wig_file;
+    }
   }
   
   $self->param('bw_file', $bw_file);
