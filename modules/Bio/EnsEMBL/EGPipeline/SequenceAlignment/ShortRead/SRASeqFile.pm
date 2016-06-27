@@ -72,6 +72,12 @@ sub retrieve_files {
   my $experiment = $run->experiment();
   my $paired = defined $experiment->design()->{LIBRARY_DESCRIPTOR}{LIBRARY_LAYOUT}{PAIRED};
   
+  # Single but several files?? Treat as single, as it is likely an error in SRA
+  if (not $paired and @files > 1) {
+    warn "Experiment is SINGLE, but there are several files. Changed to PAIRED.\n";
+    $paired = 1;
+  }
+  
   my ($seq_file_1, $seq_file_2);
   my $sam_file = catdir($work_dir, "$run_acc.sam");
   
