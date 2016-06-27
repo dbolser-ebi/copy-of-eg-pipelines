@@ -113,7 +113,7 @@ sub files {
       }
     }
     
-    if (lc($merge_level) eq 'all') {
+    if (lc($merge_level) eq 'taxon') {
       if (!defined $merge_id) {
         $merge_id = join('_', @all);
       }
@@ -153,7 +153,7 @@ sub file_pairs {
   foreach my $file_pair (@$file_pairs) {
     my ($seq_file_1, $seq_file_2) = split(/\s*,\s*/, $file_pair);
     
-    if (lc($merge_level) eq 'all') {
+    if (lc($merge_level) eq 'taxon') {
       if (!defined $merge_id) {
         $merge_id = join('_', @all);
       }
