@@ -120,7 +120,7 @@ sub generate_source {
   
   if (! defined $gene_source) {
     $gene_source = $dba->get_MetaContainer->get_division();
-    $gene_source =~ s/([a-z])(A-Z)/$1_$2/;
+    $gene_source =~ s/([a-z])([A-Z])/$1\_$2/;
     $gene_source = 'Ensembl' unless $gene_source;
   }
   
