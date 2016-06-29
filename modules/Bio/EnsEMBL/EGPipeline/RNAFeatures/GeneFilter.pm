@@ -47,13 +47,15 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 sub param_defaults {
   my ($self) = @_;
   return {
+    'gene_source'      => undef,
+    'external_db_name' => 'RFAM',
+    'stable_id_type'   => 'eg',
     'evalue_threshold' => 1e-6,
     'truncated'        => 0,
     'nonsignificant'   => 0,
     'bias_threshold'   => 0.3,
-    'gene_source'      => undef,
-    'external_db_name' => 'RFAM',
-    'stable_id_type'   => 'eg',
+    'within_repeat'    => 0,
+    'within_exon'      => 0,
   };
 }
 
