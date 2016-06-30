@@ -291,11 +291,13 @@ sub generate_stable_id {
 
 sub feature_location_id {
   my ($self, $feature) = @_;
+  my $species = $self->param_required('species');
   
   my $row_external_data = $feature->extra_data;
   my $accession = $$row_external_data{'Accession'};
   my @location_id = (
     $accession,
+    $species,
     $feature->coord_system_name,
     $feature->seq_region_name,
     $feature->start,
