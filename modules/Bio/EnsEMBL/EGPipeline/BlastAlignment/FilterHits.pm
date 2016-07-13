@@ -128,8 +128,9 @@ sub best_in_proteome {
   
   my %pfs;
   foreach my $t (@$ts) {
-    my $pfs = $pfa->fetch_all_by_translation_id($t->dbID);
-    foreach my $pf (@$pfs) {
+#    my $pfs = $pfa->fetch_all_by_translation_id($t->dbID);
+    my $ps = $t->get_all_ProteinFeatures($logic_name);
+    foreach my $pf (@$ps) {
       if ($pf->analysis->logic_name eq $logic_name) {
         push @{$pfs{$pf->hseqname}}, $pf;
       }
