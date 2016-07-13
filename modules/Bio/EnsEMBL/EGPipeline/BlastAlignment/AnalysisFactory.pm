@@ -33,7 +33,7 @@ sub run {
   my $db_file           = $self->param_required('db_fasta_file');
   my $blastp            = $self->param_required('blastp');
   my $blastx            = $self->param_required('blastx');
-  my $filter_top_x      = $self->param_required('filter_top_x');
+  my $filter_top_x      = $self->param('filter_top_x');
   my $source_species    = $self->param('source_species');
   
   my $proteomic_analyses = [];

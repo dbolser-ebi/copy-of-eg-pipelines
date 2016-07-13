@@ -128,9 +128,9 @@ sub default_options {
     blastx   => 1,
     
     # Filter so that only best X hits get saved.
-    filter_top_x => 1,
-    blastp_top_x => 1,
-    blastx_top_x => 10,
+    filter_top_x => 0,
+    blastp_top_x => 0,
+    blastx_top_x => 0,
     
     # Generate a GFF file for loading into, e.g., WebApollo
     create_gff    => 0,
@@ -556,8 +556,9 @@ sub pipeline_analyses {
                           },
       -rc_name         => 'normal',
       -flow_into       => {
-                            '2->A' => ['BlastPFactory'],
-                            'A->1' => ['FilterBlastPHits'],
+#                            '2' => ['BlastPFactory'],
+                           '2->A' => ['BlastPFactory'],
+                           'A->1' => ['FilterBlastPHits'],
                           },
     },
 
