@@ -119,29 +119,17 @@ sub best_in_proteome {
   
   my %grouped_features;
   
-  # The protein feature adaptor has no 'fetch_all' method,
-  # so we have to get them by iterating over translations.
-  my $ta  = $dba->get_adaptor("Translation");
   my $pfa = $dba->get_adaptor("ProteinFeature");
-  
-  my $ts = $ta->fetch_all();
-  
+  my $pfs = $pfa->fetch_all_by_logic_name($logic_name);
   my %pfs;
-  foreach my $t (@$ts) {
-#    my $pfs = $pfa->fetch_all_by_translation_id($t->dbID);
-    my $ps = $t->get_all_ProteinFeatures($logic_name);
-    foreach my $pf (@$ps) {
-      if ($pf->analysis->logic_name eq $logic_name) {
-        push @{$pfs{$pf->hseqname}}, $pf;
-      }
-    }
-    
-    foreach my $hit_name (keys %pfs) {
-      my @pfs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pfs{$hit_name}};    
-      my @groups = ();
-      $self->group_features(\@pfs, \@groups);
-      push @{$grouped_features{$hit_name}}, @groups;
-    }
+  foreach my $pf (@$pfs) {
+    push @{$pfs{$pf->hseqname}}, $pf;
+  }
+  foreach my $hit_name (keys %pfs) {
+    my @pfs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pfs{$hit_name}};    
+    my @groups = ();
+    $self->group_features(\@pfs, \@groups);
+    push @{$grouped_features{$hit_name}}, @groups;
   }
   
   $self->remove_features($top_x, $pfa, \%grouped_features);
