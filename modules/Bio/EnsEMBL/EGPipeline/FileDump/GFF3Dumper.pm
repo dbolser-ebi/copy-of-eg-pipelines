@@ -37,30 +37,32 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    'feature_type'       => ['Gene', 'Transcript'],
-    'data_type'          => 'basefeatures',
-    'file_type'          => 'gff3',
-    'per_chromosome'     => 0,
-    'include_scaffold'   => 1,
-    'logic_name'         => [],
-    'remove_id_prefix'   => 0,
-    'relabel_transcript' => 0,
-    'remove_separators'  => 0,
+    'feature_type'          => ['Gene', 'Transcript'],
+    'data_type'             => 'basefeatures',
+    'file_type'             => 'gff3',
+    'per_chromosome'        => 0,
+    'include_scaffold'      => 1,
+    'logic_name'            => [],
+    'remove_id_prefix'      => 0,
+    'relabel_transcript'    => 0,
+    'relabel_align_feature' => 0,
+    'remove_separators'     => 0,
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $species            = $self->param_required('species');
-  my $db_type            = $self->param_required('db_type');
-  my $out_file           = $self->param_required('out_file');
-  my $feature_types      = $self->param_required('feature_type');
-  my $per_chromosome     = $self->param_required('per_chromosome');
-  my $include_scaffold   = $self->param_required('include_scaffold');
-  my $logic_names        = $self->param_required('logic_name');
-  my $remove_id_prefix   = $self->param_required('remove_id_prefix');
-  my $relabel_transcript = $self->param_required('relabel_transcript');
-  my $remove_separators  = $self->param_required('remove_separators');
+  my $species               = $self->param_required('species');
+  my $db_type               = $self->param_required('db_type');
+  my $out_file              = $self->param_required('out_file');
+  my $feature_types         = $self->param_required('feature_type');
+  my $per_chromosome        = $self->param_required('per_chromosome');
+  my $include_scaffold      = $self->param_required('include_scaffold');
+  my $logic_names           = $self->param_required('logic_name');
+  my $remove_id_prefix      = $self->param_required('remove_id_prefix');
+  my $relabel_transcript    = $self->param_required('relabel_transcript');
+  my $relabel_align_feature = $self->param_required('relabel_align_feature');
+  my $remove_separators     = $self->param_required('remove_separators');
   
   my $reg = 'Bio::EnsEMBL::Registry';
   
@@ -117,6 +119,7 @@ sub run {
   foreach my $out_file (@$out_files) {
     $self->remove_id_prefix($out_file) if $remove_id_prefix;
     $self->relabel_transcript($out_file) if $relabel_transcript;
+    $self->relabel_align_feature($out_file) if $relabel_align_feature;
     $self->remove_separators($out_file) if $remove_separators;
   }
   
@@ -225,6 +228,17 @@ sub remove_separators {
   
   my $data = $file->slurp;
   $data =~ s/^###\n//m;
+  $file->spew($data);
+}
+
+sub relabel_align_feature {
+  my ($self, $out_file) = @_;
+  
+  my $file = path($out_file);
+  
+  my $data = $file->slurp;
+  $data =~ s/\tnucleotide_match\t/\tmatch_part\t/gm;
+  $data =~ s/\tprotein_match\t/\tmatch_part\t/gm;
   $file->spew($data);
 }
 
@@ -346,8 +360,7 @@ sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
   $summary{'start'}               = $self->seq_region_start;
   $summary{'end'}                 = $self->seq_region_end;
   $summary{'strand'}              = $self->strand;
-  $summary{'id'}                  = undef;
-  $summary{'Name'}                = $self->display_id;
+  $summary{'id'}                  = $self->display_id;
   $summary{'description'}         = $self->analysis->description;
   $summary{'score'}               = $self->score;
   $summary{'evalue'}              = $self->p_value;
