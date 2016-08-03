@@ -60,7 +60,7 @@ sub new {
   ($self->{uniprot_dba}, $self->{dbnames}) =
 	rearrange(['UNIPROT_DBA', 'DBNAMES'], @args);
   if (!defined $self->{dbnames}) {
-	$self->{dbnames} = qw/ArrayExpress PDB EMBL ChEMBL/;
+	$self->{dbnames} = qw/ArrayExpress ChEMBL EMBL MEROPS PDB/;
   }
   $self->{dbnames} = {%hash = map { $_ => 1 } @{$self->{dbnames}}};
   return $self;
