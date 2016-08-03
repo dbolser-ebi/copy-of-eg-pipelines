@@ -69,7 +69,6 @@ sub default_options {
     
     # Source for proteomes can be one of: 'file', 'database', 'uniprot'
     proteome_source    => 'file',
-    logic_name_prefix  => $self->o('proteome_source'),
     source_label       => 'Protein alignments',
     is_canonical       => 1,
     
@@ -126,6 +125,7 @@ sub default_options {
     blast_db => undef,
     blastp   => 1,
     blastx   => 1,
+    logic_name_prefix => 'worm',
     
     production_lookup => 1, 
     # need to either pull the analayis from the database or hardcode them here (less prefereable)
@@ -139,6 +139,7 @@ sub default_options {
         'displayable'   => 1,
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
+        'blast_db'      => $self->o('db_fasta_file'),
         'db_version'    => '2016-08-08',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -146,6 +147,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
+        'db_file'       => $self->o('db_fasta_file'),
       },
       
       {                 
@@ -155,6 +157,7 @@ sub default_options {
         'displayable'   => 1,
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
+        'blast_db'      => $self->o('db_fasta_file'),
         'db_version'    => '2016-08-08',
         'program'       => 'blastx',
         'program_file'  => $self->o('blastx_exe'),
@@ -162,6 +165,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
+        'db_file'       => $self->o('db_fasta_file'),
       },
       {
         'logic_name'    => 'blastp2',
@@ -170,6 +174,7 @@ sub default_options {
         'displayable'   => 1,
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
+        'blast_db'      => $self->o('db_fasta_file'),
         'db_version'    => '2016-08-08',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -177,6 +182,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
+        'db_file'       => $self->o('db_fasta_file'),
       },
       
       {                 
@@ -186,6 +192,7 @@ sub default_options {
         'displayable'   => 1,
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
+        'blast_db'      => $self->o('db_fasta_file'),
         'db_version'    => '2016-08-08',
         'program'       => 'blastx',
         'program_file'  => $self->o('blastx_exe'),
@@ -193,6 +200,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
+        'db_file'       => $self->o('db_fasta_file'),
       },
 
       
@@ -251,7 +259,7 @@ sub pipeline_analyses {
       -input_ids       => [{}],
       -flow_into       => {
                             '1->A' => ['SpeciesFactory'],
-                            'A->1' => ['BlastProtein'],
+                            'A->1' => ['TargetSpeciesFactory'],
                           },
       -meadow_type     => 'LOCAL',
     },
@@ -354,97 +362,6 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'BlastProtein',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::BlastProtein',
-      -max_retry_count => 0,
-      -parameters      => {
-                            proteome_source => $self->o('proteome_source'),
-                            db_fasta_file   => $self->o('db_fasta_file'),
-                          },
-      -flow_into       => {
-                            '2' => ['FetchFile'],
-                            '3' => ['SourceSpeciesFactory'],
-                            '4' => ['FetchUniprot'],
-                          },
-      -meadow_type     => 'LOCAL',
-    },
-
-    {
-      -logic_name      => 'FetchFile',
-      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
-      -can_be_empty    => 1,
-      -max_retry_count => 0,
-      -flow_into       => ['CreateBlastDB'],
-      -meadow_type     => 'LOCAL',
-    },
-
-    {
-      -logic_name      => 'SourceSpeciesFactory',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
-      -can_be_empty    => 1,
-      -max_retry_count => 1,
-      -parameters      => {
-                            species         => $self->o('source_species'),
-                            antispecies     => $self->o('source_antispecies'),
-                            division        => $self->o('source_division'),
-                            run_all         => $self->o('source_run_all'),
-                            meta_filters    => $self->o('source_meta_filters'),
-                            chromosome_flow => 0,
-                            variation_flow  => 0,
-                            species_varname => 'source_species',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => {
-                            '2' => ['FetchDatabase'],
-                          },
-      -meadow_type     => 'LOCAL',
-    },
-
-    {
-      -logic_name        => 'FetchDatabase',
-      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpProteome',
-      -can_be_empty      => 1,
-      -analysis_capacity => 5,
-      -parameters        => {
-                              species      => '#source_species#',
-                              proteome_dir => catdir($self->o('pipeline_dir'), 'proteomes'),
-                              is_canonical => $self->o('is_canonical'),
-                              file_varname => 'db_fasta_file',
-                            },
-      -rc_name           => 'normal',
-      -flow_into         => ['CreateBlastDB'],
-    },
-
-    {
-      -logic_name      => 'FetchUniprot',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchUniprot',
-      -can_be_empty    => 1,
-      -max_retry_count => 2,
-      -parameters      => {
-                            ftp_uri          => $self->o('uniprot_ftp_uri'),
-                            taxonomic_levels => $self->o('taxonomic_levels'),
-                            uniprot_sources  => $self->o('uniprot_sources'),
-                            out_dir          => $self->o('uniprot_dir'),
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => ['CreateBlastDB'],
-    },
-
-    {
-      -logic_name      => 'CreateBlastDB',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::CreateBlastDB',
-      -max_retry_count => 2,
-      -parameters      => {
-                            makeblastdb_exe   => $self->o('makeblastdb_exe'),
-                            blast_db_type     => 'prot',
-                            proteome_source   => $self->o('proteome_source'),
-                            logic_name_prefix => $self->o('logic_name_prefix'),
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => ['TargetSpeciesFactory'],
-    },
-
-    {
       -logic_name      => 'TargetSpeciesFactory',
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
       -max_retry_count => 1,
@@ -473,19 +390,18 @@ sub pipeline_analyses {
                             analyses     => $self->o('analyses'),
                             blastp       => $self->o('blastp'),
                             blastx       => $self->o('blastx'),
+                            logic_name_prefix => $self->o('logic_name_prefix'),
                           },
       -rc_name         => 'normal',
       -flow_into       => {
-                            '2->A' => ['AnalysisSetupCore'],
-                            'A->4' => ['FetchProteomeFiles'],
-                            '3->B' => ['AnalysisSetupCore'],
-                            'B->5' => ['FetchGenomeFiles'],
+                            '2' => ['AnalysisSetupCoreP'],
+                            '3' => ['AnalysisSetupCoreX'],
                           },
       -meadow_type     => 'LOCAL',
     },
 
     {
-      -logic_name      => 'AnalysisSetupCore',
+      -logic_name      => 'AnalysisSetupCoreP',
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
       -can_be_empty    => 1,
       -max_retry_count => 0,
@@ -498,6 +414,27 @@ sub pipeline_analyses {
                             production_db      => $self->o('production_db'),
                           },
       -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1' => ['FetchProteomeFiles'],
+                          },
+    },
+    {
+      -logic_name      => 'AnalysisSetupCoreX',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -can_be_empty    => 1,
+      -max_retry_count => 0,
+      -batch_size      => 10,
+      -parameters      => {
+                            db_backup_required => 1,
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
+                            delete_existing    => $self->o('delete_existing'),
+                            production_lookup  => $self->o('production_lookup'),
+                            production_db      => $self->o('production_db'),
+                          },
+      -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1' => ['FetchGenomeFiles'],
+                          },
     },
 
     {
@@ -567,7 +504,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastp',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),
@@ -592,7 +528,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastp',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),
@@ -617,7 +552,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastp',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),
@@ -638,7 +572,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastx',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),
@@ -663,7 +596,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastx',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),
@@ -688,7 +620,6 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type          => 'core',
-                            logic_name       => '#logic_name_prefix#_blastx',
                             blast_type       => $self->o('blast_type'),
                             blast_matrix     => $self->o('blast_matrix'),
                             output_regex     => $self->o('output_regex'),

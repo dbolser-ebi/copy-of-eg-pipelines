@@ -64,4 +64,18 @@ sub run {
   $self->param('genomic_analyses', $genomic_analyses);
 }
 
+sub write_output {
+  my ($self) = @_;
+  my $blastp = $self->param_required('blastp');
+  my $blastx = $self->param_required('blastx');
+  
+  if ($blastp) {
+    $self->dataflow_output_id($self->param('proteomic_analyses'), 2);
+  }
+  
+  if ($blastx) {  
+    $self->dataflow_output_id($self->param('genomic_analyses'), 3);
+  }
+}
+
 1;
