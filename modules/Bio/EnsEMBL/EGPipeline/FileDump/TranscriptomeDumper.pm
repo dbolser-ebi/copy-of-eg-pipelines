@@ -29,16 +29,16 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
     %{$self->Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpTranscriptome::param_defaults},
-    'data_type'  => 'transcripts',
-    'file_type'  => 'fa',
+    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
+    'data_type' => 'transcripts',
+    'file_type' => 'fa',
   };
 }
 
 sub run {
   my ($self) = @_;
-    
+  
   $self->param('transcriptome_file', $self->param_required('out_file'));
   $self->Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpTranscriptome::run;
 }

@@ -29,10 +29,10 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
     %{$self->Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpProteome::param_defaults},
-    'data_type'  => 'peptides',
-    'file_type'  => 'fa',
+    %{$self->Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper::param_defaults},
+    'data_type' => 'peptides',
+    'file_type' => 'fa',
   };
 }
 

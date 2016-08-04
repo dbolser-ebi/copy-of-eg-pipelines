@@ -79,7 +79,7 @@ sub add_upis {
 	->info("Processing translations for " . $dba->species());
   my @translations =
 	@{$dba->get_TranscriptAdaptor->fetch_all_by_biotype(
-													 'protein_coding')};
+            'protein_coding')};
   my $analysis = $self->get_analysis($dba, 'xrefchecksum');
   for my $transcript (@translations) {
 	$translationN++;
@@ -154,8 +154,7 @@ sub add_upi {
   my $nUpis = scalar(@upis);
   if ($nUpis == 0) {
 	$self->logger()
-	  ->warn(
-		   "No UPI found for translation " . $translation->stable_id());
+	  ->warn("No UPI found for translation " . $translation->stable_id());
   }
   elsif ($nUpis == 1) {
 	$stored = 1;
@@ -189,7 +188,11 @@ sub add_upi {
 sub md5_checksum {
   my ($self, $sequence) = @_;
   my $digest = Digest::MD5->new();
-  $digest->add($sequence->seq());
+  my $seq = $sequence->seq();
+  if ($seq =~ /^X[^X]/) {
+    $seq =~ s/^X//; 
+  }
+  $digest->add($seq);
   return uc($digest->hexdigest());
 }
 

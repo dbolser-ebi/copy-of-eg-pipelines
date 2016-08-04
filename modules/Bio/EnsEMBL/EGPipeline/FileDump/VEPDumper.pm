@@ -59,6 +59,8 @@ sub run {
   
   my $finished = 0;
   
+  $self->warning("Running command: $vep_cmd");
+  
   open CMD, "$vep_cmd 2>&1 |" or $self->throw("Failed to run command: $vep_cmd");
   my @buffer;
   while(<CMD>) {

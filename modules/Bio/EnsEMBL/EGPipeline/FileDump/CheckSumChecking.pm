@@ -76,7 +76,7 @@ sub create_checking_dir {
   
   FILE: foreach my $file_name (@file_names) {
     foreach my $match (@$skip_file_match) {
-      next FILE if $match =~ /\Q$match\E/;
+      next FILE if $file_name =~ /\Q$match\E/;
     }
     symlink "$results_dir/$file_name", "$checking_dir/$file_name" or die $!;
   }

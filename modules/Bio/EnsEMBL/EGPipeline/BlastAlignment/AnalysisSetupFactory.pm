@@ -16,50 +16,35 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::Common::RunnableDB::CheckOFDatabase;
+package Bio::EnsEMBL::EGPipeline::BlastAlignment::AnalysisSetupFactory;
 
 use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-sub param_defaults {
-  return {};
-}
-
 sub run {
   my ($self) = @_;
-  my $species = $self->param_required('species');
+  my $program         = $self->param_required('program');
+  my $analysis_groups = $self->param_required('analysis_groups');
+  my $analyses        = $self->param_required('analyses');
   
-  my $dba = Bio::EnsEMBL::Registry->get_DBAdaptor($species, 'otherfeatures');
-  if (defined $dba) {
-    eval {
-      $dba->dbc->connect();
-    };
-    if ($@) {
-      if ($@ =~ /Unknown database/) {
-        $self->param('db_exists', 0);
-      } else {
-        $self->throw($@);
-      }
-    } else {
-      $self->param('db_exists', 1);
+  my $merged_analyses = [];
+  
+  foreach my $analysis_group (keys %{$analysis_groups}) {
+    foreach my $analysis (@{$analyses}) {
+      my %merged_analysis = %$analysis;
+      $merged_analysis{'logic_name'} = "$analysis_group\_$program";
+      push @$merged_analyses, \%merged_analysis;
     }
-  } else {
-    $self->param('db_exists', 0);
   }
+  
+  $self->param('merged_analyses', $merged_analyses);
 }
 
 sub write_output {
   my ($self) = @_;
   
-  $self->dataflow_output_id({'db_exists' => $self->param('db_exists')}, 1);
-  
-  if ($self->param('db_exists')) {
-    $self->dataflow_output_id({'db_exists' => 1}, 2);
-  } else {
-    $self->dataflow_output_id({'db_exists' => 0}, 3);
-  }
+  $self->dataflow_output_id($self->param('merged_analyses'), 2);
 }
 
 1;
-
