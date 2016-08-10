@@ -1,0 +1,13 @@
+{
+  "anopheles_gambiae" : {
+    "core" : {
+      "regions" : [
+        ["2L", 2000000, 4000000],
+        ["Mt"],
+      ],
+      "adaptors" : [
+        { "name" : "gene"},
+      ]
+    }
+  }
+}
