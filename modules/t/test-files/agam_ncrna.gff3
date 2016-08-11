@@ -1,0 +1,19 @@
+##gff-version   3
+##sequence-region   2L 1 4000000
+##sequence-region   Mt 1 15363
+2L	VectorBase	chromosome	1	4000000	.	.	.	ID=2L;Alias=CM000356.1
+###
+2L	VectorBase	miRNA_gene	2439935	2440006	.	+	.	ID=AGAP013620_test_1;Name=mir_test
+2L	VectorBase	miRNA	2439935	2440006	.	+	.	ID=AGAP013620_test_1-RA;Parent=AGAP013620_test_1
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=AGAP013620_test_1-RA
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=AGAP013620_test_2;Name=mir_test
+2L	VectorBase	miRNA	2439935	2440006	.	+	.	ID=AGAP013620_test_2-RA;Parent=AGAP013620_test_2
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=AGAP013620_test_2-RA
+###
+Mt	VectorBase	chromosome	1	15363	.	.	.	ID=Mt;Alias=L20934
+###
+Mt	VectorBase	gene	66	134	.	-	.	ID=AGAP028358_test;Name=tRNA-Gln;description=tRNA-Gln for anticodon UUG
+Mt	VectorBase	tRNA	66	134	.	-	.	ID=AGAP028358_test-RA;Parent=AGAP028358_test
+Mt	VectorBase	exon	66	134	.	-	.	Parent=AGAP028358_test-RA
+###

@@ -68,6 +68,7 @@ sub run {
         $$analysis{'description'} .= " Results are filtered to show the best unique hit, based on E-value.";
       } else {
         $$analysis{'description'} .= " Results are filtered to show the top $top_x unique hits, based on E-value.";
+        $$analysis{'description'} .= " Multiple hits in the same region are automatically joined into a single feature.";
       }
     }
     
