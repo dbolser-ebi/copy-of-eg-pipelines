@@ -87,13 +87,15 @@ sub run {
     my $ftp = $self->get_ftp($ftp_uri);
     $self->fetch_ftp_file($ftp, $uniprot_file, $local_file);
   }
+  
+  $self->param('local_file', $local_file);
 }
 
 sub write_output {
   my ($self) = @_;
   
   my $output_id = {
-    $self->param('file_varname') => $self->param('uniprot_file'),
+    $self->param('file_varname') => $self->param('local_file'),
   };
   $self->dataflow_output_id($output_id, 1);
 }

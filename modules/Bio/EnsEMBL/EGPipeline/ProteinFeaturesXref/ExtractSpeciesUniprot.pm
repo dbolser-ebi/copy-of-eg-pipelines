@@ -63,7 +63,7 @@ sub fetch_input {
     }
   }
   
-  (my $output_file = $uniprot_fasta_file) =~ s/(\.\w+)$/_$uniprot_species$1/;
+  (my $output_file = $uniprot_fasta_file) =~ s/(\.\w+)\.gz$/_$uniprot_species$1/;
   
   $self->param('output_file', $output_file);
 }
