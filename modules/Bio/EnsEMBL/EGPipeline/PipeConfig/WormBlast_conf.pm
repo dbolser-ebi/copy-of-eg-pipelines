@@ -127,7 +127,6 @@ sub default_options {
     blastx   => 1,
     logic_name_prefix => 'worm',
     
-    production_lookup => 1, 
     # need to either pull the analayis from the database or hardcode them here (less prefereable)
     
     analyses =>
@@ -140,7 +139,7 @@ sub default_options {
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
         'blast_db'      => $self->o('db_fasta_file'),
-        'db_version'    => '2016-08-08',
+        'db_version'    => '1',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
         'parameters'    => $self->o('blast_parameters'),
@@ -158,7 +157,7 @@ sub default_options {
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
         'blast_db'      => $self->o('db_fasta_file'),
-        'db_version'    => '2016-08-08',
+        'db_version'    => '1',
         'program'       => 'blastx',
         'program_file'  => $self->o('blastx_exe'),
         'parameters'    => $self->o('blast_parameters'),
@@ -175,7 +174,7 @@ sub default_options {
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
         'blast_db'      => $self->o('db_fasta_file'),
-        'db_version'    => '2016-08-08',
+        'db_version'    => '1',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
         'parameters'    => $self->o('blast_parameters'),
@@ -193,7 +192,7 @@ sub default_options {
         'web_data'      => '{"type" => "protein"}',
         'db'            => $self->o('proteome_source'),
         'blast_db'      => $self->o('db_fasta_file'),
-        'db_version'    => '2016-08-08',
+        'db_version'    => '1',
         'program'       => 'blastx',
         'program_file'  => $self->o('blastx_exe'),
         'parameters'    => $self->o('blast_parameters'),
@@ -212,7 +211,7 @@ sub default_options {
 
     # Retrieve analysis descriptions from the production database;
     # the supplied registry file will need the relevant server details.
-    # production_lookup => 1,
+    production_lookup => 0,
 
   };
 }
@@ -402,12 +401,12 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'AnalysisSetupCoreP',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::AnalysisSetup',
       -can_be_empty    => 1,
       -max_retry_count => 0,
       -batch_size      => 10,
       -parameters      => {
-                            db_backup_required => 1,
+                            db_backup_required => 0,
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
                             delete_existing    => $self->o('delete_existing'),
                             production_lookup  => $self->o('production_lookup'),
@@ -420,12 +419,12 @@ sub pipeline_analyses {
     },
     {
       -logic_name      => 'AnalysisSetupCoreX',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::AnalysisSetup',
       -can_be_empty    => 1,
       -max_retry_count => 0,
       -batch_size      => 10,
       -parameters      => {
-                            db_backup_required => 1,
+                            db_backup_required => 0,
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
                             delete_existing    => $self->o('delete_existing'),
                             production_lookup  => $self->o('production_lookup'),
@@ -642,9 +641,9 @@ sub resource_classes {
 
   return {
     %{$self->SUPER::resource_classes},
-    '8GB_threads' => {'LSF' => '-q production-rh6 -n ' . ($blast_threads + 1) . ' -M 8000 -R "rusage[mem=8000,tmp=8000]"'},
-    '16GB_threads' => {'LSF' => '-q production-rh6 -n ' . ($blast_threads + 1) . ' -M 16000 -R "rusage[mem=16000,tmp=16000]"'},
-    '32GB_threads' => {'LSF' => '-q production-rh6 -n ' . ($blast_threads + 1) . ' -M 32000 -R "rusage[mem=32000,tmp=32000]"'},
+    '8GB_threads' => {'LSF' => '-q production-rh7 -n ' . ($blast_threads + 1) . ' -M 8000 -R "rusage[mem=8000,tmp=8000]"'},
+    '16GB_threads' => {'LSF' => '-q production-rh7 -n ' . ($blast_threads + 1) . ' -M 16000 -R "rusage[mem=16000,tmp=16000]"'},
+    '32GB_threads' => {'LSF' => '-q production-rh7 -n ' . ($blast_threads + 1) . ' -M 32000 -R "rusage[mem=32000,tmp=32000]"'},
   }
 }
 
