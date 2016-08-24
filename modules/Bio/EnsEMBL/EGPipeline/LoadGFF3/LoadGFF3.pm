@@ -70,7 +70,7 @@ sub param_defaults {
                        'region', 'biological_region',
                        'regulatory_region', 'repeat_region'],
     types_complete => 1,
-    use_name_field => 'display_xref',
+    use_name_field => undef,
     polypeptides   => 1,
     nontranslating => 'nontranslating_CDS',
     prediction     => 0,
@@ -345,11 +345,11 @@ sub add_translation {
 
 sub get_stable_id {
   my ($self, $gff_object) = @_;
-  my $use_name_field = $self->param_required('use_name_field');
+  my $use_name_field = $self->param('use_name_field');
   my $stable_ids     = $self->param_required('stable_ids');
   
   my $stable_id = $gff_object->load_id;
-  if ($use_name_field eq 'stable_id') {
+  if (defined $use_name_field && $use_name_field eq 'stable_id') {
     $stable_id = $gff_object->name if $gff_object->name;
     
     # Because the provided Name won't necessarily be unique,
@@ -822,9 +822,9 @@ sub new_translation {
 
 sub add_xrefs {
   my ($self, $gff_object, $analysis, $object, $object_type) = @_;
-  my $use_name_field = $self->param_required('use_name_field');
+  my $use_name_field = $self->param('use_name_field');
   
-  if ($use_name_field eq 'xref') {
+  if (defined $use_name_field && $use_name_field eq 'xref') {
     my $name = $gff_object->name;
     if ($name) {
       my $edb_name = $self->param_required("xref_$object_type\_external_db");
