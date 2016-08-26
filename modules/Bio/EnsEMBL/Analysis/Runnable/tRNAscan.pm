@@ -60,7 +60,7 @@ use vars qw(@ISA);
 =head2 new
 
   Arg [1]   : Bio::EnsEMBL::Analysis::Runnable::tRNAscan
-  Arg [2]   : string, db_name:     db_name from the external_db table
+  Arg [2]   : int, external_db_id: external_db_id from the external_db table
   Function  : create a new  Bio::EnsEMBL::Analysis::Runnable::tRNAscan
   Returntype: Bio::EnsEMBL::Analysis::Runnable::tRNAscan
   Exceptions: 
@@ -72,8 +72,8 @@ sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
   
-  my ($pseudo, $search_mode, $db_name) =
-    rearrange(['PSEUDO', 'SEARCH_MODE', 'DB_NAME',], @args);
+  my ($pseudo, $search_mode, $external_db_id) =
+    rearrange(['PSEUDO', 'SEARCH_MODE', 'EXTERNAL_DB_ID',], @args);
   
   $self->program('tRNAscan-SE') if (!$self->program);
   $self->options(' -Q ') if (!$self->options);
@@ -83,8 +83,7 @@ sub new {
   
   $self->search_mode($search_mode);
   
-  $db_name = 'TRNASCAN_SE' unless $db_name;
-  $self->db_name($db_name);
+  $self->external_db_id($external_db_id);
   
   return $self;
 }
@@ -101,10 +100,10 @@ sub search_mode {
   return $self->{'search_mode'};
 }
 
-sub db_name {
+sub external_db_id {
   my $self = shift;
-  $self->{'db_name'} = shift if (@_);
-  return $self->{'db_name'};
+  $self->{'external_db_id'} = shift if (@_);
+  return $self->{'external_db_id'};
 }
 
 =head2 run_analysis
@@ -218,31 +217,43 @@ sub parse_results {
     my $biotype = "tRNA";
     $biotype .= "_pseudogene" if $aa_name eq 'Pseudo';
     
-    my %extra_data = (
-      'Biotype' => $biotype,
-      'Desc' => $rna_desc,
-    );
+    my @attribs;
+    push @attribs, $self->create_attrib('rna_gene_biotype', $biotype);
+    push @attribs, $self->create_attrib('description',      $rna_desc);
     
     if (defined $score) {
       my $feature = Bio::EnsEMBL::DnaDnaAlignFeature->new(
-        -slice            => $self->query,
-        -start            => $start,
-        -end              => $end,
-        -strand           => $strand,
-        -hstart           => 1,
-        -hend             => $length,
-        -hstrand          => 1,
-        -score            => $score,
-        -hseqname         => $rna_name,
-        -cigar_string     => $cigar,
-        -external_db_name => $self->db_name,
-        -extra_data       => \%extra_data,
+        -slice          => $self->query,
+        -start          => $start,
+        -end            => $end,
+        -strand         => $strand,
+        -hstart         => 1,
+        -hend           => $length,
+        -hstrand        => 1,
+        -score          => $score,
+        -hseqname       => $rna_name,
+        -cigar_string   => $cigar,
+        -external_db_id => $self->external_db_id,
       );
+      
+      $feature->add_Attributes(@attribs);
+      
       push (@features, $feature);
     }
   }
   
   $self->output(\@features);
+}
+
+sub create_attrib {
+  my ($self, $key, $value) = @_;
+  
+  my $attrib = Bio::EnsEMBL::Attribute->new(
+    -CODE  => $key,
+    -VALUE => $value
+  );
+  
+  return $attrib;
 }
 
 1;

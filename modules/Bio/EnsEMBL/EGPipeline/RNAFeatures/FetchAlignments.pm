@@ -93,31 +93,16 @@ sub fetch_alignments {
   my $sql = "
     SELECT
       $value_column,
-      meta_value AS species,
-      LEFT(
-        SUBSTRING(
-          external_data,
-          INSTR(
-            external_data,
-            \"'Biotype' => \"
-          )+14
-        ),
-        INSTR(
-          SUBSTRING(
-            external_data,
-            INSTR(
-              external_data,
-            \"'Biotype' => \"
-            )+14
-          ),
-          \"'\"
-        )-1
-      ) AS biotype,
-      hit_name
-    FROM meta, analysis
-    INNER JOIN dna_align_feature USING (analysis_id)
-    WHERE logic_name = ?
-    AND meta_key = 'species.display_name'
+      m.meta_value AS species,
+      dafa.value AS biotype,
+      daf.hit_name
+    FROM meta m, analysis a
+    INNER JOIN dna_align_feature daf USING (analysis_id)
+    INNER JOIN dna_align_feature_attrib dafa USING (dna_align_feature_id)
+    INNER JOIN attrib_type at USING (attrib_type_id)
+    WHERE a.logic_name = ?
+    AND m.meta_key = 'species.display_name'
+    AND at.code = 'rna_gene_biotype'
     ORDER BY species, biotype, hit_name
   ;";
   
