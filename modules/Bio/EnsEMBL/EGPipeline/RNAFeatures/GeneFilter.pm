@@ -48,7 +48,6 @@ sub param_defaults {
   my ($self) = @_;
   return {
     'gene_source'      => undef,
-    'external_db_name' => 'RFAM',
     'stable_id_type'   => 'eg',
     'evalue_threshold' => 1e-6,
     'truncated'        => 0,
@@ -82,6 +81,11 @@ sub run {
   my ($overlap_count, $repeat_count, $coding_exon_count, $total_count) = (0, 0, 0, 0);
   
   FEATURE: foreach my $feature (@features) {
+    if (! defined $feature->db_name) {
+      my $dbid = $feature->dbID;
+      $self->throw("Feature (ID=$dbid) lacks an external_db reference.");
+    }
+    
     if ($self->dna_align_feature_overlap($dafa, $feature)) {
       $overlap_count++;
       next FEATURE;
@@ -433,9 +437,9 @@ sub new_exon {
 
 sub add_xref {
   my ($self, $ga, $dbea, $feature, $gene, $analysis) = @_;
-  my $external_db_name = $self->param_required('external_db_name');
   
   my $hit_name = $feature->hseqname;
+  my $db_name  = $feature->db_name;
   
   my $accessions = $feature->get_all_Attributes('rfam_accession');
   my $accession  = $hit_name;
@@ -451,7 +455,7 @@ sub add_xref {
   
   my $xref = Bio::EnsEMBL::DBEntry->new
   (
-    -dbname      => $external_db_name,
+    -dbname      => $db_name,
     -primary_id  => $accession,
     -display_id  => $hit_name,
     -description => $description,
