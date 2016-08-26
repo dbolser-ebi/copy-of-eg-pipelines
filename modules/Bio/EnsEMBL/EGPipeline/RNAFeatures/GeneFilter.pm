@@ -48,7 +48,6 @@ sub param_defaults {
   my ($self) = @_;
   return {
     'gene_source'      => undef,
-    'external_db_name' => 'RFAM',
     'stable_id_type'   => 'eg',
     'evalue_threshold' => 1e-6,
     'truncated'        => 0,
@@ -82,6 +81,11 @@ sub run {
   my ($overlap_count, $repeat_count, $coding_exon_count, $total_count) = (0, 0, 0, 0);
   
   FEATURE: foreach my $feature (@features) {
+    if (! defined $feature->db_name) {
+      my $dbid = $feature->dbID;
+      $self->throw("Feature (ID=$dbid) lacks an external_db reference.");
+    }
+    
     if ($self->dna_align_feature_overlap($dafa, $feature)) {
       $overlap_count++;
       next FEATURE;
@@ -203,26 +207,51 @@ sub within_coding_exon {
 
 sub check_thresholds {
   my ($self, $feature) = @_;
-  my $evalue_threshold  = $self->param_required('evalue_threshold');
-  my $truncated         = $self->param_required('truncated');
-  my $nonsignificant    = $self->param_required('nonsignificant');
-  my $bias_threshold    = $self->param_required('bias_threshold');
+  my $evalue_threshold = $self->param_required('evalue_threshold');
+  my $truncated        = $self->param_required('truncated');
+  my $nonsignificant   = $self->param_required('nonsignificant');
+  my $bias_threshold   = $self->param_required('bias_threshold');
   
-  my $evalue = $feature->p_value;
-  my $row_external_data = $feature->extra_data;
-  my $trunc = $$row_external_data{'Trunc'};
-  my $significant = $$row_external_data{'Significant'};
-  my $bias = $$row_external_data{'Bias'};
+  my $evalue  = $feature->p_value;
+  my $attribs = $feature->get_all_Attributes;
+  
+  my ($cmscan_bias, $cmscan_significant, $cmscan_truncated);
+  foreach my $attrib (@$attribs) {
+    if ($attrib->code eq 'cmscan_bias') {
+      $cmscan_bias = $attrib->value;
+    }
+    if ($attrib->code eq 'cmscan_significant') {
+      $cmscan_significant = 1;
+    }
+    if ($attrib->code eq 'cmscan_truncated') {
+      $cmscan_truncated = 1;
+    }
+  }
   
   my $pass_thresholds = 0;
-  if ($evalue <= $evalue_threshold) {
-    if ($truncated || $trunc eq "no") {
-      if ($nonsignificant || $significant eq "!") {
-        if ($bias <= $bias_threshold) {
-          $pass_thresholds = 1;
-        }
+  
+  if (defined $evalue) {
+    if ($evalue <= $evalue_threshold) {
+      $pass_thresholds = 1;
+    }
+    
+    if (defined $cmscan_bias) {
+      if ($cmscan_bias > $bias_threshold) {
+        $pass_thresholds = 0;
       }
-    }      
+    }
+    
+    if (defined $cmscan_truncated) {
+      if (! $truncated && $cmscan_truncated) {
+        $pass_thresholds = 0;
+      }
+    }
+    
+    if (defined $cmscan_significant) {
+      if (! $nonsignificant && ! $cmscan_significant) {
+        $pass_thresholds = 0;
+      }      
+    }
   }
   
   return $pass_thresholds;
@@ -293,8 +322,12 @@ sub feature_location_id {
   my ($self, $feature) = @_;
   my $species = $self->param_required('species');
   
-  my $row_external_data = $feature->extra_data;
-  my $accession = $$row_external_data{'Accession'};
+  my $accessions = $feature->get_all_Attributes('rfam_accession');
+  my $accession  = $feature->hseqname;
+  if (scalar(@$accessions) == 1) {
+    $accession = $$accessions[0]->value;
+  }
+  
   my @location_id = (
     $accession,
     $species,
@@ -312,9 +345,17 @@ sub feature_location_id {
 sub new_gene {
   my ($self, $feature, $stable_id, $source) = @_;
   
-  my $row_external_data = $feature->extra_data;
-  my $biotype = $$row_external_data{'Biotype'};
-  my $description = $$row_external_data{'Desc'};
+  my $biotypes = $feature->get_all_Attributes('rna_gene_biotype');
+  my $biotype  = 'ncRNA';
+  if (scalar(@$biotypes) == 1) {
+    $biotype = $$biotypes[0]->value;
+  }
+  
+  my $descriptions = $feature->get_all_Attributes('description');
+  my $description  = undef;
+  if (scalar(@$descriptions) == 1) {
+    $description = $$descriptions[0]->value;
+  }
   
   my $gene = Bio::EnsEMBL::Gene->new
   (
@@ -334,9 +375,17 @@ sub new_gene {
 sub new_transcript {
   my ($self, $feature, $stable_id, $source) = @_;
   
-  my $row_external_data = $feature->extra_data;
-  my $biotype = $$row_external_data{'Biotype'};
-  my $structure = $$row_external_data{'Structure'};
+  my $biotypes = $feature->get_all_Attributes('rna_gene_biotype');
+  my $biotype  = 'ncRNA';
+  if (scalar(@$biotypes) == 1) {
+    $biotype = $$biotypes[0]->value;
+  }
+  
+  my $structures = $feature->get_all_Attributes('ncRNA');
+  my $structure  = undef;
+  if (scalar(@$structures) == 1) {
+    $structure = $$structures[0]->value;
+  }
   
   my $transcript = Bio::EnsEMBL::Transcript->new
   (
@@ -353,11 +402,13 @@ sub new_transcript {
     -modified_date => time,
   );
   
-  my $attrib = Bio::EnsEMBL::Attribute->new(
-    -CODE  => 'ncRNA',
-    -VALUE => $structure
-  );
-  $transcript->add_Attributes($attrib);
+  if (defined $structure) {
+    my $attrib = Bio::EnsEMBL::Attribute->new(
+      -CODE  => 'ncRNA',
+      -VALUE => $structure
+    );
+    $transcript->add_Attributes($attrib);
+  }
   
   return $transcript;
 }
@@ -386,16 +437,25 @@ sub new_exon {
 
 sub add_xref {
   my ($self, $ga, $dbea, $feature, $gene, $analysis) = @_;
-  my $external_db_name = $self->param_required('external_db_name');
   
-  my $hit_name = $feature->hseqname();
-  my $row_external_data = $feature->extra_data;
-  my $accession = $$row_external_data{'Accession'};
-  my $description = $$row_external_data{'Desc'};
+  my $hit_name = $feature->hseqname;
+  my $db_name  = $feature->db_name;
+  
+  my $accessions = $feature->get_all_Attributes('rfam_accession');
+  my $accession  = $hit_name;
+  if (scalar(@$accessions) == 1) {
+    $accession = $$accessions[0]->value;
+  }
+  
+  my $descriptions = $feature->get_all_Attributes('description');
+  my $description  = undef;
+  if (scalar(@$descriptions) == 1) {
+    $description = $$descriptions[0]->value;
+  }
   
   my $xref = Bio::EnsEMBL::DBEntry->new
   (
-    -dbname      => $external_db_name,
+    -dbname      => $db_name,
     -primary_id  => $accession,
     -display_id  => $hit_name,
     -description => $description,
