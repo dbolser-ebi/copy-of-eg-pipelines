@@ -32,6 +32,7 @@ sub param_defaults {
   return {
     %{$self->SUPER::param_defaults},
     'trnascan_dir' => '/nfs/panda/ensemblgenomes/external/tRNAscan-SE-1.3.1/bin',
+    'pseudo'       => 0,
   };
 }
 
@@ -47,15 +48,21 @@ sub fetch_runnable {
     %parameters = %{$self->param('parameters_hash')};
   }
   
+  my $db_name = $self->param_required('db_name');
+  my $external_db_id = $self->fetch_external_db_id($db_name);
+  $self->throw("Unrecognised external DB '$db_name'") unless $external_db_id;
+  
   my $runnable = Bio::EnsEMBL::Analysis::Runnable::tRNAscan->new
   (
-    -query    => $self->param('query'),
-    -program  => $self->param('program'),
-    -analysis => $self->param('analysis'),
-    -datadir  => $self->param('datadir'),
-    -bindir   => $self->param('bindir'),
-    -libdir   => $self->param('libdir'),
-    -workdir  => $self->param('workdir'),
+    -query          => $self->param('query'),
+    -program        => $self->param('program'),
+    -analysis       => $self->param('analysis'),
+    -datadir        => $self->param('datadir'),
+    -bindir         => $self->param('bindir'),
+    -libdir         => $self->param('libdir'),
+    -workdir        => $self->param('workdir'),
+    -external_db_id => $external_db_id,
+    -pseudo         => $self->param('pseudo'),
     %parameters,
   );
   

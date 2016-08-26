@@ -54,6 +54,7 @@ use strict;
 use warnings;
 
 use Bio::EnsEMBL::Analysis::Runnable;
+use Bio::EnsEMBL::Attribute;
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
 use Bio::EnsEMBL::Utils::Argument qw( rearrange );
 use vars qw(@ISA);
@@ -70,7 +71,7 @@ use List::Util qw(min max);
   Arg [4]   : int, cpu:            number of processors to use
   Arg [5]   : string, heuristics:  "slowest", "slower", "slow", "default", "faster", or "fastest"
   Arg [6]   : string, threshold:   E-value threshold
-  Arg [7]   : string, db_name:     db_name from the external_db table
+  Arg [7]   : int, external_db_id: external_db_id from the external_db table
   Arg [8]   : int, recreate_index: overwrite existing indexes
   Function  : create a new  Bio::EnsEMBL::Analysis::Runnable::CMScan
   Returntype: Bio::EnsEMBL::Analysis::Runnable::CMScan
@@ -83,8 +84,8 @@ sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
   
-  my ($cmpress, $cm_file, $cpu, $heuristics, $threshold, $db_name, $recreate_index) =
-    rearrange(['CMPRESS', 'CM_FILE', 'CPU', 'HEURISTICS', 'THRESHOLD', 'DB_NAME', 'RECREATE_INDEX'], @args);
+  my ($cmpress, $cm_file, $cpu, $heuristics, $threshold, $external_db_id, $recreate_index) =
+    rearrange(['CMPRESS', 'CM_FILE', 'CPU', 'HEURISTICS', 'THRESHOLD', 'EXTERNAL_DB_ID', 'RECREATE_INDEX'], @args);
   
   $self->program('cmscan') if (!$self->program);
   
@@ -107,7 +108,7 @@ sub new {
   $threshold = '0.001' unless defined $threshold;
   $self->threshold($threshold);
   
-  $self->db_name($db_name);
+  $self->external_db_id($external_db_id);
   
   $self->recreate_index($recreate_index);
   
@@ -144,10 +145,10 @@ sub threshold {
   return $self->{'threshold'};
 }
 
-sub db_name {
+sub external_db_id {
   my $self = shift;
-  $self->{'db_name'} = shift if (@_);
-  return $self->{'db_name'};
+  $self->{'external_db_id'} = shift if (@_);
+  return $self->{'external_db_id'};
 }
 
 sub recreate_index {
@@ -285,17 +286,20 @@ sub parse_results {
   }
   push(@results, $current) if $current;
   
+  
   my @features;
   
   foreach my $result (@results) {
-    my $hit = $self->parse_result($result, \%names);
+    my ($hit, $attribs) = $self->parse_result($result, \%names);
     
     if (defined $hit) {
       my $feature = Bio::EnsEMBL::DnaDnaAlignFeature->new(
-        -slice            => $self->query,
-        -external_db_name => $self->db_name,
+        -slice          => $self->query,
+        -external_db_id => $self->external_db_id,
         %$hit,
       );
+      $feature->add_Attributes(@$attribs);
+      
       push (@features, $feature);
     }
   }
@@ -329,17 +333,22 @@ sub parse_result {
     my ($ungapped_structure, $cigar) =
       $self->parse_alignment($structure, $subject_seq, $query_seq);
     
-    my %extra_data = (
-      'Biotype' => $biotype,
-      'Desc' => $rna_desc,
-      'Trunc' => $trunc,
-      'Accuracy' => $accuracy,
-      'Bias' => $bias,
-      'GC' => $gc,
-      'Significant' => $significant,
-      'Structure' => $ungapped_structure,
-    );
-    $extra_data{'Accession'} = $rna_acc if $rna_acc && $rna_acc ne '-';
+    my @attribs;
+    push @attribs, $self->create_attrib('rna_gene_biotype', $biotype);
+    push @attribs, $self->create_attrib('description',      $rna_desc);
+    push @attribs, $self->create_attrib('cmscan_accuracy',  $accuracy);
+    push @attribs, $self->create_attrib('cmscan_bias',      $bias);
+    push @attribs, $self->create_attrib('cmscan_gc',        $gc);
+    push @attribs, $self->create_attrib('ncRNA',            $ungapped_structure);
+    if ($rna_acc && $rna_acc ne '-') {
+      push @attribs, $self->create_attrib('rfam_accession', $rna_acc);
+    }
+    if ($trunc && $trunc ne 'no' && $trunc ne '-') {
+      push @attribs, $self->create_attrib('cmscan_truncated', $trunc);
+    }
+    if ($significant && $significant eq '!') {
+      push @attribs, $self->create_attrib('cmscan_significant', 1);
+    }
     
     my %hit =
     ( 
@@ -353,15 +362,25 @@ sub parse_result {
       -p_value      => $evalue,
       -hseqname     => $rna_name,
       -cigar_string => $cigar,
-      -extra_data   => \%extra_data,
     );
   
-    return \%hit;
+    return (\%hit, \@attribs);
     
   } else {
     return;
     
   }
+}
+
+sub create_attrib {
+  my ($self, $key, $value) = @_;
+  
+  my $attrib = Bio::EnsEMBL::Attribute->new(
+    -CODE  => $key,
+    -VALUE => $value
+  );
+  
+  return $attrib;
 }
 
 sub parse_alignment {

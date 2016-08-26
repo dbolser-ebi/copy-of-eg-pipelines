@@ -30,6 +30,7 @@ use Bio::EnsEMBL::Transcript;
 use Bio::EnsEMBL::Exon;
 use Bio::EnsEMBL::RepeatFeature;
 
+use List::Util qw(min max);
 use Path::Tiny qw(path);
 
 sub param_defaults {
@@ -45,6 +46,7 @@ sub param_defaults {
     'logic_name'         => [],
     'remove_id_prefix'   => 0,
     'relabel_transcript' => 0,
+    'join_align_feature' => 0,
     'remove_separators'  => 0,
   };
 }
@@ -60,6 +62,7 @@ sub run {
   my $logic_names        = $self->param_required('logic_name');
   my $remove_id_prefix   = $self->param_required('remove_id_prefix');
   my $relabel_transcript = $self->param_required('relabel_transcript');
+  my $join_align_feature = $self->param_required('join_align_feature');
   my $remove_separators  = $self->param_required('remove_separators');
   
   my $reg = 'Bio::EnsEMBL::Registry';
@@ -117,6 +120,7 @@ sub run {
   foreach my $out_file (@$out_files) {
     $self->remove_id_prefix($out_file) if $remove_id_prefix;
     $self->relabel_transcript($out_file) if $relabel_transcript;
+    $self->join_align_feature($out_file) if $join_align_feature;
     $self->remove_separators($out_file) if $remove_separators;
   }
   
@@ -225,6 +229,49 @@ sub remove_separators {
   
   my $data = $file->slurp;
   $data =~ s/^###\n//m;
+  $file->spew($data);
+}
+
+sub join_align_feature {
+  my ($self, $out_file) = @_;
+  
+  my $file = path($out_file);
+  
+  my $data = $file->slurp;
+  $data =~ s/\tnucleotide_match\t/\tmatch_part\t/gm;
+  $data =~ s/\tprotein_match\t/\tmatch_part\t/gm;
+  
+  my @data = split(/\n/, $data);
+  my %matches;
+  
+  foreach my $row (@data) {
+    my ($region, $source, $start, $end, $strand, $id) = $row =~
+      /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Parent=([^;]+)/;
+    
+    if ($id) {
+      $matches{$id}{'region'} = $region;
+      $matches{$id}{'source'} = $source;
+      $matches{$id}{'strand'} = $strand;
+      push @{$matches{$id}{'start'}}, $start;
+      push @{$matches{$id}{'end'}}, $end;
+    }
+  }
+  
+  foreach my $id (keys %matches) {
+    my $match = join("\t",
+      $matches{$id}{'region'},
+      $matches{$id}{'source'},
+      'match',
+      min(@{$matches{$id}{'start'}}),
+      max(@{$matches{$id}{'end'}}),
+      '.',
+      $matches{$id}{'strand'},
+      '.',
+      "ID=$id"
+    );
+    $data .= "$match\n";
+  }
+  
   $file->spew($data);
 }
 
@@ -347,6 +394,7 @@ sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
   $summary{'end'}                 = $self->seq_region_end;
   $summary{'strand'}              = $self->strand;
   $summary{'id'}                  = undef;
+  $summary{'Parent'}              = $self->display_id.'_'.$self->seq_region_name.'_'.$self->strand;
   $summary{'Name'}                = $self->display_id;
   $summary{'description'}         = $self->analysis->description;
   $summary{'score'}               = $self->score;
