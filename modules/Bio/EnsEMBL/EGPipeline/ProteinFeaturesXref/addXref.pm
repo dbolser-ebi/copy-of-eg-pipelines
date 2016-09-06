@@ -31,6 +31,7 @@ sub run {
   }
   
   $self->external_db_update($dba, $external_db);
+  $self->delete_protein_features($dba,$logic_name);
 }
 
 sub add_xref {
