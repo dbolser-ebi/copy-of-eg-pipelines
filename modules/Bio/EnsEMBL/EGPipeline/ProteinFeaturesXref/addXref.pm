@@ -3,9 +3,10 @@ package Bio::EnsEMBL::EGPipeline::ProteinFeaturesXref::addXref;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::DBEntry;
-
+use Bio::EnsEMBL::IdentityXref;
 use Time::Piece;
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
@@ -34,18 +35,52 @@ sub run {
 
 sub add_xref {
   my ($self, $dbea, $feature, $analysis, $external_db) = @_;
+  my $external_db = $self->param_required('external_db');
   my $hit_name = $feature->hseqname();
-  
-  my $xref = Bio::EnsEMBL::DBEntry->new
-    (
-      -dbname      => $external_db,
-      -primary_id  => $hit_name,
-      -display_id  => $hit_name,
-    );
-  
+  my $ignore_release = 1;
+  my $ensembl_start = $feature->start();
+  my $ensembl_end = $feature->end();
+  my $xref_start = $feature->hstart();
+  my $xref_end = $feature->hend();
+  my $xref_identity = $feature->percent_id();
+  my $evalue = $feature->p_value();
+  my $score = $feature->score();
+  my $coverage = $feature->coverage();
+  my $ensembl_identity = ($coverage)  * ($xref_identity); 
+
+  my $xref = Bio::EnsEMBL::IdentityXref->new(
+    -XREF_IDENTITY    => $xref_identity,
+    -ENSEMBL_IDENTITY => $ensembl_identity,
+    -EVALUE           => $evalue,
+    -XREF_START       => $xref_start,
+    -XREF_END         => $xref_end,
+    -ENSEMBL_START    => $ensembl_start,
+    -ENSEMBL_END      => $ensembl_end,
+    -ADAPTOR          => $dbea,
+    -PRIMARY_ID       => $hit_name,
+    -DBNAME           => $external_db
+    -DISPLAY_ID       => $hit_name,
+    -SCORE            => $score
+  );
+
   $xref->analysis($analysis);
-  $dbea->store($xref, $feature->seqname(), 'Translation');
+  $dbea->store($xref, $feature->seqname(), 'Translation', $ignore_release);
+
 }
+
+#sub add_xref {
+#  my ($self, $dbea, $feature, $analysis, $external_db) = @_;
+#  my $hit_name = $feature->hseqname();
+  
+#  my $xref = Bio::EnsEMBL::DBEntry->new
+#    (
+#      -dbname      => $external_db,
+#      -primary_id  => $hit_name,
+#      -display_id  => $hit_name,
+#    );
+#  $xref->analysis($analysis);
+#  $dbea->store($xref, $feature->seqname(), 'Translation');
+#}
 
 sub external_db_reset {
   my ($self, $dba, $db_name) = @_;
