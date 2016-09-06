@@ -54,7 +54,10 @@ sub run {
   
   if (defined $analysis) {
 
-    return if ($self->skip($analysis,$aa));
+    if ($self->skip($analysis,$aa,$dbh)){
+      $dba->dbc->disconnect_if_idle(); 
+      return; 
+    }
 
     if ($self->param('delete_existing')) {
       my $analysis_id = $analysis->dbID;
@@ -63,7 +66,6 @@ sub run {
         my $sth = $dbh->prepare($sql) or throw("Failed to delete rows using '$sql': ".$dbh->errstr);
         $sth->execute or throw("Failed to delete rows using '$sql': ".$sth->errstr);
       }
-#      $aa->remove($analysis);
     } else {
       my $logic_rename = $self->param_required('logic_rename');
       my $renamed_analysis = $aa->fetch_by_logic_name($logic_rename);
@@ -75,6 +77,9 @@ sub run {
       } else {
         $analysis->logic_name($logic_rename);
         $aa->update($analysis);
+        my $new_analysis = $self->create_analysis;
+        $new_analysis->db_version((stat($new_analysis->db_file))[9]);
+        $aa->store($new_analysis);
       }
     }
   } else {
@@ -94,26 +99,43 @@ sub run {
 # compare timestamps to determine if the analysis needs to be run
 sub skip {
 
-  my ($self,$analysis,$aa)=@_;
-  $self->{'skipped_analysis'} = $self->param_required('logic_name');
+  my ($self,$analysis,$aa,$dbh)=@_;
   my $analysis_timestamp = $analysis->db_version;
   my $blast_timestamp = (stat($analysis->db_file))[9];
 
-  if ($blast_timestamp > $analysis_timestamp) {
+  if ($blast_timestamp != $analysis_timestamp) {
     $analysis->db_version($blast_timestamp);
     $aa->update($analysis);
     return undef;
   } else {
-    return 1; # skip it
+
+    my $analysis_id = $analysis->dbID;
+    my $count=0;
+
+    foreach my $table (@{$self->param('linked_tables')}) { # technically there should be only one linked_table
+      my $sql = "SELECT COUNT(*) FROM $table WHERE analysis_id = $analysis_id";
+      my $sth = $dbh->prepare($sql) or throw("Failed to count rows using '$sql': ".$dbh->errstr);
+      $sth->execute or throw("Failed to count rows using '$sql': ".$sth->errstr);
+      my($c)=$sth->fetchrow_array;
+      # print $self->param('species'),' : ',$analysis->logic_name,"/",$self->param('logic_name')," query:$sql count:$c\n";
+      $count+=$c;
+      $sth->finish();
+    }
+    return undef unless $count; # don't skip it if there are zero features
   }
- 
+  $self->{skipped_analysis} = $self->param('logic_name');
+  return 1;
 }
 
-# send skippable analysis to #2 as dead end
+# send skippable analysis to #3 as dead end
 sub write_output {
   my ($self) = @_;
-  if ($self->{skipped_analysis}) {
-     $self->dataflow_output_id($self->{'skipped_analysis'},2);
+  if ($self->{skipped_analysis} eq $self->param('logic_name')) {
+     # print "skipping ",$self->param('logic_name')," ",$self->{skipped_analysis},"\n";
+     $self->dataflow_output_id($self->{'skipped_analysis'},3);
+  }else{
+     # print "continuing ",$self->param('logic_name'),"\n";
+     $self->dataflow_output_id({},2);
   }
 }
 

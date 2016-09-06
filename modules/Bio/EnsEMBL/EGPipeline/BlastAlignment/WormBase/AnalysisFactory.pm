@@ -41,9 +41,9 @@ sub run {
     
     if ($filter_top_x) {
       my $top_x;
-      if ($$analysis{'logic_name'} =~ /blastp$/) {
+      if ($$analysis{'program'} =~ /blastp$/) {
         $top_x = $self->param_required('blastp_top_x');
-      } elsif ($$analysis{'logic_name'} =~ /blastx$/) {
+      } elsif ($$analysis{'program'} =~ /blastx$/) {
         $top_x = $self->param_required('blastx_top_x');
       }
       if ($top_x eq 1) {
@@ -53,9 +53,9 @@ sub run {
       }
     }
     
-    if ($$analysis{'logic_name'} =~ /blastp/ && $blastp) {
+    if ($$analysis{'program'} =~ /blastp/ && $blastp) {
       push @$proteomic_analyses, $analysis;
-    } elsif ($$analysis{'logic_name'} =~ /blastx/ && $blastx) {
+    } elsif ($$analysis{'program'} =~ /blastx/ && $blastx) {
       push @$genomic_analyses, $analysis;
     }
   }
