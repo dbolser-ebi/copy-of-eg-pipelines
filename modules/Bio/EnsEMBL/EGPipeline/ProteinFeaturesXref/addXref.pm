@@ -35,7 +35,7 @@ sub run {
 
 sub add_xref {
   my ($self, $dbea, $feature, $analysis, $external_db) = @_;
-  my $external_db = $self->param_required('external_db');
+ # my $external_db = $self->param_required('external_db');
   my $hit_name = $feature->hseqname();
   my $ignore_release = 1;
   my $ensembl_start = $feature->start();
@@ -46,19 +46,19 @@ sub add_xref {
   my $evalue = $feature->p_value();
   my $score = $feature->score();
   my $coverage = $feature->coverage();
-  my $ensembl_identity = ($coverage)  * ($xref_identity); 
+  my $ensembl_identity = ($xref_end - $xref_start + 1)  * ($xref_identity) / ($ensembl_end - $ensembl_start +      1); 
 
   my $xref = Bio::EnsEMBL::IdentityXref->new(
     -XREF_IDENTITY    => $xref_identity,
     -ENSEMBL_IDENTITY => $ensembl_identity,
     -EVALUE           => $evalue,
-    -XREF_START       => $xref_start,
-    -XREF_END         => $xref_end,
+    -QUERY_START       => $xref_start,
+    -QUERY_END         => $xref_end,
     -ENSEMBL_START    => $ensembl_start,
     -ENSEMBL_END      => $ensembl_end,
     -ADAPTOR          => $dbea,
     -PRIMARY_ID       => $hit_name,
-    -DBNAME           => $external_db
+    -DBNAME           => $external_db,
     -DISPLAY_ID       => $hit_name,
     -SCORE            => $score
   );
@@ -101,6 +101,17 @@ sub external_db_update {
   my $sql = "UPDATE external_db SET db_release = ? WHERE db_name = ?;";
   my $sth = $dbh->prepare($sql);
   $sth->execute($db_release, $db_name) or $self->throw("Failed to execute ($db_release, $db_name): $sql");
+}
+
+sub delete_protein_features {
+  my ($self, $dba, $logic_name) = @_;
+  my $dbh = $dba->dbc->db_handle();
+ 
+  my $sql = " DELETE protein_feature.* FROM protein_feature INNER JOIN analysis ON
+  protein_feature.analysis_id = analysis.analysis_id WHERE analysis.logic_name = ?;"
+  my $sth = $dbh->prepare($sql);
+  $sth->execute($logic_name) or $self->throw("Failed to execute ($logic_name): $sql");
+
 }
 
 1;
