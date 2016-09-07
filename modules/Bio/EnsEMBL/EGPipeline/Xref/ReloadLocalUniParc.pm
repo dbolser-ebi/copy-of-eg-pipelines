@@ -42,6 +42,7 @@ use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
+use File::Copy qw(copy);
 
 sub param_defaults {
   return {
@@ -53,27 +54,39 @@ sub param_defaults {
 
 sub run {
   my ($self) = @_;
-  
+
   my $ftp_file    = $self->param_required('ftp_file');
   my $ftp_dir     = $self->param_required('ftp_dir');
   my $tmp_dir     = $self->param_required('tmp_dir');
   my $uniparc_db  = $self->param_required('uniparc_db');
   my $uniparc_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniparc_db);
   my $uniparc_dbh = $uniparc_dba->dbc->db_handle();
-  
-  `cp $ftp_dir/$ftp_file $tmp_dir/$ftp_file`;
-  
-  my @load_sql = (
+
+  copy "$ftp_dir/$ftp_file", "$tmp_dir/protein.txt";
+
+  my @preload_sql = (
     "DROP INDEX md5_idx ON protein;",
     "TRUNCATE TABLE protein;",
-    "LOAD DATA LOCAL INFILE '$tmp_dir/$ftp_file' INTO TABLE protein FIELDS TERMINATED BY ' ';",
-    "CREATE INDEX md5_idx ON protein(md5);",
   );
-  
-  foreach my $load_sql (@load_sql) {
+
+  foreach my $load_sql (@preload_sql) {
     $uniparc_dbh->do($load_sql) or $self->throw("Failed to execute: $load_sql");
   }
-  
+
+  my $cmd = $self->mysqlimport_command_line($uniparc_dba->dbc);
+  $cmd .= " --fields_terminated_by ' ' $tmp_dir/protein.txt";
+  system($cmd) == 0 or $self->throw("Failed to run ".$cmd);
+
+  my @postload_sql = (
+    "CREATE INDEX md5_idx ON protein(md5);",
+    "TRUNCATE TABLE last_update;",
+    "INSERT INTO last_update (update_time) VALUES (NOW());",
+  );
+
+  foreach my $load_sql (@postload_sql) {
+    $uniparc_dbh->do($load_sql) or $self->throw("Failed to execute: $load_sql");
+  }
+
 }
 
 1;
