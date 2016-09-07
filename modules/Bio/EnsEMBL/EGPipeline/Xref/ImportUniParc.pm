@@ -20,7 +20,7 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::Xref::ReloadLocalUniParc
+Bio::EnsEMBL::EGPipeline::Xref::ImportUniParc
 
 =head1 DESCRIPTION
 
@@ -34,8 +34,9 @@ James Allen
 
 use strict;
 use warnings;
+use feature 'say';
 
-package Bio::EnsEMBL::EGPipeline::Xref::ReloadLocalUniParc;
+package Bio::EnsEMBL::EGPipeline::Xref::ImportUniParc;
 
 use strict;
 use warnings;
@@ -43,26 +44,59 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use File::Copy qw(copy);
+use Time::Local;
 
 sub param_defaults {
   return {
-    'ftp_file' => 'upidump.lis',
-    'ftp_dir'  => '/ebi/ftp/pub/contrib/uniparc',
+    'ftp_file' => '/ebi/ftp/pub/contrib/uniparc/upidump.lis',
     'tmp_dir'  => '/tmp',
   };
 }
 
 sub run {
   my ($self) = @_;
-
   my $ftp_file    = $self->param_required('ftp_file');
-  my $ftp_dir     = $self->param_required('ftp_dir');
   my $tmp_dir     = $self->param_required('tmp_dir');
   my $uniparc_db  = $self->param_required('uniparc_db');
   my $uniparc_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniparc_db);
+
+  if ($self->import_required($ftp_file, $uniparc_dba)) {
+    $self->import_uniparc($ftp_file, $tmp_dir, $uniparc_dba);
+  }
+}
+
+sub import_required {
+  my ($self, $ftp_file, $uniparc_dba) = @_;
+  my $required = 1;
+
+  my $file_timestamp = (stat $ftp_file)[9];
+
   my $uniparc_dbh = $uniparc_dba->dbc->db_handle();
 
-  copy "$ftp_dir/$ftp_file", "$tmp_dir/protein.txt";
+  my $sql = "SELECT update_time FROM last_update ORDER BY update_time DESC";
+  my $sth = $uniparc_dbh->prepare($sql);
+  $sth->execute();
+
+  my $results = $sth->fetchall_arrayref();
+  if (scalar(@$results)) {
+    my $update_time = $$results[0][0];
+    my ($year, $month, $day, $h, $m, $s) = split(/\D/, $update_time);
+    my $update_time_epoch = timelocal($s, $m, $h, $day, $month-1, $year-1900);
+
+    if ($update_time_epoch > $file_timestamp) {
+      $required = 0;
+    }
+  }
+
+  return $required;
+}
+
+sub import_uniparc {
+  my ($self, $ftp_file, $tmp_dir, $uniparc_dba) = @_;
+
+  copy $ftp_file, "$tmp_dir/protein.txt";
+
+  my $uniparc_dbh = $uniparc_dba->dbc->db_handle();
 
   my @preload_sql = (
     "DROP INDEX md5_idx ON protein;",
@@ -86,7 +120,6 @@ sub run {
   foreach my $load_sql (@postload_sql) {
     $uniparc_dbh->do($load_sql) or $self->throw("Failed to execute: $load_sql");
   }
-
 }
 
 1;
