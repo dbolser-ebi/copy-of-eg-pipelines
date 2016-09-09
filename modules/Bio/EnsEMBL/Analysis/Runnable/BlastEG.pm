@@ -126,6 +126,10 @@ sub parse_results {
   system($sed_command) == 0 or throw("FAILED to run ".$sed_command);
   
   $self->output($self->parser->parse_files([$resultsfile]));
+
+  # cleanup
+  unlink $self->resultsfile if -e $self->resultsfile;
+  unlink $self->queryfile if -e $self->queryfile;
 }
 
 1;
