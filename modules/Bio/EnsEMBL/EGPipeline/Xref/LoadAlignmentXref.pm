@@ -1,13 +1,14 @@
-package Bio::EnsEMBL::EGPipeline::ProteinFeaturesXref::addXref;
+package Bio::EnsEMBL::EGPipeline::Xref::LoadAlignmentXref;
 
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::IdentityXref;
-use List::Util qw(min max);
-use Time::Piece;
+use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
-use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
+use Bio::EnsEMBL::DBEntry;
+use Bio::EnsEMBL::IdentityXref;
+use Bio::SeqIO;
+use List::Util qw(min max);
 
 sub run {
   my ($self) = @_;
@@ -15,42 +16,45 @@ sub run {
   my $external_db = $self->param_required('external_db');
 
   my $dba  = $self->core_dba();
-  my $pfa  = $dba->get_adaptor('ProteinFeature');
   my $aa   = $dba->get_adaptor('Analysis');
-  my $dbea = $dba->get_adaptor('DBEntry');
 
   my $analysis = $aa->fetch_by_logic_name($logic_name);
-  my $protein_features = $pfa->fetch_all_by_logic_name($logic_name);
 
   $self->external_db_reset($dba, $external_db);
 
+  $self->add_xrefs($dba, $analysis, $external_db, $logic_name);
+
+  $self->external_db_update($dba, $external_db);
+
+  $self->delete_protein_features($dba, $logic_name);
+}
+
+sub add_xrefs {
+  my ($self, $dba, $analysis, $external_db, $logic_name) = @_;
+
+  my $xref_metadata = $self->xref_metadata();
+
+  my $dbea = $dba->get_adaptor('DBEntry');
+  my $pfa  = $dba->get_adaptor('ProteinFeature');
+
   my %protein_features;
 
+  my $protein_features = $pfa->fetch_all_by_logic_name($logic_name);
   foreach my $feature (@$protein_features) {
     my $translation_id = $feature->seqname();
     my $hit_name       = $feature->hseqname();
     push @{$protein_features{$translation_id}{$hit_name}}, $feature;
   }
 
-  $self->add_xrefs($dbea, $analysis, $external_db, \%protein_features);
-
-  $self->external_db_update($dba, $external_db);
-
-  #$self->delete_protein_features($dba, $logic_name);
-}
-
-sub add_xrefs {
-  my ($self, $dbea, $analysis, $external_db, $protein_features) = @_;
-
-  foreach my $translation_id (keys %$protein_features) {
-    foreach my $hit_name (keys %{$$protein_features{$translation_id}}) {
+  foreach my $translation_id (keys %protein_features) {
+    foreach my $hit_name (keys %{$protein_features{$translation_id}}) {
       my $xref;
 
-      my @features = @{$$protein_features{$translation_id}{$hit_name}};
+      my @features = @{$protein_features{$translation_id}{$hit_name}};
       if (scalar(@features) == 1) {
-        $xref = $self->add_xref($analysis, $external_db, $hit_name, $features[0]);
+        $xref = $self->add_xref($analysis, $external_db, $hit_name, $features[0], $xref_metadata);
       } else {
-        $xref = $self->add_compound_xref($analysis, $external_db, $hit_name, \@features);
+        $xref = $self->add_compound_xref($analysis, $external_db, $hit_name, \@features, $xref_metadata);
       }
 
       $dbea->store($xref, $translation_id, 'Translation');
@@ -59,7 +63,7 @@ sub add_xrefs {
 }
 
 sub add_xref {
-  my ($self, $analysis, $external_db, $hit_name, $feature) = @_;
+  my ($self, $analysis, $external_db, $hit_name, $feature, $xref_metadata) = @_;
 
   my $ensembl_length   = $feature->end - $feature->start + 1;
   my $xref_length      = $feature->hend - $feature->hstart + 1;
@@ -69,7 +73,9 @@ sub add_xref {
   my $xref = Bio::EnsEMBL::IdentityXref->new(
     -DBNAME           => $external_db,
     -PRIMARY_ID       => $hit_name,
-    -DISPLAY_ID       => $hit_name,
+    -DISPLAY_ID       => $$xref_metadata{$hit_name}{display_id},
+    -DESCRIPTION      => $$xref_metadata{$hit_name}{description},
+    -VERSION          => $$xref_metadata{$hit_name}{version},
     -ENSEMBL_START    => $feature->start,
     -ENSEMBL_END      => $feature->end,
     -QUERY_START      => $feature->hstart,
@@ -78,6 +84,7 @@ sub add_xref {
     -XREF_IDENTITY    => $xref_identity,
     -EVALUE           => $feature->p_value,
     -SCORE            => $feature->score,
+		-INFO_TYPE        => 'SEQUENCE_MATCH',
   );
   $xref->analysis($analysis);
 
@@ -85,7 +92,7 @@ sub add_xref {
 }
 
 sub add_compound_xref {
-  my ($self, $analysis, $external_db, $hit_name, $features) = @_;
+  my ($self, $analysis, $external_db, $hit_name, $features, $xref_metadata) = @_;
 
   my @ensembl_starts;
   my @ensembl_ends;
@@ -110,7 +117,9 @@ sub add_compound_xref {
   my $xref = Bio::EnsEMBL::IdentityXref->new(
     -DBNAME           => $external_db,
     -PRIMARY_ID       => $hit_name,
-    -DISPLAY_ID       => $hit_name,
+    -DISPLAY_ID       => $$xref_metadata{$hit_name}{display_id},
+    -DESCRIPTION      => $$xref_metadata{$hit_name}{description},
+    -VERSION          => $$xref_metadata{$hit_name}{version},
     -ENSEMBL_START    => min(@ensembl_starts),
     -ENSEMBL_END      => max(@ensembl_ends),
     -QUERY_START      => min(@xref_starts),
@@ -123,25 +132,29 @@ sub add_compound_xref {
   return $xref;
 }
 
-sub external_db_reset {
-  my ($self, $dba, $db_name) = @_;
+sub xref_metadata {
+  my ($self) = @_;
+  my $db_fasta_file = $self->param_required('db_fasta_file');
 
-  my $dbh = $dba->dbc->db_handle();
-  my $sql = "UPDATE external_db SET db_release = NULL WHERE db_name = ?;";
-  my $sth = $dbh->prepare($sql);
-  $sth->execute($db_name) or $self->throw("Failed to execute ($db_name): $sql");
-}
+  my %xref_metadata;
 
-sub external_db_update {
-  my ($self, $dba, $db_name) = @_;
+  open(F, $db_fasta_file);
+  my $seq_in = Bio::SeqIO->new(
+    -fh     => \*F,
+    -format => 'fasta',
+  );
 
-  my $t = localtime;
+  while (my $inseq = $seq_in->next_seq) {
+    my ($secondary_id, $desc, $version) = split(/\|/, $inseq->desc);
 
-  my $db_release = "EG Alignment Xref pipeline; ".$t->datetime;
-  my $dbh = $dba->dbc->db_handle();
-  my $sql = "UPDATE external_db SET db_release = ? WHERE db_name = ?;";
-  my $sth = $dbh->prepare($sql);
-  $sth->execute($db_release, $db_name) or $self->throw("Failed to execute ($db_release, $db_name): $sql");
+    $xref_metadata{$inseq->display_id} = {
+      display_id  => $secondary_id,
+      description => $desc,
+      version     => $version,
+    };
+  }
+
+  return \%xref_metadata;
 }
 
 sub delete_protein_features {
