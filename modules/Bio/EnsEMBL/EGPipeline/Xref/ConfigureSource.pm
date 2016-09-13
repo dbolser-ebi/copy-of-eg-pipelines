@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::ProteinFeaturesXref::ConfigureSource;
+package Bio::EnsEMBL::EGPipeline::Xref::ConfigureSource;
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ sub write_output {
   my ($self) = @_;
   my $logic_name  = $self->param_required('logic_name');
   my $external_db = $self->param_required('external_db');
-  
+
   $self->dataflow_output_id(
     {
       'logic_name'  => $logic_name,

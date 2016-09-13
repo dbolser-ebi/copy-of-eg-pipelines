@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::ProteinFeaturesXref::ExtractSpeciesFactory;
+package Bio::EnsEMBL::EGPipeline::Xref::ExtractSpeciesFactory;
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 sub write_output {
   my ($self) = @_;
   my $logic_name = $self->param_required('logic_name');
-  
+
   if ($logic_name =~ /sprot|trembl/) {
     $self->dataflow_output_id({}, 2);
   } elsif ($logic_name =~ /refseq/) {

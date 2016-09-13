@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::ProteinFeaturesXref::AnalysisSetupFactory;
+package Bio::EnsEMBL::EGPipeline::Xref::AnalysisSetupFactory;
 
 use strict;
 use warnings;
@@ -26,7 +26,7 @@ sub run {
   my ($self) = @_;
   my $analyses   = $self->param_required('analyses');
   my $logic_name = $self->param_required('logic_name');
-  
+
   foreach my $analysis (@{$analyses}) {
     if ($$analysis{'logic_name'} eq $logic_name) {
       $self->param('analysis', $analysis);
@@ -37,7 +37,7 @@ sub run {
 
 sub write_output {
   my ($self) = @_;
-  
+
   $self->dataflow_output_id($self->param('analysis'), 2);
 }
 
