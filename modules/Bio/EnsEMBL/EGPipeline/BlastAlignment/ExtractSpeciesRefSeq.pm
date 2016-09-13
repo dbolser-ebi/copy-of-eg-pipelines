@@ -112,9 +112,13 @@ sub extract_species {
 
   while (my $inseq = $seq_in->next_seq) {
     if ($self->species_match($inseq->desc, $species, $data_type)) {
-      my $display_id = $inseq->display_id;
-      $display_id =~ s/.*?([^\|]+)\|?$/$1/;
-      $inseq->display_id($display_id);
+      my ($primary_id, $version) = $inseq->display_id =~ /(\w+)\.(\d+)|[^\|]+$/;
+      $inseq->display_id($primary_id);
+
+      my ($desc) = $inseq->desc =~ /^(.*)\s+\[.*/;
+      $desc =~ s/PREDICTED:\s+//;
+      $inseq->desc(join('|', map { $_ || '' } ($primary_id, $desc, $version)));
+      
       $seq_out->write_seq($inseq);
     }
   }

@@ -110,9 +110,12 @@ sub extract_species {
 
   while (my $inseq = $seq_in->next_seq) {
     if ($inseq->desc =~ /OS=$species/) {
-      my $display_id = $inseq->display_id;
-      $display_id =~ s/^[^\|]+\|([^\|]+).*/$1/;
-      $inseq->display_id($display_id);
+      my (undef, $primary_id, $secondary_id) = split(/\|/, $inseq->display_id);
+      $inseq->display_id($primary_id);
+
+      my ($desc, $version) = $inseq->desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
+      $inseq->desc(join('|', map { $_ || '' } ($secondary_id, $desc, $version)));
+
       $seq_out->write_seq($inseq);
     }
   }
