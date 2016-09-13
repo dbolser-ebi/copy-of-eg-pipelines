@@ -59,7 +59,7 @@ sub fetch_input {
   my $reports = "The alignment xref pipeline for $species has completed.\n";
   $reports .= "Summaries are below; note that the last one includes pre-existing data.\n";
 
-  $reports .= $self->xref_summary($dbh, $logic_name, '$external_db xrefs:');
+  $reports .= $self->xref_summary($dbh, $logic_name, "$external_db xrefs:");
 
   $reports .= $self->xref_total_summary($dbh, 'All xrefs, pre-existing and newly-added:');
 
