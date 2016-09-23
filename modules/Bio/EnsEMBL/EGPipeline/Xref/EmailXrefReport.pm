@@ -81,8 +81,8 @@ sub fetch_input {
     }
   }
 
-  $reports .= $self->gene_data_summary($self->hive_dbh, 'gene_descriptions', 'Gene description sources');
-  $reports .= $self->gene_data_summary($self->hive_dbh, 'gene_names', 'Gene name sources');
+  $reports .= $self->gene_data_summary($self->hive_dbh, $species, 'gene_descriptions', 'Gene description sources');
+  $reports .= $self->gene_data_summary($self->hive_dbh, $species, 'gene_names', 'Gene name sources');
 
   $reports .= $self->xref_total_summary($dbh, 'All xrefs, pre-existing and newly-added:');
   $reports .= $self->xref_ontology_summary($dbh, 'Ontology xrefs, pre-existing and newly-added:');
@@ -182,22 +182,22 @@ sub xref_summary {
 }
 
 sub gene_data_summary {
-  my ($self, $dbh, $table_name, $title) = @_;
+  my ($self, $dbh, $species, $table_name, $title) = @_;
 
   my $sql = "
     SELECT db_name, total FROM $table_name
-    WHERE timing = ?
+    WHERE species = ? AND timing = ?
     ORDER BY db_name
     ;
   ";
   my $sth = $dbh->prepare($sql);
 
-  $sth->execute('before');
+  $sth->execute($species, 'before');
   my $columns = $sth->{NAME};
   my $before_results = $sth->fetchall_arrayref();
   my $before_table = $self->format_table("Before pipeline:", $columns, $before_results);
 
-  $sth->execute('after');
+  $sth->execute($species, 'after');
   my $after_results = $sth->fetchall_arrayref();
   my $after_table = $self->format_table("After pipeline:", $columns, $after_results);
 
