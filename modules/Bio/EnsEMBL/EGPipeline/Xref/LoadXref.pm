@@ -78,7 +78,7 @@ sub remove_xrefs {
   my $db_names = "'" . join("','", @$external_dbs) . "'";
 
   my $sql = q/
-    DELETE ox.*, ix.*, ontix FROM
+    DELETE ox.*, ix.*, ontix.* FROM
       translation tn INNER JOIN
       transcript tt USING (transcript_id) INNER JOIN
       seq_region sr USING (seq_region_id) INNER JOIN
@@ -89,12 +89,48 @@ sub remove_xrefs {
       identity_xref ix USING (object_xref_id) LEFT OUTER JOIN
       ontology_xref ontix USING (object_xref_id)
     WHERE
-      ox.ensembl_object_type='Translation' AND
+      ox.ensembl_object_type = 'Translation' AND
       cs.species_id = ? AND
   /;
   $sql .= "edb.db_name IN ($db_names)";
-
   my $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($dba->species_id);
+
+  $sql = q/
+    DELETE ox.*, ix.*, ontix.* FROM
+      transcript tt INNER JOIN
+      seq_region sr USING (seq_region_id) INNER JOIN
+      coord_system cs USING (coord_system_id) INNER JOIN
+      object_xref ox ON (ox.ensembl_id = tt.transcript_id) INNER JOIN
+      xref x USING (xref_id) INNER JOIN
+      external_db edb USING (external_db_id) LEFT OUTER JOIN
+      identity_xref ix USING (object_xref_id) LEFT OUTER JOIN
+      ontology_xref ontix USING (object_xref_id)
+    WHERE
+      ox.ensembl_object_type = 'Transcript' AND
+      cs.species_id = ? AND
+  /;
+  $sql .= "edb.db_name IN ($db_names)";
+  $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($dba->species_id);
+
+  $sql = q/
+    DELETE ox.*, dx.*, ix.*, ontix.* FROM
+      gene g INNER JOIN
+      seq_region sr USING (seq_region_id) INNER JOIN
+      coord_system cs USING (coord_system_id) INNER JOIN
+      object_xref ox ON (ox.ensembl_id = g.gene_id) INNER JOIN
+      xref x USING (xref_id) INNER JOIN
+      external_db edb USING (external_db_id) LEFT OUTER JOIN
+      dependent_xref dx USING (object_xref_id) LEFT OUTER JOIN
+      identity_xref ix USING (object_xref_id) LEFT OUTER JOIN
+      ontology_xref ontix USING (object_xref_id)
+    WHERE
+      ox.ensembl_object_type = 'Gene' AND
+      cs.species_id = ? AND
+  /;
+  $sql .= "edb.db_name IN ($db_names)";
+  $sth = $dba->dbc->db_handle->prepare($sql);
   $sth->execute($dba->species_id);
 }
 

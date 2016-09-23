@@ -107,11 +107,12 @@ sub add_xrefs {
 sub add_xref {
   my ($self, $go, $uniprot_xref, $analysis, $external_db) = @_;
 
-  my ($term, $evidence) = @$go;
+  my ($term, $description, $evidence) = @$go;
 
 	my $xref = Bio::EnsEMBL::OntologyXref->new(
     -PRIMARY_ID  => $term,
 		-DISPLAY_ID  => $term,
+    -DESCRIPTION => $description,
 		-DBNAME      => $external_db,
 		-INFO_TYPE   => 'DEPENDENT',
   );
@@ -130,6 +131,7 @@ sub get_go_for_uniprot {
   my $sql = q/
     SELECT
   		primary_id AS term,
+      regexp_replace(secondary_id,'.*:','') AS description,
   		regexp_replace(note,':.*','') AS evidence
   	FROM
       dbentry d INNER JOIN

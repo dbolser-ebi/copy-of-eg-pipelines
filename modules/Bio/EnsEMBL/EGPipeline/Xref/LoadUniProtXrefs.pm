@@ -36,6 +36,7 @@ package Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs;
 
 use strict;
 use warnings;
+use feature 'say';
 
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
@@ -61,6 +62,7 @@ sub run {
   my $replace_all  = $self->param_required('replace_all');
 
   my @external_dbs = values %$external_dbs;
+  push @external_dbs, 'protein_id' if exists($$external_dbs{'EMBL'});
 
   my $dba = $self->get_DBAdaptor($db_type);
   my $aa  = $dba->get_adaptor('Analysis');
@@ -83,7 +85,7 @@ sub run {
 }
 
 sub add_xrefs {
-  my ($self, $dba, $analysis, $external_db) = @_;
+  my ($self, $dba, $analysis, $external_dbs) = @_;
   my $uniprot_db           = $self->param_required('uniprot_db');
   my $uniprot_external_dbs = $self->param_required('uniprot_external_dbs');
 
@@ -101,9 +103,13 @@ sub add_xrefs {
         my $transitive_xrefs = $self->get_xrefs_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
 
         foreach my $transitive_xref (@$transitive_xrefs) {
-          my $xref = $self->add_xref($transitive_xref, $uniprot_xref->primary_id, $analysis, $external_db);
+          my $xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
           if (defined $xref) {
-       	    $dbea->store($xref, $translation->dbID(), 'Translation');
+            if ($xref->dbname eq 'EntrezGene') {
+              $dbea->store($xref, $translation->transcript->get_Gene->dbID(), 'Gene', 0, $uniprot_xref);
+            } else {
+       	      $dbea->store($xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+            }
           }
         }
       }
@@ -112,9 +118,9 @@ sub add_xrefs {
 }
 
 sub add_xref {
-  my ($self, $transitive_xref, $uniprot, $analysis, $external_dbs) = @_;
+  my ($self, $transitive_xref, $analysis, $external_dbs) = @_;
 
-  my ($dbname, $primary_id, $secondary_id, $note, $quaternary_id) = @$transitive_xref;
+  my ($dbname, $primary_id, $secondary_id, $quaternary_id) = @$transitive_xref;
   my $xref;
 
   if (exists $$external_dbs{$dbname}) {
@@ -149,7 +155,6 @@ sub get_xrefs_for_uniprot {
   		abbreviation AS dbname,
       primary_id,
       secondary_id,
-      note,
       quaternary_id
   	FROM
       dbentry d INNER JOIN
@@ -162,9 +167,9 @@ sub get_xrefs_for_uniprot {
 
   $sth->execute($accession);
 
-  my @xrefs = $sth->fetchall_arrayref();
+  my $xrefs = $sth->fetchall_arrayref();
 
-  return \@xrefs;
+  return $xrefs;
 }
 
 1;
