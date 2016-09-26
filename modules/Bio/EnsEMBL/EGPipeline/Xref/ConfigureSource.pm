@@ -34,7 +34,7 @@ sub write_output {
   } elsif ($external_db eq 'RefSeq_peptide') {
     ($database_type, $query_type, $data_source) = ('pep', 'pep', 'refseq');
   } elsif ($external_db eq 'RefSeq_dna') {
-    ($database_type, $query_type, $data_source) = ('nuc', 'nuc', 'refseq');
+    ($database_type, $query_type, $data_source) = ('dna', 'dna', 'refseq');
   }
   
   $self->dataflow_output_id(
@@ -48,3 +48,4 @@ sub write_output {
 }
 
 1;
+dna

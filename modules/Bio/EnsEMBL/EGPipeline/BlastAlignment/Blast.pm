@@ -53,9 +53,8 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    'blast_type'       => 'ncbi',
     'output_regex'     => '^\s*(\w+)',
-    'query_type'       => 'nuc',
+    'query_type'       => 'dna',
     'database_type'    => 'pep',
     'pvalue_threshold' => 0.01,
     'filter_prune'     => 1,
@@ -71,11 +70,6 @@ sub fetch_runnable {
     %parameters = %{$self->param('parameters_hash')};
   }
   
-  if ($self->param_required('blast_type') eq 'wu') {
-    $ENV{BLASTMAT} = $self->param_required('blast_matrix');
-  }
-  
-  $parameters{'TYPE'}     = $self->param_required('blast_type');
   $parameters{'DATABASE'} = $self->param_required('blast_db');
   $parameters{'PARSER'}   = $self->make_parser();
   $parameters{'FILTER'}   = undef;

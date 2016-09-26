@@ -45,7 +45,7 @@ use File::Basename qw(fileparse);
 sub param_defaults {
   return {
     'blast_db'      => undef,
-    'blast_db_type' => 'pep',
+    'database_type' => 'pep',
   };
 }
 
@@ -72,9 +72,9 @@ sub run {
   my $makeblastdb_exe = $self->param('makeblastdb_exe');
   my $db_fasta_file   = $self->param('db_fasta_file');
   my $blast_db        = $self->param('blast_db');
-  my $blast_db_type   = $self->param('blast_db_type');
+  my $database_type   = $self->param('database_type');
   
-  my $db_type = $blast_db_type eq 'pep' ? 'prot' : 'nucl';
+  my $blast_db_type = $database_type eq 'pep' ? 'prot' : 'nucl';
   
   my $cmd = "$makeblastdb_exe -in $db_fasta_file -out $blast_db -dbtype $blast_db_type";
   
@@ -82,8 +82,19 @@ sub run {
   if ($out =~ /error/mi) {
     $self->throw("Error when executing $cmd:\n$out");
   } else {
-    my $results = (-e "$blast_db.phr" && -e "$blast_db.pin" && -e "$blast_db.psq");
-    my $results_large_file = (-e "$blast_db.00.phr" && -e "$blast_db.00.pin" && -e "$blast_db.00.psq" && -e "$blast_db.pal");
+    my ($suffix_initial) = $blast_db_type =~ /^(\w)/;
+    
+    my $results = (
+      -e "$blast_db.$suffix_initial".'hr' &&
+      -e "$blast_db.$suffix_initial".'in' &&
+      -e "$blast_db.$suffix_initial".'sq'
+    );
+    my $results_large_file = (
+      -e "$blast_db.00.$suffix_initial".'hr' &&
+      -e "$blast_db.00.$suffix_initial".'in' &&
+      -e "$blast_db.00.$suffix_initial".'sq' &&
+      -e "$blast_db.$suffix_initial".'al'
+    );
     
     if (!$results && !$results_large_file) {
       $self->throw("Error when executing $cmd:\n$out");

@@ -46,7 +46,7 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 sub param_defaults {
   return {
     'db_type'       => 'core',
-    'query_type'    => 'nuc',
+    'query_type'    => 'dna',
     'database_type' => 'pep',
     'filter_top_x'  => 1,
     'create_gff'    => 0,
@@ -68,10 +68,10 @@ sub run {
       if ($query_type eq 'pep') {
         $self->best_pep_pep($dba, $filter_top_x, $logic_name);
       } else {
-        $self->best_pep_nuc($dba, $filter_top_x, $logic_name);
+        $self->best_pep_dna($dba, $filter_top_x, $logic_name);
       }
     } else {
-      $self->best_nuc_nuc($dba, $filter_top_x, $logic_name);
+      $self->best_dna_dna($dba, $filter_top_x, $logic_name);
     }
   }
 }
@@ -86,7 +86,7 @@ sub write_output {
   }
 }
 
-sub best_nuc_nuc {
+sub best_dna_dna {
   my ($self, $dba, $top_x, $logic_name) = @_;
   
   my %grouped_features;
@@ -104,7 +104,7 @@ sub best_nuc_nuc {
   $self->remove_features($top_x, $dafa, \%grouped_features);
 }
 
-sub best_pep_nuc {
+sub best_pep_dna {
   my ($self, $dba, $top_x, $logic_name) = @_;
   
   my %grouped_features;
