@@ -48,4 +48,3 @@ sub write_output {
 }
 
 1;
-dna
