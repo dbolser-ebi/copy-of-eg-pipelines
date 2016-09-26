@@ -44,9 +44,8 @@ Bio::EnsEMBL::Analysis::Runnable::BlastEG
 
 =head1 DESCRIPTION
 
-  This module is a wrapper for running blast. It defaults to run
-  ncbi-blast, but can run wu-blast. It requires a parser object,
-  e.g. FilterBPlite.
+  This module is a wrapper for running ncbi-blast. 
+  It requires a parser object, e.g. FilterBPlite.
 
 =cut
 
@@ -57,7 +56,7 @@ use warnings;
 
 use Bio::EnsEMBL::Analysis::Runnable;
 use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use Bio::EnsEMBL::Utils::Argument qw( rearrange );
+use Bio::EnsEMBL::Utils::Argument qw(rearrange);
 use vars qw(@ISA);
 
 @ISA = qw(Bio::EnsEMBL::Analysis::Runnable);
@@ -65,24 +64,15 @@ use vars qw(@ISA);
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  my ($type, $database, $parser) =
-    rearrange(['TYPE', 'DATABASE', 'PARSER'], @args);
+  my ($database, $parser) = rearrange(['DATABASE', 'PARSER'], @args);
   
-  $type = 'ncbi' unless defined $type;
   throw("DATABASE option is mandatory") unless defined $database;
   throw("PARSER option is mandatory") unless defined $parser;
   
-  $self->type($type);
   $self->database($database);
   $self->parser($parser);
   
   return $self;
-}
-
-sub type {
-  my $self = shift;
-  $self->{'type'} = shift if(@_);
-  return $self->{'type'};
 }
 
 sub database {
@@ -104,14 +94,7 @@ sub run_analysis {
   my $queryfile   = $self->queryfile;
   my $resultsfile = $self->resultsfile;
 
-  if ($self->type eq 'wu') {
-    if (! -e $ENV{BLASTMAT} && ! -e $ENV{WUBLASTMAT}) {  
-      throw("Environment variable \$BLASTMAT is not set !!! ");
-    }
-    $command .= " $database $queryfile -o $resultsfile ";
-  } else {
-    $command .= " -db $database -query $queryfile -out $resultsfile ";
-  }
+  $command .= " -db $database -query $queryfile -out $resultsfile ";
   $command .= $self->options;
   
   system($command) == 0 or throw("FAILED to run ".$command);
