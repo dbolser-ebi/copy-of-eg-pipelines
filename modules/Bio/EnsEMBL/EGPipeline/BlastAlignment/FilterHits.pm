@@ -45,29 +45,33 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
   return {
-    'db_type'      => 'core',
-    'filter_top_x' => 1,
-    'blastx_top_x' => 10,
-    'blastp_top_x' => 1,
-    'create_gff'   => 0,
+    'db_type'       => 'core',
+    'query_type'    => 'nuc',
+    'database_type' => 'pep',
+    'filter_top_x'  => 1,
+    'create_gff'    => 0,
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $db_type      = $self->param_required('db_type');
-  my $seq_type     = $self->param_required('seq_type');
-  my $filter_top_x = $self->param_required('filter_top_x');
-  my $blastp_top_x = $self->param_required('blastp_top_x');
-  my $blastx_top_x = $self->param_required('blastx_top_x');
-  my $logic_name   = $self->param_required('logic_name');
+  my $db_type       = $self->param_required('db_type');
+  my $query_type    = $self->param_required('query_type');
+  my $database_type = $self->param_required('database_type');
+  my $filter_top_x  = $self->param_required('filter_top_x');
+  my $logic_name    = $self->param_required('logic_name');
   
   if ($filter_top_x) {
     my $dba = $self->get_DBAdaptor($db_type);
-    if ($seq_type eq 'genome') {
-      $self->best_in_genome($dba, $blastx_top_x, $logic_name);
-    } elsif ($seq_type eq 'proteome') {
-      $self->best_in_proteome($dba, $blastp_top_x, $logic_name);
+    
+    if ($database_type eq 'pep') {
+      if ($query_type eq 'pep') {
+        $self->best_pep_pep($dba, $filter_top_x, $logic_name);
+      } else {
+        $self->best_pep_nuc($dba, $filter_top_x, $logic_name);
+      }
+    } else {
+      $self->best_nuc_nuc($dba, $filter_top_x, $logic_name);
     }
   }
 }
@@ -82,7 +86,25 @@ sub write_output {
   }
 }
 
-sub best_in_genome {
+sub best_nuc_nuc {
+  my ($self, $dba, $top_x, $logic_name) = @_;
+  
+  my %grouped_features;
+  
+  my $sa = $dba->get_adaptor("Slice");
+  my $dafa = $dba->get_adaptor("DNAAlignFeature");
+  
+  my $slices = $sa->fetch_all('toplevel');
+  foreach my $slice (@$slices) {
+    my $dafs = $dafa->fetch_all_by_Slice($slice, $logic_name);
+    
+    $self->process_features($dafs, \%grouped_features);
+  }
+  
+  $self->remove_features($top_x, $dafa, \%grouped_features);
+}
+
+sub best_pep_nuc {
   my ($self, $dba, $top_x, $logic_name) = @_;
   
   my %grouped_features;
@@ -92,58 +114,59 @@ sub best_in_genome {
   
   my $slices = $sa->fetch_all('toplevel');
   foreach my $slice (@$slices) {
-    my %pafs;
     my $pafs = $pafa->fetch_all_by_Slice($slice, $logic_name);
-    foreach my $paf (@$pafs) {
-      push @{$pafs{$paf->hseqname}}, $paf;
-    }
     
-    # For hits from the same source on a single seq_region, we want
-    # to group them into sets within which the hits do not overlap.
-    # This means that short hits that would otherwise be lost due to
-    # E-value filtering are retained, by piggy-backing on the higher
-    # scoring hits.
-    foreach my $hit_name (keys %pafs) {
-      my @pafs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pafs{$hit_name}};
-      my @groups = ();
-      $self->group_features(\@pafs, \@groups);
-      push @{$grouped_features{$hit_name}}, @groups;
-    }
+    $self->process_features($pafs, \%grouped_features);
   }
   
   $self->remove_features($top_x, $pafa, \%grouped_features);
 }
 
-sub best_in_proteome {
+sub best_pep_pep {
   my ($self, $dba, $top_x, $logic_name) = @_;
   
   my %grouped_features;
   
   my $pfa = $dba->get_adaptor("ProteinFeature");
   my $pfs = $pfa->fetch_all_by_logic_name($logic_name);
-  my %pfs;
-  foreach my $pf (@$pfs) {
-    push @{$pfs{$pf->hseqname}}, $pf;
-  }
-  foreach my $hit_name (keys %pfs) {
-    my @pfs = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$pfs{$hit_name}};    
-    my @groups = ();
-    $self->group_features(\@pfs, \@groups);
-    push @{$grouped_features{$hit_name}}, @groups;
-  }
+  
+  $self->process_features($pfs, \%grouped_features);
   
   $self->remove_features($top_x, $pfa, \%grouped_features);
 }
 
+sub process_features {
+  my ($self, $features, $grouped_features) = @_;
+  
+  my %features;
+  foreach my $feature (@$features) {
+    push @{$features{$feature->hseqname}}, $feature;
+  }
+  
+  # For hits from the same source on a single seq_region, we want
+  # to group them into sets within which the hits do not overlap.
+  # This means that short hits that would otherwise be lost due to
+  # E-value filtering are retained, by piggy-backing on the higher
+  # scoring hits.
+  foreach my $hit_name (keys %features) {
+    my @features = sort {$a->p_value <=> $b->p_value or $b->score <=> $a->score} @{$features{$hit_name}};    
+    my $groups = $self->group_features(\@features);
+    push @{$$grouped_features{$hit_name}}, @$groups;
+  }
+}
+
 sub group_features {
-  my ($self, $features, $groups) = @_;
+  my ($self, $features) = @_;
+  my @groups;
   
   while (scalar(@$features)) {
     my $group = [];
     $self->disjoint($features, $features, $group);
     
-    push @$groups, $group;
+    push @groups, $group;
   }
+  
+  return \@groups;
 } 
 
 sub disjoint {

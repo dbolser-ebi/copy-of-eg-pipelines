@@ -46,7 +46,7 @@ sub param_defaults {
   return {
     'blast_type'    => 'ncbi',
     'blast_db'      => undef,
-    'blast_db_type' => 'prot',
+    'blast_db_type' => 'pep',
   };
 }
 
@@ -79,7 +79,7 @@ sub run {
   my $cmd;
   if ($blast_type eq 'wu') {
     $cmd = "$makeblastdb_exe -i $db_fasta_file -n $blast_db";
-    if ($blast_db_type eq 'prot') {
+    if ($blast_db_type eq 'pep') {
       $cmd .= " -p T";
     } else {
       $cmd .= " -p F";
