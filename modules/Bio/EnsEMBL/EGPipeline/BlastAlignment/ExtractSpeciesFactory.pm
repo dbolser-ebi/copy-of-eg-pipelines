@@ -28,8 +28,10 @@ sub write_output {
 
   if ($logic_name =~ /sprot|trembl/) {
     $self->dataflow_output_id({}, 2);
-  } elsif ($logic_name =~ /refseq/) {
-    $self->dataflow_output_id({}, 3);
+  } elsif ($logic_name =~ /refseq_dna/) {
+    $self->dataflow_output_id({data_type => 'nuc'}, 3);
+  } elsif ($logic_name =~ /refseq_peptide/) {
+    $self->dataflow_output_id({data_type => 'pep'}, 3);
   }
 }
 

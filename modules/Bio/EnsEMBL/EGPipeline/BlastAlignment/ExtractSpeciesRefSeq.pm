@@ -42,56 +42,6 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use Bio::SeqIO;
 
-sub param_defaults {
-  return {
-    'file_varname' => 'species_fasta_file',
-    'data_type'    => 'protein',
-  };
-}
-
-sub fetch_input {
-  my ($self) = @_;
-  my $fasta_file     = $self->param_required('fasta_file');
-  my $species        = $self->param('species');
-  my $source_species = $self->param('source_species');
-
-  if (! defined $source_species) {
-    if (! defined $species) {
-      $self->throw('-species or -source_species parameter is required');
-    } else {
-      $source_species = $species;
-      $self->param('source_species', $source_species);
-    }
-  }
-
-  (my $output_file = $fasta_file) =~ s/(\.\w+)$/_$source_species$1/;
-
-  $self->param('output_file', $output_file);
-}
-
-sub run {
-  my ($self) = @_;
-  my $fasta_file     = $self->param_required('fasta_file');
-  my $output_file    = $self->param_required('output_file');
-  my $source_species = $self->param_required('source_species');
-  my $data_type      = $self->param_required('data_type');
-
-  $self->extract_species($fasta_file, $output_file, $source_species, $data_type);
-}
-
-sub write_output {
-  my ($self) = @_;
-  my $output_file = $self->param('output_file');
-  if (-s $output_file) {
-    my $file_varname = $self->param('file_varname');
-    $self->dataflow_output_id({$file_varname => $output_file}, 1);
-  } else {
-    my $source_species = $self->param('source_species');
-    $self->warning("No RefSeq data for $source_species.");
-    $self->input_job->autoflow(0);
-  }
-}
-
 sub extract_species {
   my ($self, $file, $output_file, $species, $data_type) = @_;
 
@@ -127,7 +77,7 @@ sub extract_species {
 sub species_match {
   my ($self, $desc, $species, $data_type) = @_;
 
-  if ($data_type eq 'protein') {
+  if ($data_type eq 'pep') {
     return $desc =~ /\[$species\]/;
   } else {
     return $desc =~ /^$species/;
