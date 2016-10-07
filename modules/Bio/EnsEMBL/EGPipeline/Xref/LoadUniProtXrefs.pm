@@ -36,7 +36,6 @@ package Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs;
 
 use strict;
 use warnings;
-use feature 'say';
 
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 

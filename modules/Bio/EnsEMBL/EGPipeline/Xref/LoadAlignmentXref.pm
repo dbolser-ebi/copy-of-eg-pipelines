@@ -109,7 +109,6 @@ sub fetch_features {
       my $nearby_transcripts = $ta->fetch_all_nearest_by_Feature(
         -FEATURE => $feature,
         -SAME_STRAND => 1,
-        #-RANGE => 0,
         -LIMIT => 1,
       );
       
