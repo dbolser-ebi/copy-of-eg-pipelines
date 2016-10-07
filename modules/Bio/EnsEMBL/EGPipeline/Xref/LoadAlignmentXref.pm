@@ -10,56 +10,122 @@ use Bio::EnsEMBL::IdentityXref;
 use Bio::SeqIO;
 use List::Util qw(min max);
 
+sub param_defaults {
+  my ($self) = @_;
+
+  return {
+    %{$self->SUPER::param_defaults},
+    'database_type' => 'pep',
+    'query_type'    => 'pep',
+  };
+}
+
 sub run {
   my ($self) = @_;
   my $logic_name  = $self->param_required('logic_name');
   my $external_db = $self->param_required('external_db');
 
-  my $dba  = $self->core_dba();
-  my $aa   = $dba->get_adaptor('Analysis');
+  my $dba = $self->core_dba();
+  my $aa  = $dba->get_adaptor('Analysis');
 
   my $analysis = $aa->fetch_by_logic_name($logic_name);
+  
+  my ($obj_name, $table_name) = $self->feature_type();
 
   $self->external_db_reset($dba, $external_db);
 
-  $self->add_xrefs($dba, $analysis, $external_db, $logic_name);
+  $self->add_xrefs($dba, $analysis, $external_db, $logic_name, $obj_name);
 
   $self->external_db_update($dba, $external_db);
 
-  $self->delete_protein_features($dba, $logic_name);
+  $self->delete_features($dba, $logic_name, $table_name);
+}
+
+sub feature_type {
+  my ($self) = @_;
+  my $database_type = $self->param_required('database_type');
+  my $query_type    = $self->param_required('query_type');
+  
+  my ($obj_name, $table_name);
+  
+  if ($database_type eq 'pep') {
+    if ($query_type eq 'pep') {
+      $obj_name   = 'ProteinFeature';
+      $table_name = 'protein_feature';
+    } else {
+      $obj_name   = 'ProteinAlignFeature';
+      $table_name = 'protein_align_feature';
+    }
+  } else {
+    $obj_name   = 'DnaAlignFeature';
+    $table_name = 'dna_align_feature';
+  }
+  
+  return ($obj_name, $table_name);
 }
 
 sub add_xrefs {
-  my ($self, $dba, $analysis, $external_db, $logic_name) = @_;
-
+  my ($self, $dba, $analysis, $external_db, $logic_name, $obj_name) = @_;
+  
+  my $object_type = $obj_name eq 'ProteinFeature' ? 'Translation' : 'Transcript';
+  
   my $xref_metadata = $self->xref_metadata();
 
   my $dbea = $dba->get_adaptor('DBEntry');
-  my $pfa  = $dba->get_adaptor('ProteinFeature');
 
-  my %protein_features;
+  my $features = $self->fetch_features($dba, $logic_name, $obj_name);
 
-  my $protein_features = $pfa->fetch_all_by_logic_name($logic_name);
-  foreach my $feature (@$protein_features) {
-    my $translation_id = $feature->seqname();
-    my $hit_name       = $feature->hseqname();
-    push @{$protein_features{$translation_id}{$hit_name}}, $feature;
-  }
-
-  foreach my $translation_id (keys %protein_features) {
-    foreach my $hit_name (keys %{$protein_features{$translation_id}}) {
+  foreach my $id (keys %$features) {
+    foreach my $hit_name (keys %{$$features{$id}}) {
       my $xref;
 
-      my @features = @{$protein_features{$translation_id}{$hit_name}};
+      my @features = @{$$features{$id}{$hit_name}};
       if (scalar(@features) == 1) {
         $xref = $self->add_xref($analysis, $external_db, $hit_name, $features[0], $xref_metadata);
       } else {
         $xref = $self->add_compound_xref($analysis, $external_db, $hit_name, \@features, $xref_metadata);
       }
 
-      $dbea->store($xref, $translation_id, 'Translation');
+      $dbea->store($xref, $id, $object_type);
     }
   }
+}
+
+sub fetch_features {
+  my ($self, $dba, $logic_name, $obj_name) = @_;
+  
+  my $fa = $dba->get_adaptor($obj_name);
+  my $ta = $dba->get_adaptor('Transcript');
+
+  my %features;
+  
+  my $all_features = $fa->fetch_all_by_logic_name($logic_name);
+  foreach my $feature (@$all_features) {
+    my @ids;
+    
+    if ($obj_name eq 'ProteinFeature') {
+      push @ids, $feature->seqname; # Change this to translation_id, pending Ensembl fix.
+    } else {
+      my $nearby_transcripts = $ta->fetch_all_nearest_by_Feature(
+        -FEATURE => $feature,
+        -SAME_STRAND => 1,
+        #-RANGE => 0,
+        -LIMIT => 1,
+      );
+      
+      foreach my $nearby_transcript (@$nearby_transcripts) {
+        push @ids, $$nearby_transcript[0]->dbID;
+      }
+    }
+    
+    my $hit_name = $feature->hseqname;
+    
+    foreach my $id (@ids) {
+      push @{$features{$id}{$hit_name}}, $feature;
+    }
+  }
+  
+  return \%features;
 }
 
 sub add_xref {
@@ -157,13 +223,13 @@ sub xref_metadata {
   return \%xref_metadata;
 }
 
-sub delete_protein_features {
-  my ($self, $dba, $logic_name) = @_;
+sub delete_features {
+  my ($self, $dba, $logic_name, $table_name) = @_;
   my $dbh = $dba->dbc->db_handle();
 
   my $sql =
-    "DELETE protein_feature.* FROM protein_feature INNER JOIN ".
-    "analysis ON protein_feature.analysis_id = analysis.analysis_id ".
+    "DELETE $table_name.* FROM $table_name INNER JOIN ".
+    "analysis ON $table_name.analysis_id = analysis.analysis_id ".
     "WHERE analysis.logic_name = ?;";
   my $sth = $dbh->prepare($sql);
   $sth->execute($logic_name) or $self->throw("Failed to execute ($logic_name): $sql");
