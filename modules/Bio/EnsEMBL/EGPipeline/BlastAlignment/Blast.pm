@@ -94,6 +94,7 @@ sub fetch_runnable {
       $self->param('save_object_type', 'ProteinAlignFeature');
     }
   } else {
+    $self->param('results_index', 'transcript');
     $self->param('save_object_type', 'DnaAlignFeature');
   }
   
