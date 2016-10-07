@@ -75,16 +75,25 @@ sub run {
   my $seq_file_2  = $self->param('seq_file_2');
   my $clean_up    = $self->param_required('clean_up');
   
-  my $sam_file = "$seq_file_1.sam";
+  my $sam_file   = "$seq_file_1.sam";
+  my $bam_file   = "$seq_file_1.bam";
+  my $bam_exists = -s $bam_file;
+  my $sam_exists = -s $sam_file;
+  
+  # Can we reuse some files? Only if we have a bam file (which means that the sam file was converted succesfully)
+  if ($bam_exists and not $sam_exists) {
+    $aligner->dummy(1);
+  }
+  
+  # Align to create a SAM file
   $aligner->align($genome_file, $sam_file, $seq_file_1, $seq_file_2);
-  my $bam_file = $aligner->sam_to_bam($sam_file);
-  unlink $sam_file if $clean_up;
+  $aligner->dummy(0);
+  $self->param('sam_file', $sam_file);
   
   my $index_cmds = $self->param('index_cmds') || [];
   my $align_cmds = $aligner->align_cmds;
   my $version    = $aligner->version;
   
-  $self->param('bam_file', $bam_file);
   $self->param('cmds', join("; ", (@$index_cmds, @$align_cmds)));
   $self->param('version', $version);
 }
@@ -92,13 +101,17 @@ sub run {
 sub write_output {
   my ($self) = @_;
   
-  my $dataflow_output = {
-    'bam_file' => $self->param('bam_file'),
+  my $dataflow_output_to_table = {
+    'sam_file' => $self->param('sam_file'),
     'cmds'     => $self->param('cmds'),
     'version'  => $self->param('version'),
   };
+  my $dataflow_output_to_next = {
+    'sam_file' => $self->param('sam_file'),
+  };
   
-  $self->dataflow_output_id($dataflow_output, 1);
+  $self->dataflow_output_id($dataflow_output_to_next,  1);
+  $self->dataflow_output_id($dataflow_output_to_table, 2);
 }
 
 sub max_intron_length {
