@@ -40,7 +40,7 @@ Post questions to the Ensembl development list: http://lists.ensembl.org/mailman
 
 =cut
 
-package Bio::EnsEMBL::Analysis::Runnable::GenBlast;
+package Bio::EnsEMBL::Analysis::Runnable::WormBase::GenBlast;
 
 use strict;
 use warnings;
@@ -73,11 +73,11 @@ sub new {
   my $self = $class->SUPER::new(@args);
 
   my ($database,$ref_slices) = rearrange([qw(DATABASE REFSLICES)], @args);
-  $self->database($database) if defined $database;
-  $self->genome_slices($ref_slices) if defined $ref_slices;
+  $self->database($database) if defined $database; # bleh
+  $self->genome_slices($ref_slices) if defined $ref_slices; # gah 
 
   throw("You must supply a database") if not $self->database; 
-  throw("You must supply a query") if not $self->query;
+  throw("You must supply a query") if not $self->query; # easier
   throw("You must supply a hash of reference slices") if not $self->genome_slices;
 
   return $self;
@@ -133,7 +133,7 @@ sub run{
 sub run_analysis{
   my ($self, $program) = @_;
   if(!$program){
-    $program = $self->program;
+    $program = $self->analysis->program_file;
   }
 
   throw($program." is not executable GenBlast::run_analysis ") 
@@ -144,7 +144,7 @@ sub run_analysis{
   # set up environment variables
   # we want the path of the program_file
   my $dir = dirname($program);
-  $ENV{GBLAST_PATH} = $dir;
+  $ENV{GBLAST_PATH} = '/nfs/panda/ensemblgenomes/wormbase/software/packages/wublast/';
   $ENV{path} = "" if (!defined $ENV{path});
   $ENV{path} = "(".$ENV{path}.":".$dir.")";
 
@@ -173,7 +173,8 @@ sub run_analysis{
 
   $self->resultsfile($self->query. $outfile_suffix. ".gff");
 
-  system($command) == 0 or throw("FAILED to run ".$command);
+  my $exitStatus = system($command);
+  throw("FAILED to run ".$command." with exit status $exitStatus\n") if $exitStatus;
 
   foreach my $file (glob("${outfile_glob_prefix}*")) {
     $self->files_to_delete($file);
@@ -203,7 +204,7 @@ sub parse_results{
   }
 
   open(OUT, "<".$results) or throw("FAILED to open ".$results.
-                                   "GenBlast:parse_results");
+                                   " GenBlast:parse_results");
   my (%transcripts, @transcripts);
 
   LINE:while(<OUT>){
@@ -280,10 +281,6 @@ sub parse_results{
 }
 
 
-
-
-
-
 ############################################################
 #
 # get/set methods
@@ -311,8 +308,7 @@ sub query {
       throw("[$val] is neither a Bio::Seq not a file");
     }
     $self->{_query} = $val;
-  }
-  
+  } 
   return $self->{_query}
 }
 
