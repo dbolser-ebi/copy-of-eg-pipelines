@@ -1,0 +1,4 @@
+gene	1	73460
+exon	1	4059
+dna_align_feature	1	73460
+transcript	1	6357

@@ -41,6 +41,10 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
 
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+use Bio::EnsEMBL::Hive::Version 2.4;
+use File::Spec::Functions qw(catdir);
+
 sub default_options {
   my ($self) = @_;
   return {
@@ -54,9 +58,7 @@ sub default_options {
     antispecies  => [],
     meta_filters => {},
     db_type      => 'core',
-    
-    oracle_home => '/sw/arch/dbtools/oracle/product/11.1.0.6.2/client',
-    
+
     local_uniparc_db => {
       -driver => 'mysql',
       -host   => 'mysql-eg-pan-prod.ebi.ac.uk',
@@ -65,8 +67,7 @@ sub default_options {
       -pass   => 'writ3rpan1',
       -dbname => 'uniparc',
     },
-    reload_local_uniparc => 0,
-    
+
     remote_uniparc_db => {
       -driver => 'Oracle',
       -host   => 'ora-vm-004.ebi.ac.uk',
@@ -75,7 +76,7 @@ sub default_options {
       -pass   => 'uniparc',
       -dbname => 'UAPRO',
     },
-    
+
     remote_uniprot_db => {
       -driver => 'Oracle',
       -host   => 'ora-dlvm5-026.ebi.ac.uk',
@@ -84,30 +85,52 @@ sub default_options {
       -pass   => 'spselect',
       -dbname => 'SWPREAD',
     },
-    
-    load_uniparc => 1,
-    
-    load_uniprot         => 1,
-    uniprot_replace_all  => 0,
-    uniprot_gene_names   => 0,
-    uniprot_descriptions => 0,
-    
-    load_uniprot_go => 1,
-    
+
+    replace_all           => 0,
+    description_source    => [],
+    overwrite_description => 0,
+    gene_name_source      => [],
+    overwrite_gene_name   => 0,
+
+    load_uniprot        => 1,
+    load_uniprot_go     => 1,
     load_uniprot_xrefs  => 1,
-    uniprot_xref_source => ['ArrayExpress', 'ChEMBL', 'EMBL', 'MEROPS', 'PDB'],
-    
+
+    uniparc_external_db   => 'UniParc',
+    uniprot_external_dbs  => {
+      'reviewed'   => 'Uniprot/SWISSPROT',
+      'unreviewed' => 'Uniprot/SPTREMBL',
+    },
+    uniprot_gn_external_db => 'Uniprot_gn',
+    uniprot_go_external_db => 'GO',
+    uniprot_xref_external_dbs => {
+      'ArrayExpress' => 'ArrayExpress',
+      'ChEMBL'       => 'ChEMBL',
+      'EMBL'         => 'EMBL',
+      'MEROPS'       => 'MEROPS',
+      'PDB'          => 'PDB',
+    },
+
+    checksum_logic_name => 'xrefchecksum',
+    checksum_module     => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc',
+
+    uniparc_transitive_logic_name => 'xrefuniparc',
+    uniparc_transitive_module     => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt',
+
+    uniprot_transitive_logic_name  => 'xrefuniprot',
+    uniprot_transitive_go_module   => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO',
+    uniprot_transitive_xref_module => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs',
+
     # Retrieve analysis descriptions from the production database;
     # the supplied registry file will need the relevant server details.
     production_lookup => 1,
-    
+
     # By default, an email is sent for each species when the pipeline
     # is complete, showing the breakdown of xrefs assigned.
     email_xref_report => 1,
   }
 }
 
-# Force an automatic loading of the registry in all workers.
 sub beekeeper_extra_cmdline_options {
   my ($self) = @_;
 
@@ -115,11 +138,10 @@ sub beekeeper_extra_cmdline_options {
     $self->SUPER::beekeeper_extra_cmdline_options,
     "-reg_conf ".$self->o('registry')
   );
-  
+
   return $options;
 }
 
-# Switch on implicit parameter propagation.
 sub hive_meta_table {
   my ($self) = @_;
 
@@ -129,75 +151,30 @@ sub hive_meta_table {
   };
 }
 
-sub pipeline_analyses {
+sub pipeline_create_commands {
   my ($self) = @_;
 
-  my $transitive_xrefs = [];
-  if ($self->o('load_uniprot_go')) {
-    push @$transitive_xrefs, 'LoadUniProtGO';
-  }
-  if ($self->o('load_uniprot_xrefs')) {
-    push @$transitive_xrefs, 'LoadUniProtXrefs';
-  }
-  
-  my $species_factory_flow = {'2' => 'LoadXrefs'};
-  my $load_xrefs_flow;
-  my $load_uniparc_flow;
-  my $load_uniprot_flow;
-  my $load_uniparc_wait = [];
-  
-  if ($self->o('load_uniparc')) {
-    if ($self->o('reload_local_uniparc')) {
-      $species_factory_flow = {
-        '1' => 'ReloadLocalUniparc',
-        '2' => 'LoadXrefs',
-      };
-      $load_uniparc_wait = ['ReloadLocalUniparc'],
-    }
-    
-    if ($self->o('email_xref_report')) {
-      $load_xrefs_flow = {
-        '1->A' => 'LoadUniParc',
-        'A->1' => 'EmailXrefReport',
-      };
-    } else {
-      $load_xrefs_flow = ['LoadUniParc'];
-    }
-    
-    if ($self->o('load_uniprot')) {
-      $load_uniparc_flow = ['LoadUniProt'];
-      if (scalar @$transitive_xrefs > 0) {
-        $load_uniprot_flow = $transitive_xrefs;
-      }
-    } elsif (scalar @$transitive_xrefs > 0) {
-      $load_uniparc_flow = $transitive_xrefs;
-    }
-    
-  } elsif ($self->o('load_uniprot')) {
-    if ($self->o('email_xref_report')) {
-      $load_xrefs_flow = {
-        '1->A' => 'LoadUniProt',
-        'A->1' => 'EmailXrefReport',
-      };
-    } else {
-      $load_xrefs_flow = ['LoadUniProt'];
-    }
-    
-    if (scalar @$transitive_xrefs > 0) {
-      $load_uniprot_flow = $transitive_xrefs;
-    }
-    
-  } elsif (scalar @$transitive_xrefs > 0) {
-    if ($self->o('email_xref_report')) {
-      $load_xrefs_flow = {
-        '1->A' => $transitive_xrefs,
-        'A->1' => 'EmailXrefReport',
-      };
-    } else {
-      $load_xrefs_flow = $transitive_xrefs;
-    }
-    
-  }
+  return [
+    @{$self->SUPER::pipeline_create_commands},
+    'mkdir -p '.$self->o('pipeline_dir'),
+  ];
+}
+
+sub pipeline_wide_parameters {
+  my ($self) = @_;
+
+  return {
+    %{$self->SUPER::pipeline_wide_parameters},
+    'db_type'            => $self->o('db_type'),
+    'load_uniprot'       => $self->o('load_uniprot'),
+    'load_uniprot_go'    => $self->o('load_uniprot_go'),
+    'load_uniprot_xrefs' => $self->o('load_uniprot_xrefs'),
+    'email_xref_report'  => $self->o('email_xref_report'),
+  };
+}
+
+sub pipeline_analyses {
+  my ($self) = @_;
 
   return [
     {
@@ -215,106 +192,215 @@ sub pipeline_analyses {
                           },
       -input_ids       => [ {} ],
       -max_retry_count => 1,
-      -flow_into       => $species_factory_flow,
-      -meadow_type     => 'LOCAL',
-    },
-
-    {
-      -logic_name      => 'LoadXrefs',
-      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
-      -parameters      => {
-                            oracle_home => $self->o('oracle_home'),
+      -flow_into       => {
+                            '2->A' => ['BackupTables'],
+                            'A->2' => WHEN('#email_xref_report#' => ['EmailXrefReport']),
                           },
-      -max_retry_count => 0,
       -meadow_type     => 'LOCAL',
-      -flow_into       => $load_xrefs_flow,
     },
 
     {
-      -logic_name      => 'ReloadLocalUniparc',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::ReloadLocalUniParc',
+      -logic_name        => 'BackupTables',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DatabaseDumper',
+      -analysis_capacity => 5,
+      -max_retry_count   => 1,
+      -parameters        => {
+                             table_list => [
+                               'analysis',
+                               'analysis_description',
+                               'dependent_xref',
+                               'gene',
+                               'identity_xref',
+                               'interpro',
+                               'object_xref',
+                               'ontology_xref',
+                               'xref',
+                             ],
+                              output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => ['ImportUniParc'],
+    },
+
+    {
+      -logic_name      => 'ImportUniParc',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::ImportUniParc',
       -parameters      => {
                             uniparc_db => $self->o('local_uniparc_db'),
                           },
       -max_retry_count => 1,
-      -rc_name         => '4Gb_mem_4Gb_tmp',
+      -rc_name         => '4Gb_mem_4Gb_tmp-rh7',
+      -flow_into       => ['SetupUniParc'],
+    },
+
+    {
+      -logic_name      => 'SetupUniParc',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count => 0,
+      -parameters      => {
+                            logic_name         => $self->o('checksum_logic_name'),
+                            module             => $self->o('checksum_module'),
+                            production_lookup  => $self->o('production_lookup'),
+                            production_db      => $self->o('production_db'),
+                            db_backup_required => 1,
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                            delete_existing    => 1,
+                            linked_tables      => ['object_xref'],
+                          },
+      -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1->A' => ['RemoveOrphans'],
+                            'A->1' => ['LoadUniParc'],
+                          },
+    },
+
+    {
+      -logic_name        => 'RemoveOrphans',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -max_retry_count   => 0,
+      -parameters        => {
+                               sql => [
+                                 'DELETE dx.* FROM '.
+                                   'dependent_xref dx LEFT OUTER JOIN '.
+                                   'object_xref ox USING (object_xref_id) '.
+                                   'WHERE ox.object_xref_id IS NULL',
+                                 'DELETE onx.* FROM '.
+                                   'ontology_xref onx LEFT OUTER JOIN '.
+                                   'object_xref ox USING (object_xref_id) '.
+                                   'WHERE ox.object_xref_id IS NULL',
+                               ]
+                             },
+      -meadow_type       => 'LOCAL',
     },
 
     {
       -logic_name      => 'LoadUniParc',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc',
       -parameters      => {
-                            db_type            => $self->o('db_type'),
-                            uniparc_db         => $self->o('local_uniparc_db'),
-                            logic_name         => 'xrefchecksum',
-                            module             => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc',
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 0,
+                            uniparc_db  => $self->o('local_uniparc_db'),
+                            logic_name  => $self->o('checksum_logic_name'),
+                            external_db => $self->o('uniparc_external_db'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal',
-      -wait_for        => $load_uniparc_wait,
-      -flow_into       => $load_uniparc_flow,
+      -rc_name         => 'normal-rh7',
+      -flow_into       => WHEN('#load_uniprot#' => ['SetupUniProt']),
+    },
+
+    {
+      -logic_name      => 'SetupUniProt',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count => 0,
+      -parameters      => {
+                            logic_name         => $self->o('uniparc_transitive_logic_name'),
+                            module             => $self->o('uniparc_transitive_module'),
+                            production_lookup  => $self->o('production_lookup'),
+                            production_db      => $self->o('production_db'),
+                            db_backup_required => 1,
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                            delete_existing    => 1,
+                            linked_tables      => ['object_xref'],
+                          },
+      -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1->A' => ['RemoveOrphans'],
+                            'A->1' => ['LoadUniProt'],
+                          },
     },
 
     {
       -logic_name      => 'LoadUniProt',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt',
       -parameters      => {
-                            db_type            => $self->o('db_type'),
-                            uniparc_db         => $self->o('remote_uniparc_db'),
-                            uniprot_db         => $self->o('remote_uniprot_db'),
-                            replace_all        => $self->o('uniprot_replace_all'),
-                            gene_names         => $self->o('uniprot_gene_names'),
-                            descriptions       => $self->o('uniprot_descriptions'),
-                            logic_name         => 'xrefuniparc',
-                            module             => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt',
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 0,
+                            uniparc_db            => $self->o('remote_uniparc_db'),
+                            uniprot_db            => $self->o('remote_uniprot_db'),
+                            replace_all           => $self->o('replace_all'),
+                            description_source    => $self->o('description_source'),
+                            overwrite_description => $self->o('overwrite_description'),
+                            gene_name_source      => $self->o('gene_name_source'),
+                            overwrite_gene_name   => $self->o('overwrite_gene_name'),
+                            logic_name            => $self->o('uniparc_transitive_logic_name'),
+                            external_dbs          => $self->o('uniprot_external_dbs'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal',
-      -flow_into       => $load_uniprot_flow,
+      -rc_name         => 'normal-rh7',
+      -flow_into       => [
+                            WHEN('#load_uniprot_go#'    => ['SetupUniProtGO']),
+                            WHEN('#load_uniprot_xrefs#' => ['SetupUniProtXrefs']),
+                          ],
+    },
+
+    {
+      -logic_name      => 'SetupUniProtGO',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count => 0,
+      -parameters      => {
+                            logic_name         => $self->o('uniprot_transitive_logic_name'),
+                            module             => $self->o('uniprot_transitive_go_module'),
+                            production_lookup  => $self->o('production_lookup'),
+                            production_db      => $self->o('production_db'),
+                            db_backup_required => 1,
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                            delete_existing    => 1,
+                            linked_tables      => ['object_xref'],
+                          },
+      -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1->A' => ['RemoveOrphans'],
+                            'A->1' => ['LoadUniProtGO'],
+                          },
     },
 
     {
       -logic_name      => 'LoadUniProtGO',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO',
       -parameters      => {
-                            db_type            => $self->o('db_type'),
-                            uniprot_db         => $self->o('remote_uniprot_db'),
-                            replace_all        => 1,
-                            logic_name         => 'xrefuniprot',
-                            module             => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt*',
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 0,
+                            uniprot_db           => $self->o('remote_uniprot_db'),
+                            replace_all          => $self->o('replace_all'),
+                            logic_name           => $self->o('uniprot_transitive_logic_name'),
+                            external_db          => $self->o('uniprot_go_external_db'),
+                            uniprot_external_dbs => $self->o('uniprot_external_dbs'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal',
+      -rc_name         => 'normal-rh7',
+    },
+
+    {
+      -logic_name      => 'SetupUniProtXrefs',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count => 0,
+      -parameters      => {
+                            logic_name         => $self->o('uniprot_transitive_logic_name'),
+                            module             => $self->o('uniprot_transitive_xref_module'),
+                            production_lookup  => $self->o('production_lookup'),
+                            production_db      => $self->o('production_db'),
+                            db_backup_required => 1,
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                            delete_existing    => 1,
+                            linked_tables      => ['object_xref'],
+                          },
+      -meadow_type     => 'LOCAL',
+      -flow_into       => {
+                            '1->A' => ['RemoveOrphans'],
+                            'A->1' => ['LoadUniProtXrefs'],
+                          },
     },
 
     {
       -logic_name      => 'LoadUniProtXrefs',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs',
       -parameters      => {
-                            db_type            => $self->o('db_type'),
-                            uniprot_db         => $self->o('remote_uniprot_db'),
-                            xref_source        => $self->o('uniprot_xref_source'),
-                            logic_name         => 'xrefuniprot',
-                            module             => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt*',
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 0,
+                            uniprot_db           => $self->o('remote_uniprot_db'),
+                            replace_all          => $self->o('replace_all'),
+                            logic_name           => $self->o('uniprot_transitive_logic_name'),
+                            external_dbs         => $self->o('uniprot_xref_external_dbs'),
+                            uniprot_external_dbs => $self->o('uniprot_external_dbs'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal',
+      -rc_name         => 'normal-rh7',
     },
 
     {
@@ -324,13 +410,12 @@ sub pipeline_analyses {
                             email              => $self->o('email'),
                             subject            => 'Xref pipeline report for #species#',
                             db_type            => $self->o('db_type'),
-                            load_uniparc       => $self->o('load_uniparc'),
                             load_uniprot       => $self->o('load_uniprot'),
                             load_uniprot_go    => $self->o('load_uniprot_go'),
                             load_uniprot_xrefs => $self->o('load_uniprot_xrefs'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal',
+      -rc_name         => 'normal-rh7',
     },
 
  ];

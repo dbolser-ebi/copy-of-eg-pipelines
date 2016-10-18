@@ -64,7 +64,7 @@ sub run {
     $self->seq_edits_from_protein($dba, $logic_name, $protein_fasta_file);
   }
   
-  $self->set_protein_coding($dba, $logic_name);
+  #$self->set_protein_coding($dba, $logic_name);
 }
 
 sub seq_edits_from_genbank {
@@ -271,14 +271,23 @@ sub adjust_three_prime_edit {
 sub seq_edits_from_protein {
   my ($self, $dba, $logic_name, $protein_fasta_file) = @_;
   
+  #my $sa = $dba->get_adaptor("Slice");
   my $ta = $dba->get_adaptor('Transcript');
   my $aa = $dba->get_adaptor("Attribute");
   
   my %protein = $self->load_fasta($protein_fasta_file);
   
   my $transcripts = $ta->fetch_all_by_logic_name($logic_name);
-  
+  #my $transcripts = $ta->fetch_all();
+
+  # Can run into memory problems if trying to iterate over all transcripts,
+  # so break them down by slice.
+  #my $slices = $sa->fetch_all('toplevel');
+  #foreach my $slice (@$slices) {
+  #  my $transcripts = $slice->get_all_Transcripts();
+    
   foreach my $transcript (@$transcripts) {
+    #next if $transcript->analysis->logic_name ne $logic_name;
     my $translation = $transcript->translation;
     
     if ($translation && exists $protein{$translation->stable_id}) {
@@ -286,6 +295,7 @@ sub seq_edits_from_protein {
       my $file_seq = $protein{$translation->stable_id};
       
       if ($db_seq ne $file_seq) {
+        
         my $shift_success = $self->shift_translation_start($dba, $transcript, $file_seq);
         
         if (! $shift_success) {
@@ -309,7 +319,9 @@ sub seq_edits_from_protein {
             $self->warning('Protein sequence length mismatch for '.$translation->stable_id);
           }
         }
+#return;
       }
+#    }
     }
   }
 }
@@ -403,10 +415,12 @@ sub set_protein_coding {
   my $genes = $ga->fetch_all_by_logic_name($logic_name);
   
   foreach my $gene (@$genes) {
+#say $gene->stable_id;
     my $nontranslating_transcript = 0;
     my $protein_coding_transcript = 0;
     
     foreach my $transcript (@{$gene->get_all_Transcripts}) {
+#say $transcript->stable_id;
       if ($transcript->translation) {
         if ($transcript->translation->seq =~ /\*/) {
           $transcript->biotype('nontranslating_CDS');
