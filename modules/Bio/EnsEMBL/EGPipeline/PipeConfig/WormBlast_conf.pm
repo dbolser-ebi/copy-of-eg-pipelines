@@ -59,10 +59,10 @@ sub default_options {
     meta_filters => {},
     
     # Parameters for dumping and splitting Fasta query files.
-    max_seq_length          => 1000000,
+    max_seq_length          => 250000,
     max_seq_length_per_file => $self->o('max_seq_length'),
-    max_seqs_per_file       => 200,
-    max_files_per_directory => 400,
+    max_seqs_per_file       => 500,
+    max_files_per_directory => 500,
     max_dirs_per_directory  => $self->o('max_files_per_directory'),
     
     max_hive_capacity => 100,
@@ -94,7 +94,8 @@ sub default_options {
     blastx_exe       => catdir($self->o('blast_dir'), 'bin/blastx'),
     blast_matrix     => undef,
     blast_threads    => 4,
-    blast_parameters => '-evalue 0.0001 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -seg yes -num_threads '.$self->o('blast_threads'),
+    blast_parameters => '-evalue 0.0001 -seg no -soft_masking true -word_size 2 -num_alignments 500000 -num_descriptions 500000 -lcase_masking -num_threads '.$self->o('blast_threads'),
+#   blast_parameters => '-evalue 0.0001 -num_alignments 400000 -num_descriptions 400000 -lcase_masking -seg yes -num_threads '.$self->o('blast_threads'),
     
     # For wu-blast, set the following  parameters instead of the above.
     # blast_type       => 'wu',
@@ -106,10 +107,10 @@ sub default_options {
     # blast_parameters => '-W 3 -B 100000 -V 100000 -hspmax=0 -lcmask -wordmask=seg',
     
     # For parsing the output.
-    output_regex     => '^\s*([\w\-]+)',
+    output_regex     => '^\s*([\w\-\.]+)',
     pvalue_threshold => 0.0001,
     filter_prune     => 1,
-    filter_min_score => 200,
+    filter_min_score => 100,
     
     # By default, do both blastp and blastx.
     # Specify blast_db if you don't want it in the directory alongside db_file.
@@ -119,7 +120,23 @@ sub default_options {
     logic_name_prefix => 'worm',
     
     # need to either pull the analayis from the database or hardcode them here (less prefereable)
-    
+    genblastAnalysis =>  [
+      {
+        'logic_name'    => 'geneblast',
+        'display_label' => $self->o('source_label'),
+        'description'   => 'C.elegans peptide sequences aligned to the proteome with <em>GenBlastG</em>.',
+        'displayable'   => 1,
+        'web_data'      => '{"type" => "protein"}',
+        'db'            => 'genome.fa',
+        'db_version'    => '1',
+        'program'       => 'genblast',
+        'program_file'  => '/nfs/panda/ensemblgenomes/wormbase/software/packages/genBlastG/genblast',
+        'parameters'    => '-gff -g T -d 10000 -r 1 -c 0.5',
+        'module'        => 'Bio::EnsEMBL::Analysis::Runnable::WormBase::GenBlastG',
+        'linked_tables' => ['prediction_exon','prediction_transcript'],
+        'db_type'       => 'core',
+      },
+    ], 
     analyses =>
     [
       {
@@ -541,7 +558,7 @@ sub default_options {
         'displayable'   => 1,
         'web_data'      => '{"type" => "protein"}',
         'db'            => 'srapep',
-        'blast_db'      => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/srapep251.pep',
+        'blast_db'      => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/srapep255.pep',
         'db_version'    => '1',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -549,7 +566,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/srapep251.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/srapep255.pep',
       },
       {                 
         'logic_name'    => 'srapepx',
@@ -673,6 +690,7 @@ sub pipeline_analyses {
       -parameters        => {
                               proteome_dir => catdir($self->o('pipeline_dir'), '#species#', 'proteome'),
                               use_dbID     => 1,
+                              allow_stop_codons => 1,
                             },
       -rc_name           => 'normal',
       -flow_into         => ['SplitProteome'],
@@ -863,7 +881,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastP',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
@@ -887,7 +905,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastP_HighMem',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
@@ -911,7 +929,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastP_HigherMem',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
@@ -931,7 +949,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastX',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
@@ -955,7 +973,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastX_HighMem',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
@@ -979,7 +997,7 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'BlastX_HigherMem',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::Blast',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::WormBase::Blast',
       -can_be_empty    => 1,
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
