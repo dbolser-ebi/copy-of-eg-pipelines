@@ -41,6 +41,7 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
 
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
 use Bio::EnsEMBL::Hive::Version 2.4;
 
 use File::Spec::Functions qw(catdir);
@@ -85,12 +86,11 @@ sub default_options {
     
     # Taxonomic level is one of 'fungi', 'invertebrates', 'plants';
     # the UniProt source can be 'sprot' or 'trembl'.
-    uniprot_ftp_uri  => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions',
-    taxonomic_level  => 'invertebrates',
-    uniprot_source   => 'sprot',
-    taxonomic_levels => [$self->o('taxonomic_level')],
-    uniprot_sources  => [$self->o('uniprot_source')],
-    uniprot_dir      => catdir($self->o('pipeline_dir'), 'uniprot'),
+    uniprot_ebi_path  => '/ebi/ftp/pub/databases/uniprot/current_release/knowledgebase',
+    uniprot_ftp_uri   => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase',
+    uniprot_tax_level => undef,
+    uniprot_source    => 'sprot',
+    uniprot_dir       => catdir($self->o('pipeline_dir'), 'uniprot'),
     
     # Default is to use ncbi-blast; wu-blast is possible, for backwards
     # compatability, but it is now unsupported and orders of magnitude
@@ -217,6 +217,15 @@ sub pipeline_create_commands {
   ];
 }
 
+sub pipeline_wide_parameters {
+ my ($self) = @_;
+ 
+ return {
+   %{$self->SUPER::pipeline_wide_parameters},
+   'uniprot_source' => $self->o('uniprot_source'),
+ };
+}
+
 sub pipeline_analyses {
   my $self = shift @_;
   
@@ -244,6 +253,7 @@ sub pipeline_analyses {
                             run_all         => $self->o('run_all'),
                             meta_filters    => $self->o('meta_filters'),
                             chromosome_flow => 0,
+                            regulation_flow => 0,
                             variation_flow  => 0,
                           },
       -rc_name         => 'normal',
@@ -390,7 +400,10 @@ sub pipeline_analyses {
       -flow_into       => {
                             '2' => ['FetchFile'],
                             '3' => ['SourceSpeciesFactory'],
-                            '4' => ['FetchUniprot'],
+                            '4' => WHEN('#uniprot_source# eq "sprot"' =>
+                                      ['FetchUniprot'],
+                                     ELSE
+                                      ['FetchUniprot_HighMem']),
                           },
       -meadow_type     => 'LOCAL',
     },
@@ -447,12 +460,31 @@ sub pipeline_analyses {
       -can_be_empty    => 1,
       -max_retry_count => 2,
       -parameters      => {
-                            ftp_uri          => $self->o('uniprot_ftp_uri'),
-                            taxonomic_levels => $self->o('taxonomic_levels'),
-                            uniprot_sources  => $self->o('uniprot_sources'),
-                            out_dir          => $self->o('uniprot_dir'),
+                            ebi_path        => $self->o('uniprot_ebi_path'),
+                            ftp_uri         => $self->o('uniprot_ftp_uri'),
+                            taxonomic_level => $self->o('uniprot_tax_level'),
+                            data_source     => $self->o('uniprot_source'),
+                            out_dir         => $self->o('uniprot_dir'),
+                            file_varname    => 'db_fasta_file',
                           },
       -rc_name         => 'normal',
+      -flow_into       => ['CreateBlastDB'],
+    },
+
+    {
+      -logic_name      => 'FetchUniprot_HighMem',
+      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchUniprot',
+      -can_be_empty    => 1,
+      -max_retry_count => 2,
+      -parameters      => {
+                            ebi_path        => $self->o('uniprot_ebi_path'),
+                            ftp_uri         => $self->o('uniprot_ftp_uri'),
+                            taxonomic_level => $self->o('uniprot_tax_level'),
+                            data_source     => $self->o('uniprot_source'),
+                            out_dir         => $self->o('uniprot_dir'),
+                            file_varname    => 'db_fasta_file',
+                          },
+      -rc_name         => '32Gb_mem_4Gb_tmp',
       -flow_into       => ['CreateBlastDB'],
     },
 
@@ -462,6 +494,7 @@ sub pipeline_analyses {
       -max_retry_count => 2,
       -parameters      => {
                             makeblastdb_exe   => $self->o('makeblastdb_exe'),
+                            blast_db          => $self->o('blast_db'),
                             blast_db_type     => 'prot',
                             proteome_source   => $self->o('proteome_source'),
                             logic_name_prefix => $self->o('logic_name_prefix'),
@@ -788,12 +821,13 @@ sub pipeline_analyses {
       -can_be_empty    => 1,
       -max_retry_count => 1,
       -parameters      => {
-                            db_type           => 'otherfeatures',
-                            feature_type      => ['ProteinAlignFeature'],
-                            include_scaffold  => 0,
-                            remove_separators => 1,
-                            results_dir       => catdir($self->o('pipeline_dir'), '#species#'),
-                            out_file_stem     => '#logic_name_prefix#_blastx.gff3',
+                            db_type            => 'otherfeatures',
+                            feature_type       => ['ProteinAlignFeature'],
+                            include_scaffold   => 0,
+                            remove_separators  => 1,
+                            join_align_feature => 1,
+                            results_dir        => catdir($self->o('pipeline_dir'), '#species#'),
+                            out_file_stem      => '#logic_name_prefix#_blastx.gff3',
                           },
       -rc_name         => 'normal',
       -flow_into       => ['GFF3Tidy'],

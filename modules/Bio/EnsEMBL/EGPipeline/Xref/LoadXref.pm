@@ -39,55 +39,21 @@ package Bio::EnsEMBL::EGPipeline::Xref::LoadXref;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup');
+use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 use Time::Piece;
 
 sub param_defaults {
   my ($self) = @_;
-  
+
   return {
     %{$self->SUPER::param_defaults},
-    'db_type'     => 'core',
-    'oracle_home' => '/sw/arch/dbtools/oracle/product/11.1.0.6.2/client',
+    'db_type' => 'core',
   };
-}
-
-sub fetch_input {
-  my ($self) = @_;
-  
-  if (!exists $ENV{'ORACLE_HOME'}) {
-    $ENV{'ORACLE_HOME'} = $self->param_required('oracle_home');
-  }
-  
-  my $t = localtime;
-  $self->param('timestamp', $t->datetime);
-}
-
-sub analysis_setup {
-  my ($self, $dba) = @_;
-  
-  my $logic_name = $self->param_required('logic_name');
-  my $aa         = $dba->get_adaptor('Analysis');
-  my $analysis   = $aa->fetch_by_logic_name($logic_name);
-  
-  if ($self->param('production_lookup')) {
-    $self->production_updates;
-  }
-  
-  my $new_analysis = $self->create_analysis;
-  $new_analysis->created($self->param('timestamp'));
-  if (defined $analysis) {
-    $new_analysis->adaptor($aa);
-    $new_analysis->dbID($analysis->dbID);
-    $aa->update($new_analysis) || $self->throw("Failed to update analysis '$logic_name'");
-  } else {
-    $aa->store($new_analysis) || $self->throw("Failed to store analysis '$logic_name'");
-  }
 }
 
 sub external_db_reset {
   my ($self, $dba, $db_name) = @_;
-  
+
   my $dbh = $dba->dbc->db_handle();
   my $sql = "UPDATE external_db SET db_release = NULL WHERE db_name = ?;";
   my $sth = $dbh->prepare($sql);
@@ -96,12 +62,40 @@ sub external_db_reset {
 
 sub external_db_update {
   my ($self, $dba, $db_name) = @_;
-  
-  my $db_release = "EG Xref pipeline; ".$self->param('timestamp');
+
+  my $t = localtime;
+  my $db_release = "EG Xref pipeline; ".$t->datetime;
+
   my $dbh = $dba->dbc->db_handle();
   my $sql = "UPDATE external_db SET db_release = ? WHERE db_name = ?;";
   my $sth = $dbh->prepare($sql);
   $sth->execute($db_release, $db_name) or $self->throw("Failed to execute ($db_release, $db_name): $sql");
+}
+
+sub remove_xrefs {
+  my ($self, $dba, $external_dbs) = @_;
+
+  my $db_names = "'" . join("','", @$external_dbs) . "'";
+
+  my $sql = q/
+    DELETE ox.*, ix.*, ontix FROM
+      translation tn INNER JOIN
+      transcript tt USING (transcript_id) INNER JOIN
+      seq_region sr USING (seq_region_id) INNER JOIN
+      coord_system cs USING (coord_system_id) INNER JOIN
+      object_xref ox ON (ox.ensembl_id = tn.translation_id) INNER JOIN
+      xref x USING (xref_id) INNER JOIN
+      external_db edb USING (external_db_id) LEFT OUTER JOIN
+      identity_xref ix USING (object_xref_id) LEFT OUTER JOIN
+      ontology_xref ontix USING (object_xref_id)
+    WHERE
+      ox.ensembl_object_type='Translation' AND
+      cs.species_id = ? AND
+  /;
+  $sql .= "edb.db_name IN ($db_names)";
+
+  my $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($dba->species_id);
 }
 
 1;

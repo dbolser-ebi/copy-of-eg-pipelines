@@ -242,6 +242,14 @@ sub set_query {
     }
     $runnable->{'query'} = $translation;
     
+  } elsif ($self->param('results_index') eq 'transcript') {
+    my $transcript_adaptor = $dba->get_adaptor('Transcript');
+    my $transcript = $transcript_adaptor->fetch_by_stable_id($result_index);
+    if (!defined($transcript)) {
+      $transcript = $transcript_adaptor->fetch_by_dbID($result_index);
+    }
+    $runnable->query($transcript->feature_Slice) if defined $transcript;
+    
   } else {
     my $slice_adaptor = $dba->get_adaptor('Slice');
     my ($name, $start, $end) = ($result_index, undef, undef);
@@ -341,6 +349,21 @@ sub save_to_db {
   $adaptor->dbc && $adaptor->dbc->disconnect_if_idle();
   
   return;
+}
+
+sub fetch_external_db_id {
+  my ($self, $db_name) = @_;
+  
+  my $sql = 'SELECT external_db_id FROM external_db WHERE db_name = ?';
+  
+  my $dba = $self->get_DBAdaptor($self->param('db_type'));
+  my $dbh = $dba->dbc->db_handle;
+  my $sth = $dbh->prepare($sql);
+  $sth->execute($db_name);
+  
+  my ($external_db_id) = $sth->fetchrow_array;
+  
+  return $external_db_id;
 }
 
 1;

@@ -39,7 +39,9 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::RNAFeatures_conf;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Hive::Version 2.3;
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+use Bio::EnsEMBL::Hive::Version 2.4;
+
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
 use File::Spec::Functions qw(catdir);
 
@@ -93,9 +95,6 @@ sub default_options {
     # nonetheless inappropriate. (An alternative is to ratchet up the strictness
     # of the taxonomic filter, but you may then start excluding appropriate
     # models...)
-    # In addition, some rRNA models are clade-specific, but have nonetheless
-    # been aligned across the entire tree of life; so those are in the
-    # blacklist by default. Ditto the U3 and SRP clans.
     rfam_version        => '12.1',
     rfam_dir            => catdir($self->o('program_dir'), 'Rfam', $self->o('rfam_version')),
     rfam_cm_file        => catdir($self->o('rfam_dir'), 'Rfam.cm'),
@@ -140,11 +139,8 @@ sub default_options {
     trnascan_dir        => catdir($self->o('program_dir'), 'tRNAscan-SE-1.3.1', 'bin'),
     trnascan_exe        => catdir($self->o('program_dir'), 'bin', 'tRNAscan-SE'),
     trnascan_logic_name => 'trnascan_align',
-    trnascan_param_hash =>
-    {
-      db_name => 'TRNASCAN_SE',
-      pseudo  => 0,
-    },
+    trnascan_db_name    => 'TRNASCAN_SE',
+    trnascan_pseudo     => 0,
     trnascan_parameters => '',
 
     analyses =>
@@ -242,6 +238,15 @@ sub pipeline_create_commands {
   ];
 }
 
+sub pipeline_wide_parameters {
+ my ($self) = @_;
+ 
+ return {
+   %{$self->SUPER::pipeline_wide_parameters},
+   'run_cmscan' => $self->o('run_cmscan'),
+ };
+}
+
 sub pipeline_analyses {
   my ($self) = @_;
   
@@ -276,6 +281,7 @@ sub pipeline_analyses {
                               run_all         => $self->o('run_all'),
                               meta_filters    => $self->o('meta_filters'),
                               chromosome_flow => 0,
+                              regulation_flow => 0,
                               variation_flow  => 0,
                             },
       -flow_into         => {
@@ -344,7 +350,12 @@ sub pipeline_analyses {
                               genome_dir => catdir($self->o('pipeline_dir'), '#species#'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => ['TaxonomicFilter'],
+      -flow_into         => {
+                              '1' => WHEN('#run_cmscan#' =>
+                                      ['TaxonomicFilter'],
+                                     ELSE
+                                      ['SplitDumpFile']),
+                            },
     },
 
     {
@@ -368,6 +379,21 @@ sub pipeline_analyses {
                               taxonomic_minimum   => $self->o('taxonomic_minimum'),
                             },
       -rc_name           => '4Gb_mem',
+      -flow_into         => ['CMScanIndex'],
+    },
+
+    {
+      -logic_name        => 'CMScanIndex',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CMScanIndex',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              rfam_cm_file      => catdir($self->o('pipeline_dir'), '#species#', 'Rfam.filtered.cm'),
+                              rfam_logic_name   => $rfam_logic_name,
+                              cmscan_cm_file    => $self->o('cmscan_cm_file'),
+                              cmscan_logic_name => $self->o('cmscan_logic_name'),
+                              parameters_hash   => $self->o('cmscan_param_hash'),
+                            },
+      -rc_name           => 'normal',
       -flow_into         => ['SplitDumpFile'],
     },
 
@@ -417,6 +443,7 @@ sub pipeline_analyses {
       -max_retry_count   => 1,
       -parameters        => {
                               escape_branch => -1,
+                              db_name       => $self->o('rfam_db_name'),
                             },
       -rc_name           => 'cmscan_4Gb_mem',
       -flow_into         => {
@@ -430,7 +457,9 @@ sub pipeline_analyses {
       -can_be_empty      => 1,
       -hive_capacity     => $self->o('max_hive_capacity'),
       -max_retry_count   => 0,
-      -parameters        => {},
+      -parameters        => {
+                              db_name => $self->o('rfam_db_name'),
+                            },
       -rc_name           => 'cmscan_8Gb_mem',
     },
 
@@ -440,9 +469,10 @@ sub pipeline_analyses {
       -hive_capacity     => $self->o('max_hive_capacity'),
       -max_retry_count   => 1,
       -parameters        => {
-                              trnascan_dir    => $self->o('trnascan_dir'),
-                              logic_name      => $self->o('trnascan_logic_name'),
-                              parameters_hash => $self->o('trnascan_param_hash'),
+                              trnascan_dir => $self->o('trnascan_dir'),
+                              logic_name   => $self->o('trnascan_logic_name'),
+                              db_name      => $self->o('trnascan_db_name'),
+                              pseudo       => $self->o('trnascan_pseudo'),
                             },
       -rc_name           => 'normal',
     },
@@ -466,6 +496,7 @@ sub pipeline_analyses {
                               run_all         => $self->o('run_all'),
                               meta_filters    => $self->o('meta_filters'),
                               chromosome_flow => 0,
+                              regulation_flow => 0,
                               variation_flow  => 0,
                             },
       -flow_into         => {
@@ -510,15 +541,14 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name           => 'SummaryPlots',
-      -module               => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
-      -failed_job_tolerance => 100,
-      -max_retry_count      => 1,
-      -parameters           => {
-                                 scripts_dir => catdir($self->o('eg_pipelines_dir'), 'scripts', 'rna_features'),
-                                 cmd => 'Rscript #scripts_dir#/summary_plots.r -l #scripts_dir#/R_lib -i #cmscanfile# -e #evalue# -b #biotypesfile# -d #distinctfile# -c #plotcolour#',
-                               },
-      -meadow_type          => 'LOCAL',
+      -logic_name        => 'SummaryPlots',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              scripts_dir => catdir($self->o('eg_pipelines_dir'), 'scripts', 'rna_features'),
+                              cmd => 'Rscript #scripts_dir#/summary_plots.r -l #scripts_dir#/R_lib -i #cmscanfile# -e #evalue# -b #biotypesfile# -d #distinctfile# -c #plotcolour#',
+                            },
+      -meadow_type       => 'LOCAL',
     },
 
     {

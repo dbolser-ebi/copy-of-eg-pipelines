@@ -28,42 +28,143 @@ Add UniProt transitive xrefs to a core database.
 
 =head1 Author
 
-James Allen
+Dan Staines and James Allen
 
 =cut
-
-use strict;
-use warnings;
 
 package Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs;
 
 use strict;
 use warnings;
+
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use Bio::EnsEMBL::EGPipeline::Xref::UniProtXrefLoader;
+
+sub param_defaults {
+  my ($self) = @_;
+
+  return {
+    %{$self->SUPER::param_defaults},
+    'logic_name'           => 'xrefuniprot',
+    'external_dbs'         => {},
+    'uniprot_external_dbs' => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
+    'replace_all'          => 0,
+  };
+}
 
 sub run {
   my ($self) = @_;
-  
-  my $uniprot_db  = $self->param_required('uniprot_db');
+  my $db_type      = $self->param_required('db_type');
+  my $logic_name   = $self->param_required('logic_name');
+  my $external_dbs = $self->param_required('external_dbs');
+  my $replace_all  = $self->param_required('replace_all');
+
+  my @external_dbs = values %$external_dbs;
+
+  my $dba = $self->get_DBAdaptor($db_type);
+  my $aa  = $dba->get_adaptor('Analysis');
+
+  my $analysis = $aa->fetch_by_logic_name($logic_name);
+
+  if ($replace_all) {
+    $self->remove_xrefs($dba, \@external_dbs);
+  }
+
+  foreach my $external_db (@external_dbs) {
+    $self->external_db_reset($dba, $external_db);
+  }
+
+  $self->add_xrefs($dba, $analysis, $external_dbs);
+
+  foreach my $external_db (@external_dbs) {
+    $self->external_db_update($dba, $external_db);
+  }
+}
+
+sub add_xrefs {
+  my ($self, $dba, $analysis, $external_db) = @_;
+  my $uniprot_db           = $self->param_required('uniprot_db');
+  my $uniprot_external_dbs = $self->param_required('uniprot_external_dbs');
+
   my $uniprot_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniprot_db);
-  my $loader      = Bio::EnsEMBL::EGPipeline::Xref::UniProtXrefLoader->new
-  (
-    -UNIPROT_DBA => $uniprot_dba,
-    -DBNAMES     => $self->param('xref_source'),
-  );
-  
-  my $dba = $self->get_DBAdaptor($self->param('db_type'));
-  $self->analysis_setup($dba);
-  foreach my $db_name (@{$self->param('xref_source')}) {
-    $self->external_db_reset($dba, $db_name);
+
+  my $ta   = $dba->get_adaptor('Translation');
+  my $dbea = $dba->get_adaptor('DBEntry');
+
+  my $translations = $ta->fetch_all();
+  foreach my $translation (@$translations) {
+    foreach my $status (keys %$uniprot_external_dbs) {
+      my $uniprot_xrefs = $dbea->fetch_all_by_Translation($translation, $$uniprot_external_dbs{$status});
+
+      foreach my $uniprot_xref (@$uniprot_xrefs) {
+        my $transitive_xrefs = $self->get_xrefs_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
+
+        foreach my $transitive_xref (@$transitive_xrefs) {
+          my $xref = $self->add_xref($transitive_xref, $uniprot_xref->primary_id, $analysis, $external_db);
+          if (defined $xref) {
+       	    $dbea->store($xref, $translation->dbID(), 'Translation');
+          }
+        }
+      }
+    }
   }
-  $loader->load_xrefs($dba);
-  foreach my $db_name (@{$self->param('xref_source')}) {
-    $self->external_db_update($dba, $db_name);
+}
+
+sub add_xref {
+  my ($self, $transitive_xref, $uniprot, $analysis, $external_dbs) = @_;
+
+  my ($dbname, $primary_id, $secondary_id, $note, $quaternary_id) = @$transitive_xref;
+  my $xref;
+
+  if (exists $$external_dbs{$dbname}) {
+    my $external_db = $$external_dbs{$dbname};
+
+    # For ENA we don't want genomic references where we have the CDS
+    if ($dbname eq 'EMBL'    &&
+      defined $secondary_id  && $secondary_id ne '-' &&
+		  defined $quaternary_id && $quaternary_id eq 'Genomic_DNA')
+    {
+      $primary_id  = $secondary_id;
+      $external_db = 'protein_id';
+    }
+
+  	$xref = Bio::EnsEMBL::DBEntry->new(
+      -PRIMARY_ID  => $primary_id,
+  		-DISPLAY_ID  => $primary_id,
+  		-DBNAME      => $external_db,
+  		-INFO_TYPE   => 'DEPENDENT',
+    );
+  	$xref->analysis($analysis);
   }
+
+  return $xref;
+}
+
+sub get_xrefs_for_uniprot {
+  my ($self, $uniprot_dba, $accession) = @_;
+
+  my $sql = q/
+    SELECT
+  		abbreviation AS dbname,
+      primary_id,
+      secondary_id,
+      note,
+      quaternary_id
+  	FROM
+      dbentry d INNER JOIN
+  		dbentry_2_database dd USING (dbentry_id) INNER JOIN
+      database_name db USING (database_id)
+    WHERE
+      d.accession = ?
+  /;
+  my $sth = $uniprot_dba->dbc->db_handle->prepare($sql);
+
+  $sth->execute($accession);
+
+  my @xrefs = $sth->fetchall_arrayref();
+
+  return \@xrefs;
 }
 
 1;

@@ -42,7 +42,7 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
 sub param_defaults {
   my ($self) = @_;
-  
+
   return {
     %{$self->SUPER::param_defaults},
     'db_type' => 'core',
@@ -52,21 +52,19 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   my $species            = $self->param_required('species');
-  my $load_uniparc       = $self->param('load_uniparc');
   my $load_uniprot       = $self->param('load_uniprot');
   my $load_uniprot_go    = $self->param('load_uniprot_go');
   my $load_uniprot_xrefs = $self->param('load_uniprot_xrefs');
-  
+
   my $dba = $self->get_DBAdaptor($self->param('db_type'));
   my $dbh = $dba->dbc->db_handle;
-  
+
   my $reports = "The xref pipeline for $species has completed.\n";
   $reports .= "Summaries are below; note that the last two include pre-existing data.\n";
-  
-  if ($load_uniparc) {
-    $reports .= $self->xref_summary(
+
+  $reports .= $self->xref_summary(
       $dbh, 'xrefchecksum', 'UniParc xrefs assigned via checksum on sequence:');
-  }
+  
   if ($load_uniprot) {
     $reports .= $self->xref_summary(
       $dbh, 'xrefuniparc', 'UniProt xrefs assigned transitively via UniParc:');
@@ -75,16 +73,16 @@ sub fetch_input {
     $reports .= $self->xref_summary(
       $dbh, 'xrefuniprot', 'Xrefs assigned transitively via UniProt:');
   }
-  
+
   $reports .= $self->xref_total_summary($dbh, 'All xrefs, pre-existing and newly-added:');
   $reports .= $self->xref_ontology_summary($dbh, 'Ontology xrefs, pre-existing and newly-added:');
-      
+
   $self->param('text', $reports);
 }
 
 sub xref_summary {
   my ($self, $dbh, $logic_name, $title) = @_;
-  
+
   my $sql = "
     SELECT
       db_name,
@@ -103,19 +101,19 @@ sub xref_summary {
       ensembl_object_type
     ;
   ";
-  
+
   my $sth = $dbh->prepare($sql);
   $sth->execute($logic_name);
-  
+
   my $columns = $sth->{NAME};
   my $results = $sth->fetchall_arrayref();
-  
+
   return $self->format_table($title, $columns, $results);
 }
 
 sub xref_total_summary {
   my ($self, $dbh, $title) = @_;
-  
+
   my $sql = "
     SELECT
       db_name,
@@ -134,19 +132,19 @@ sub xref_total_summary {
       logic_name
     ;
   ";
-  
+
   my $sth = $dbh->prepare($sql);
   $sth->execute();
-  
+
   my $columns = $sth->{NAME};
   my $results = $sth->fetchall_arrayref();
-  
+
   return $self->format_table($title, $columns, $results);
 }
 
 sub xref_ontology_summary {
   my ($self, $dbh, $title) = @_;
-  
+
   my $sql = "
     SELECT
       edb1.db_name,
@@ -169,13 +167,13 @@ sub xref_ontology_summary {
       ensembl_object_type
     ;
   ";
-  
+
   my $sth = $dbh->prepare($sql);
   $sth->execute();
-  
+
   my $columns = $sth->{NAME};
   my $results = $sth->fetchall_arrayref();
-  
+
   return $self->format_table($title, $columns, $results);
 }
 

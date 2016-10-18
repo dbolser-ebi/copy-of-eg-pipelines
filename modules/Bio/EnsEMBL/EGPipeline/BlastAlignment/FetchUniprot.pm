@@ -38,137 +38,97 @@ package Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchUniprot;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
+use base ('Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchExternal');
 
 use Bio::SeqIO;
 use File::Path qw(make_path);
-use Net::FTP;
-use URI;
+use File::Spec::Functions qw(catdir);
+use IO::Uncompress::Gunzip qw(gunzip);
 
 sub param_defaults {
   return {
-    'ftp_uri'          => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/taxonomic_divisions',
-    'taxonomic_levels' => ['invertebrates'],
-    'uniprot_sources'  => ['sprot'],
+    'ebi_path'     => '/ebi/ftp/pub/databases/uniprot/current_release/knowledgebase',
+    'ftp_uri'      => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase',
+    'data_source'  => 'sprot',
+    'file_varname' => 'uniprot_fasta_file',
   };
 }
 
 sub fetch_input {
   my ($self) = @_;
-  my $out_dir = $self->param_required('out_dir');
+  my $out_dir         = $self->param_required('out_dir');
+  my $data_source     = $self->param_required('data_source');
+  my $taxonomic_level = $self->param('taxonomic_level');
   
   if (!-e $out_dir) {
     $self->warning("Output directory '$out_dir' does not exist. I shall create it.");
     make_path($out_dir) or $self->throw("Failed to create output directory '$out_dir'");
   }
   
-  my $uniprot_fasta_file =
-    "$out_dir/".
-    join("_", @{$self->param('uniprot_sources')}).
-    "_".
-    join("_", @{$self->param('taxonomic_levels')}).
-    ".fa";
-  $self->param('db_fasta_file', $uniprot_fasta_file);
-}
-
-sub write_output {
-  my ($self) = @_;
+  my ($uniprot_file, $output_file);
+  if ($taxonomic_level) {
+    $uniprot_file = "uniprot_$data_source\_$taxonomic_level.dat.gz";
+    $output_file  = catdir($out_dir, "$data_source\_$taxonomic_level.fa");
+  } else {
+    $uniprot_file = "uniprot_$data_source.fasta.gz";
+    $output_file  = catdir($out_dir, "uniprot_$data_source.fasta");
+  }
   
-  my $output_id = {
-    'db_fasta_file' => $self->param('db_fasta_file'),
-  };
-  $self->dataflow_output_id($output_id, 1);
+  $self->param('uniprot_file', $uniprot_file);
+  $self->param('output_file',  $output_file);
 }
 
 sub run {
   my ($self) = @_;
+  my $ebi_path        = $self->param_required('ebi_path');
+  my $ftp_uri         = $self->param_required('ftp_uri');
+  my $out_dir         = $self->param_required('out_dir');
+  my $uniprot_file    = $self->param_required('uniprot_file');
+  my $output_file     = $self->param_required('output_file');
+  my $taxonomic_level = $self->param('taxonomic_level');
   
-  my $ftp = $self->get_ftp();
-  my $files = $self->fetch_uniprot_files($ftp);
-  $self->convert_to_fasta($files);
-}
-
-sub get_ftp {
-  my ($self) = @_;
-  
-  my $ftp_uri = URI->new($self->param('ftp_uri'));
-  my $ftp_host = $ftp_uri->host;
-  my $ftp_path = $ftp_uri->path;
-  
-  my $ftp = Net::FTP->new($ftp_host) or $self->throw("Failed to reach FTP host '$ftp_host': $@");
-  $ftp->login or $self->throw(printf("Anonymous FTP login failed: %s.\n", $ftp->message));
-  $ftp->cwd($ftp_path) or $self->throw(printf("Failed to change directory to '$ftp_path': %s.\n", $ftp->message));
-  $ftp->binary();
-  
-  return $ftp;
-}
-
-sub fetch_uniprot_files {
-  my ($self, $ftp) = @_;
-  
-  my $taxonomic_levels = $self->param('taxonomic_levels');
-  my $uniprot_sources = $self->param('uniprot_sources');
-  my $out_dir = $self->param('out_dir');
-  
-  my @files = ();
-  foreach my $level (@$taxonomic_levels) {
-    foreach my $source (@$uniprot_sources) {
-      my $file = "uniprot_$source\_$level.dat.gz";
-      my $local_file = "$out_dir/$file";
-      my $remote_size = $ftp->size($file);
-      my $remote_mdtm = $ftp->mdtm($file);
-      
-      if (-e $local_file) {
-        my $local_size = -s $local_file;
-        my $local_mdtm = (stat $local_file)[9];
-        
-        if ( ($remote_size == $local_size) && ($remote_mdtm == $local_mdtm) ) {
-          $self->warning("Using existing file '$local_file' with matching timestamp.");
-          push @files, $local_file;
-          next;
-        }
-      }
-      $ftp->get($file, $local_file) or $self->throw("Failed to get '$file': $@");
-      
-      # Set the local timestamp to match the remote one.
-      utime $remote_mdtm, $remote_mdtm, $local_file;
-      push @files, $local_file;
-    }
+  if ($taxonomic_level) {
+    $ebi_path = catdir($ebi_path, 'taxonomic_divisions');
+    $ftp_uri .= '/taxonomic_divisions';
+  } else {
+    $ebi_path = catdir($ebi_path, 'complete');
+    $ftp_uri .= '/complete';
   }
   
-  $self->throw("No files for given taxonomic levels ("
-    .join(", ", @$taxonomic_levels).") and UniProt sources ("
-    .join(", ", @$uniprot_sources).").") unless scalar(@files) > 0;
+  my $ebi_file   = catdir($ebi_path, $uniprot_file);
+  my $local_file = catdir($out_dir,  $uniprot_file);
   
-  return \@files;
+  if (-e $ebi_file) {
+    $self->fetch_ebi_file($ebi_file, $local_file);
+  } else {
+    my $ftp = $self->get_ftp($ftp_uri);
+    $self->fetch_ftp_file($ftp, $uniprot_file, $local_file);
+  }
+  
+  if ($taxonomic_level) {
+    $self->convert_to_fasta($local_file, $output_file);
+  } else {
+    gunzip $local_file => $output_file;
+  }
 }
 
 sub convert_to_fasta {
-  my ($self, $files) = @_;
+  my ($self, $file, $output_file) = @_;
   
   my $seq_out = Bio::SeqIO->new(
-    -file   => '>'.$self->param('db_fasta_file'),
+    -file   => '>'.$output_file,
     -format => 'fasta',
   );
   
-  foreach my $file (@$files) {
-    my $counter = 0;
-    
-    # Don't forget these are gzipped files...
-    open(F, "gunzip -c $file |");
-    my $seq_in = Bio::SeqIO->new(
-      -fh     => \*F,
-      -format => 'swiss',
-    );
+  # Don't forget these are gzipped files...
+  open(F, "gunzip -c $file |");
+  my $seq_in = Bio::SeqIO->new(
+    -fh     => \*F,
+    -format => 'swiss',
+  );
   
-    while (my $inseq = $seq_in->next_seq) {
-      $counter++;
-      if ($counter >= 100000) {
-        $self->warning("Processed $counter sequences.");
-        $counter = 0;
-      }
-      $seq_out->write_seq($inseq);
-    }
+  while (my $inseq = $seq_in->next_seq) {
+    $seq_out->write_seq($inseq);
   }
 }
 
