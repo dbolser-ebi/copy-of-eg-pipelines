@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# IMPORTANT: You need to run this test with at
+# least 8GB of memory and 8GB of /tmp space.
+
 use strict;
 use warnings;
 use feature 'say';
 use Data::Dumper;
 
+use File::Path qw(make_path remove_tree);
+use File::Spec::Functions qw(catdir);
 use FindBin;
 use Test::Exception;
 use Test::More;
@@ -33,6 +38,14 @@ my $curr_dir = $FindBin::Bin.'/../../';
 my $testdb = Bio::EnsEMBL::Test::MultiTestDB->new($species, $curr_dir);
 my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
+
+my $test_files_dir     = catdir($FindBin::Bin, '../../test-files');
+my $genome_file        = catdir($test_files_dir, 'agam_genome.fa');
+my $single_read_file   = catdir($test_files_dir, 'agam_single_read.fastq');
+my $paired_read_1_file = catdir($test_files_dir, 'agam_paired_read_1.fastq');
+my $paired_read_2_file = catdir($test_files_dir, 'agam_paired_read_2.fastq');
+
+my $tmp_dir = "/tmp/$ENV{'USER'}/alignsequence";
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::AlignSequence';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
@@ -60,43 +73,75 @@ $obj->param('escape_branch', undef);
 $obj->param('max_intron', 1);
 
 # Test basic functionality for each aligner.
-my %aligner_classes =
+my %aligners =
 (
-  bowtie2 => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::Bowtie2Aligner',
-  bwa     => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::BwaAligner',
-  gsnap   => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::GsnapAligner',
-  hisat2  => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::HISAT2Aligner',
-  star    => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::StarAligner',
-  tophat2 => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::TopHat2Aligner',
-);
-
-my %aligner_dirs =
-(
-  bowtie2 => '/nfs/panda/ensemblgenomes/external/bowtie2',
-  bwa     => '/nfs/panda/ensemblgenomes/external/bwa',
-  gsnap   => '/nfs/panda/ensemblgenomes/external/gmap-gsnap/bin',
-  hisat2  => '/nfs/panda/ensemblgenomes/external/hisat2',
-  star    => '/nfs/panda/ensemblgenomes/external/STAR',
-  tophat2 => '/nfs/panda/ensemblgenomes/external/tophat2',
-);
-
-my %aligner_versions =
-(
-  bowtie2 => '2.2.6',
-  bwa     => '0.6.1-r104',
-  gsnap   => '2012-11-09',
-  hisat2  => '2.0.4',
-  star    => 'unknown',
-  tophat2 => '2.1.1',
+  bowtie2 => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::Bowtie2Aligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/bowtie2',
+               version       => '2.2.6',
+               single_total  => 25000,
+               single_mapped => 1625,
+               paired_total  => 50000,
+               paired_mapped => 3746,
+             },
+  bwa     => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::BwaAligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/bwa',
+               version       => '0.6.1-r104',
+               single_total  => 25000,
+               single_mapped => 2137,
+               paired_total  => 50000,
+               paired_mapped => 3711,
+             },
+  gsnap   => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::GsnapAligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/gmap-gsnap/bin',
+               version       => '2012-11-09',
+               single_total  => 25675,
+               single_mapped => 1598,
+               paired_total  => 50285,
+               paired_mapped => 4471,
+             },
+  hisat2  => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::HISAT2Aligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/hisat2',
+               version       => '2.0.4',
+               single_total  => 25932,
+               single_mapped => 2299,
+               paired_total  => 50030,
+               paired_mapped => 3735,
+             },
+  star    => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::StarAligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/STAR',
+               version       => '2.3.1z',
+               single_total  => 8630,
+               single_mapped => 8630,
+               paired_total  => 3688,
+               paired_mapped => 3688,
+             },
+  tophat2 => {
+               class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::TopHat2Aligner',
+               dir           => '/nfs/panda/ensemblgenomes/external/tophat2',
+               version       => '2.1.1',
+               single_total  => 3158,
+               single_mapped => 3158,
+               paired_total  => 3626,
+               paired_mapped => 3626,
+             },
 );
 
 $obj->param(samtools_dir => '/nfs/panda/ensemblgenomes/external/samtools');
 
-foreach my $aligner (sort keys %aligner_classes) {
-  my $class   = $aligner_classes{$aligner};
-  my $dir     = $aligner_dirs{$aligner};
-  my $version = $aligner_versions{$aligner};
-  my $intron_length = $aligner =~ /^(hisat2|star|tophat2)$/ ? 23 : undef;
+foreach my $aligner (sort keys %aligners) {
+  my $class         = $aligners{$aligner}{class};
+  my $dir           = $aligners{$aligner}{dir};
+  my $version       = $aligners{$aligner}{version};
+  my $single_total  = $aligners{$aligner}{single_total};
+  my $single_mapped = $aligners{$aligner}{single_mapped};
+  my $paired_total  = $aligners{$aligner}{paired_total};
+  my $paired_mapped = $aligners{$aligner}{paired_mapped};
+  my $intron_length = $aligner =~ /^(hisat2|star|tophat2)$/ ? 25000 : undef;
   
   $obj->param('aligner_class', $class);
   $obj->param('aligner_dir',   $dir);
@@ -108,6 +153,68 @@ foreach my $aligner (sort keys %aligner_classes) {
   is($aligner_object->version,             $version,       "fetch_input method: $aligner version correct");
   is($aligner_object->{max_intron_length}, $intron_length, "fetch_input method: $aligner max_intron_length correct");
   is($aligner_object->{threads},           4,              "fetch_input method: $aligner threads correct");
+  
+  # Have per-aligner directories for indexes and results
+  my $results_dir = catdir($tmp_dir, $aligner);
+  make_path($results_dir);
+
+  my $genome_link        = catdir($results_dir, 'agam_genome.fa');
+  my $single_read_link   = catdir($results_dir, 'agam_single_read.fastq');
+  my $paired_read_1_link = catdir($results_dir, 'agam_paired_read_1.fastq');
+  my $paired_read_2_link = catdir($results_dir, 'agam_paired_read_2.fastq');
+  
+  symlink $genome_file, $genome_link;
+  symlink $single_read_file, $single_read_link;
+  symlink $paired_read_1_file, $paired_read_1_link;
+  symlink $paired_read_2_file, $paired_read_2_link;
+  
+  $obj->param('genome_file', $genome_link);
+  
+  unless ($aligner_object->index_exists($genome_link)) {
+    $aligner_object->index_file($genome_link);
+  }
+  
+  # Single read file
+  $obj->param('seq_file_1', $single_read_link);
+  $obj->param('seq_file_2', undef);
+  
+  $obj->run();
+  
+  is(-e $obj->param('bam_file'), 1, "run method: $aligner bam_file exists (single read)");
+  
+  my $single_stats = $aligner_object->get_bam_stats($obj->param('bam_file'));
+  my ($total_single_reads)  = $single_stats =~ /^(\d+).*in total/m;
+  my ($mapped_single_reads) = $single_stats =~ /^(\d+).*mapped/m;
+  
+  is($total_single_reads,  $single_total,  "run method: $aligner number of reads (single read)");
+  is($mapped_single_reads, $single_mapped, "run method: $aligner mapped reads (single read)");
+
+  # Paired read files
+  $obj->param('seq_file_1', $paired_read_1_link);
+  $obj->param('seq_file_2', $paired_read_2_link);
+  
+  $obj->run();
+  
+  is(-e $obj->param('bam_file'), 1, "run method: $aligner bam_file exists (paired read)");
+
+  my $paired_stats = $aligner_object->get_bam_stats($obj->param('bam_file'));
+  my ($total_paired_reads)  = $paired_stats =~ /^(\d+).*in total/m;
+  my ($mapped_paired_reads) = $paired_stats =~ /^(\d+).*mapped/m;
+  
+  is($total_paired_reads,  $paired_total,  "run method: $aligner number of reads (paired read)");
+  is($mapped_paired_reads, $paired_mapped, "run method: $aligner mapped reads (paired read)");
+
+  remove_tree($results_dir);
+
+  # STAR puts files in the current dir, and there is no way
+  # to redirect them elsewhere...
+  if ($aligner eq 'star') {
+    unlink 'Log.final.out';
+    unlink 'Log.out';
+    unlink 'Log.progress.out';
+    unlink 'Log.std.out';
+    unlink 'SJ.out.tab';
+  }
 }
 
 done_testing();
