@@ -45,10 +45,11 @@ sub run {
   my $merge_label = $self->param_required('merge_label');
   my $run_ids     = $self->param_required('run_ids');
   
-  my ($name, $caption, $description) = ($merge_label, '', '');
+  my ($name, $description) = ($merge_label, '');
+  my $caption = $ini_type eq 'rnaseq_align' ? 'RNA-seq alignment' : $name;
   
   if (length($run_ids) > 0) {
-    ($caption, $description) = $self->sra_desc($merge_id, $merge_label, $run_ids);
+    ($description) = $self->sra_desc($merge_id, $merge_level, $run_ids);
   }
   
   my ($header, $data_file, $source_type);
@@ -89,10 +90,9 @@ sub write_output {
 sub sra_desc {
   my ($self, $merge_id, $merge_level, $run_ids) = @_;
   
-  my $caption = "$merge_level $merge_id";
   my $description = ucfirst(lc($merge_level)) . ' ' . $self->ena_link($merge_id);
   
-  if ($merge_level ne 'Run') {
+  if ($merge_level !~ /^run$/i) {
     my @run_ids = split(/,/, $run_ids);
     my @run_links = map { $self->ena_link($_) } @run_ids;
     
@@ -104,7 +104,7 @@ sub sra_desc {
     $description .= join(', ', @run_links).')';
   }
   
-  return ($caption, $description);
+  return ($description);
 }
 
 sub ena_link {
