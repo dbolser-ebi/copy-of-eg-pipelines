@@ -27,7 +27,7 @@ sub param_defaults {
   
   return {
     'bedtools_dir'  => '/nfs/panda/ensemblgenomes/external/bedtools/bin',
-    'ucscutils_dir' => '/nfs/panda/ensemblgenomes/external/ucscutils',
+    'ucscutils_dir' => '/nfs/panda/ensemblgenomes/external/ucsc_utils',
     'clean_up'      => 1,
   };
 }
