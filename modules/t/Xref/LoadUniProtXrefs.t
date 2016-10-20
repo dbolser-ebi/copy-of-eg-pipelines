@@ -60,20 +60,28 @@ can_ok($module_name, @hive_methods);
 can_ok($module_name, @super_methods);
 can_ok($module_name, @module_methods);
 
+my $uniprot_edbs = {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'};
+
 # Create an instance of the module; a dummy job object is required to
 # prevent errors when the module generates log messages.
 my $obj     = Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $obj->input_job($job_obj);
 
-# These are the modules param_defaults.
+# Set and check default parameters.
+my $param_defaults = $obj->param_defaults();
+$obj->input_job->param_init($param_defaults);
+is($obj->param('db_type'), 'core',                            'param_defaults method: db_type');
+is($obj->param('logic_name'), 'xrefuniprot',                  'param_defaults method: logic_name');
+is_deeply($obj->param('external_dbs'), {},                    'param_defaults method: external_dbs');
+is_deeply($obj->param('uniprot_external_dbs'), $uniprot_edbs, 'param_defaults method: uniprot_external_dbs');
+is($obj->param('replace_all'), 0,                             'param_defaults method: replace_all');
+
+# Mandatory parameters.
 $obj->param('species', $species);
-$obj->param('db_type', 'core');
-$obj->param('logic_name', 'xrefuniprot');
+$obj->param('uniprot_db', \%uniprot_db);
 $obj->param('external_dbs', {});
 $obj->param('uniprot_external_dbs', {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'});
-$obj->param('replace_all', 0);
-$obj->param('uniprot_db', \%uniprot_db);
 
 my $analysis     = $aa->fetch_by_logic_name($obj->param('logic_name'));
 my $external_dbs = $obj->param('external_dbs');

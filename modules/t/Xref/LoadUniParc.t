@@ -62,11 +62,15 @@ my $obj     = Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $obj->input_job($job_obj);
 
-# These are the modules param_defaults.
+# Set and check default parameters.
+my $param_defaults = $obj->param_defaults();
+$obj->input_job->param_init($param_defaults);
+is($obj->param('db_type'),     'core',         'param_defaults method: db_type');
+is($obj->param('logic_name'),  'xrefchecksum', 'param_defaults method: logic_name');
+is($obj->param('external_db'), 'UniParc',      'param_defaults method: external_db');
+
+# Mandatory parameters.
 $obj->param('species', $species);
-$obj->param('db_type', 'core');
-$obj->param('logic_name', 'xrefchecksum');
-$obj->param('external_db', 'UniParc');
 $obj->param('uniparc_db', \%uniparc_db);
 
 my $analysis    = $aa->fetch_by_logic_name($obj->param('logic_name'));

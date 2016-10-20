@@ -59,19 +59,25 @@ can_ok($module_name, @hive_methods);
 can_ok($module_name, @super_methods);
 can_ok($module_name, @module_methods);
 
+my $uniprot_edbs = {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'};
+
 # Create an instance of the module; a dummy job object is required to
 # prevent errors when the module generates log messages.
 my $obj     = Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $obj->input_job($job_obj);
 
-# These are the modules param_defaults.
+# Set and check default parameters.
+my $param_defaults = $obj->param_defaults();
+$obj->input_job->param_init($param_defaults);
+is($obj->param('db_type'), 'core',                            'param_defaults method: db_type');
+is($obj->param('logic_name'), 'xrefuniprot',                  'param_defaults method: logic_name');
+is($obj->param('external_db'), 'GO',                          'param_defaults method: external_db');
+is_deeply($obj->param('uniprot_external_dbs'), $uniprot_edbs, 'param_defaults method: uniprot_external_dbs');
+is($obj->param('replace_all'), 0,                             'param_defaults method: replace_all');
+
+# Mandatory parameters.
 $obj->param('species', $species);
-$obj->param('db_type', 'core');
-$obj->param('logic_name', 'xrefuniprot');
-$obj->param('external_db', 'GO');
-$obj->param('uniprot_external_dbs', {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'});
-$obj->param('replace_all', 0);
 $obj->param('uniprot_db', \%uniprot_db);
 
 my $analysis    = $aa->fetch_by_logic_name($obj->param('logic_name'));
@@ -146,26 +152,26 @@ is($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, 137, 'run method: correct number of GO x
 $obj->run();
 
 $go_xrefs = object_xrefs();
-is($$go_xrefs{IEA}{'Interpro'}, 545,          'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, 124, 'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, 398,  'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'null'}, 6,                'run method: correct number of GO xrefs');
-is($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, 4,   'run method: correct number of GO xrefs');
-is($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, 20,  'run method: correct number of GO xrefs');
-is($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, 273,  'run method: correct number of GO xrefs');
+is($$go_xrefs{IEA}{'Interpro'}, 545,                    'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 124, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 401,  'run method: correct number of GO xrefs');
+is($$go_xrefs{IEA}{'null'}, 6,                          'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 4,   'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 20,  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 286,  'run method: correct number of GO xrefs');
 
 # Delete all object_xrefs and ontology_xrefs with matching external_db
 $obj->param('replace_all', 1);
 $obj->run();
 
 $go_xrefs = object_xrefs();
-ok(!defined($$go_xrefs{IEA}{'Interpro'}),    'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, 61, 'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, 201, 'run method: correct number of GO xrefs');
-ok(!defined($$go_xrefs{IEA}{'null'}),        'run method: correct number of GO xrefs');
-is($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, 2,  'run method: correct number of GO xrefs');
-is($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, 11, 'run method: correct number of GO xrefs');
-is($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, 139, 'run method: correct number of GO xrefs');
+ok(!defined($$go_xrefs{IEA}{'Interpro'}),              'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 61, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 204, 'run method: correct number of GO xrefs');
+ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 11, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 152, 'run method: correct number of GO xrefs');
 
 done_testing();
 

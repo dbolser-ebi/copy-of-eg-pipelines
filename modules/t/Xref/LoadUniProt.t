@@ -73,26 +73,32 @@ can_ok($module_name, @hive_methods);
 can_ok($module_name, @super_methods);
 can_ok($module_name, @module_methods);
 
+my $external_dbs = {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'};
+
 # Create an instance of the module; a dummy job object is required to
 # prevent errors when the module generates log messages.
 my $obj     = Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $obj->input_job($job_obj);
 
-# These are the modules param_defaults.
+# Set and check default parameters.
+my $param_defaults = $obj->param_defaults();
+$obj->input_job->param_init($param_defaults);
+is($obj->param('db_type'), 'core',                      'param_defaults method: db_type');
+is($obj->param('logic_name'), 'xrefuniparc',            'param_defaults method: logic_name');
+is_deeply($obj->param('external_dbs'), $external_dbs,   'param_defaults method: external_dbs');
+is($obj->param('replace_all'), 0,                       'param_defaults method: replace_all');
+is_deeply($obj->param('description_source'), [],        'param_defaults method: description_source');
+is($obj->param('overwrite_description'), 0,             'param_defaults method: overwrite_description');
+is_deeply($obj->param('gene_name_source'), [],          'param_defaults method: gene_name_source');
+is($obj->param('overwrite_gene_name'), 0,               'param_defaults method: overwrite_gene_name');
+is($obj->param('uniparc_external_db'), 'UniParc',       'param_defaults method: uniparc_external_db');
+is($obj->param('uniprot_gn_external_db'), 'Uniprot_gn', 'param_defaults method: uniprot_gn_external_db');
+
+# Mandatory parameters.
 $obj->param('species', $species);
-$obj->param('db_type', 'core');
-$obj->param('logic_name', 'xrefuniparc');
-$obj->param('external_dbs', {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'});
-$obj->param('replace_all', 0);
-$obj->param('description_source', []);
-$obj->param('overwrite_description', 0);
-$obj->param('gene_name_source', []);
-$obj->param('overwrite_gene_name', 0);
 $obj->param('uniparc_db', \%uniparc_db);
 $obj->param('uniprot_db', \%uniprot_db);
-$obj->param('uniparc_external_db', 'UniParc');
-$obj->param('uniprot_gn_external_db', 'Uniprot_gn');
 
 my $analysis     = $aa->fetch_by_logic_name($obj->param('logic_name'));
 my $external_dbs = $obj->param('external_dbs');
@@ -423,9 +429,9 @@ $descriptions = descriptions();
 is($$descriptions{'null'}, 51,                    'run method: correct number of description sources');
 ok(!exists($$descriptions{'no source'}),          'run method: correct number of description sources');
 is($$descriptions{'UniProtKB/Swiss-Prot'}, 15,    'run method: correct number of description sources');
-is($$descriptions{'UniProtKB/TrEMBL'}, 17,        'run method: correct number of description sources');
+is($$descriptions{'UniProtKB/TrEMBL'}, 19,        'run method: correct number of description sources');
 is($$descriptions{'VB Community Annotation'}, 7,  'run method: correct number of description sources');
-is($$descriptions{'VB External Description'}, 51, 'run method: correct number of description sources');
+is($$descriptions{'VB External Description'}, 49, 'run method: correct number of description sources');
 
 # Add gene names
 my $gene_names = gene_names();
