@@ -41,8 +41,15 @@ my $pseudo_gff3_file = $FindBin::Bin.'/../test-files/agam_pseudo.gff3';
 my $transl_gff3_file = $FindBin::Bin.'/../test-files/agam_transl.gff3';
 my $fasta_file       = $FindBin::Bin.'/../test-files/agam.fa';
 
-my $gene_source = 'Ensembl';
-my $logic_name  = 'gff3_test';
+
+my $gene_types   = ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene', 'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ];
+my $mrna_types   = ['mRNA', 'transcript', 'pseudogenic_transcript', 'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'];
+my $exon_types   = ['exon', 'pseudogenic_exon'];
+my $cds_types    = ['CDS'];
+my $utr_types    = ['five_prime_UTR', 'three_prime_UTR'];
+my $ignore_types = ['misc_RNA', 'RNA', 'match', 'match_part', 'cDNA_match', 'nucleotide_match', 'protein_match', 'polypeptide', 'protein', 'chromosome', 'supercontig', 'contig', 'region', 'biological_region', 'regulatory_region', 'repeat_region'];
+my $gene_source  = 'Ensembl';
+my $logic_name   = 'gff3_test';
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
@@ -67,20 +74,29 @@ $lg_obj->input_job($job_obj);
 my $aa       = $dba->get_adaptor('Analysis');
 my $analysis = $aa->fetch_by_logic_name($logic_name);
 
-# These are the modules param_defaults.
-$lg_obj->param('db_type', 'core');
+# Set and check default parameters.
+my $param_defaults = $lg_obj->param_defaults();
+$lg_obj->input_job->param_init($param_defaults);
+is($lg_obj->param('db_type'), 'core',                      'param_defaults method: db_type');
+is_deeply($lg_obj->param('gene_types'), $gene_types,       'param_defaults method: gene_types');
+is_deeply($lg_obj->param('mrna_types'), $mrna_types,       'param_defaults method: mrna_types');
+is_deeply($lg_obj->param('exon_types'), $exon_types,       'param_defaults method: exon_types');
+is_deeply($lg_obj->param('cds_types'), $cds_types,         'param_defaults method: cds_types');
+is_deeply($lg_obj->param('utr_types'), $utr_types,         'param_defaults method: utr_types');
+is_deeply($lg_obj->param('ignore_types'), $ignore_types,   'param_defaults method: ignore_types');
+is($lg_obj->param('types_complete'), 1,                    'param_defaults method: types_complete');
+is($lg_obj->param('use_name_field'), undef,                'param_defaults method: use_name_field');
+is($lg_obj->param('polypeptides'), 1,                      'param_defaults method: polypeptides');
+is($lg_obj->param('nontranslating'), 'nontranslating_CDS', 'param_defaults method: nontranslating');
+is($lg_obj->param('prediction'), 0,                        'param_defaults method: prediction');
+is($lg_obj->param('gene_source'), $gene_source,            'param_defaults method: gene_source');
+is_deeply($lg_obj->param('stable_ids'), {},                'param_defaults method: stable_ids');
 
 # Mandatory parameters.
 $lg_obj->param('species', $species);
 $lg_obj->param('gff3_file', $gff3_file);
 $lg_obj->param('fasta_file', $fasta_file);
 $lg_obj->param('logic_name', $logic_name);
-$lg_obj->param('gene_source', $gene_source);
-$lg_obj->param('nontranslating', 'nontranslating_CDS');
-$lg_obj->param('polypeptides', 0);
-$lg_obj->param('prediction', 0);
-$lg_obj->param('use_name_field', 'no');
-$lg_obj->param('stable_ids', {});
 
 # There's a lot to test here, so this file is broken into chapters.
 # Chapter 1: basic functionality tested with a single simple gene,

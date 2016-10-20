@@ -42,8 +42,10 @@ my $dg_obj  = Bio::EnsEMBL::EGPipeline::LoadGFF3::DeleteGenes->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $dg_obj->input_job($job_obj);
 
-# These are the modules param_defaults.
-$dg_obj->param('db_type', 'core');
+# Set and check default parameters.
+my $param_defaults = $dg_obj->param_defaults();
+$dg_obj->input_job->param_init($param_defaults);
+is($dg_obj->param('db_type'), 'core', 'param_defaults method: db_type');
 
 # Species is a mandatory parameter.
 $dg_obj->param('species', $species);
@@ -53,7 +55,7 @@ my $logic_name = 'vectorbase_anopheles_gambiae';
 my $aa = $dba->get_adaptor('Analysis');
 my $analysis = $aa->fetch_by_logic_name($logic_name);
 
-is_rows(77, $dba, 'gene', 'where analysis_id = ? ', [$analysis->dbID]);
+is_rows(152, $dba, 'gene', 'where analysis_id = ? ', [$analysis->dbID]);
 
 # Deleting a gene affects a _lot_ of tables...
 $testdb->hide($dbtype, 
