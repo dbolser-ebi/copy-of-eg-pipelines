@@ -31,7 +31,7 @@ sub run{
 
 
   my $genblast_files = $analysis->db_file;
-  $genblast_files=~s/SEQUENCES.*/genblast\/split_wormpep/;
+  $genblast_files=~s/genome\/genome\.fa/split_wormpep/;
 
   my @files = glob("$genblast_files/*");
   $self->param('files', \@files);

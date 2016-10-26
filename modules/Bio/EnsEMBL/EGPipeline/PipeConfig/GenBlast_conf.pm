@@ -57,14 +57,14 @@ sub default_options {
     division     => [],
     run_all      => 0,
     meta_filters => {},
-    max_hive_capacity => 100,
+    max_hive_capacity => 150,
     
     source_species      => [],
     source_antispecies  => [],
     source_division     => [],
     source_run_all      => 0,
     source_meta_filters => {},
-    blast_threads       => 4,
+    blast_threads       => 1,
 
   };
 }
