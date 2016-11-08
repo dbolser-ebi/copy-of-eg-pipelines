@@ -50,10 +50,11 @@ sub param_defaults {
     'logic_name'             => 'xrefuniparc',
     'external_dbs'           => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
     'replace_all'            => 0,
-    'description_source'     => [],
-    'overwrite_description'  => 0,
     'gene_name_source'       => [],
     'overwrite_gene_name'    => 0,
+    'description_source'     => [],
+    'overwrite_description'  => 0,
+    'description_blacklist'  => [],
     'uniparc_external_db'    => 'UniParc',
     'uniprot_gn_external_db' => 'Uniprot_gn',
   };
@@ -157,6 +158,9 @@ sub add_xref {
 
 sub get_uniprot_for_upi {
   my ($self, $uniparc_dba, $uniprot_dba, $tax_id, $upi) = @_;
+  
+  my @blacklist = @{$self->param_required('description_blacklist')};
+  my $blacklist = join('|', @blacklist);
 
   my %uniprots;
 
@@ -206,18 +210,21 @@ sub get_uniprot_for_upi {
   my $uniparc_results = $uniparc_sth->fetchall_arrayref();
   foreach my $uniparc_result (@$uniparc_results) {
     my $ac = $$uniparc_result[0];
+    my %synonyms;
 
     $uniprot_sth->execute($ac);
     my $uniprot_results = $uniprot_sth->fetchall_arrayref();
     foreach my $uniprot_result (@$uniprot_results) {
       my ($name, $desc, $type, $version, $gene_name, $gene_name_type) = @$uniprot_result;
-
+      
       if (!exists $uniprots{$ac}) {
         $uniprots{$ac}{ac}   = $ac;
         $uniprots{$ac}{name} = $name;
         $uniprots{$ac}{type} = $type == 0 ? 'reviewed' : 'unreviewed';
-        if (defined $desc && $desc ne '' && $desc ne 'Uncharacterized protein') {
-          $uniprots{$ac}{description} = $desc;
+        if (defined $desc && $desc ne '') {
+          if ($desc !~ /^($blacklist)$/) {
+            $uniprots{$ac}{description} = $desc;
+          }
         }
         if (defined $version && $version ne '') {
           $uniprots{$ac}{version} = $version;
@@ -226,11 +233,14 @@ sub get_uniprot_for_upi {
 
 
       if (defined $gene_name) {
-        if ($gene_name_type eq 'Name') {
-          $uniprots{$ac}{gene_name} = $gene_name;
-        } else {
-          push @{$uniprots{$ac}{synonyms}}, $gene_name;
-         }
+        if (!exists $synonyms{$gene_name}) {
+          if ($gene_name_type eq 'Name') {
+            $uniprots{$ac}{gene_name} = $gene_name;
+          } else {
+            push @{$uniprots{$ac}{synonyms}}, $gene_name;
+          }
+          $synonyms{$gene_name}++;
+        }
       }
     }
   }
@@ -244,7 +254,7 @@ sub set_descriptions {
   my ($self, $dba, $analysis, $external_dbs) = @_;
   my $sources   = $self->param_required('description_source');
   my $overwrite = $self->param_required('overwrite_description');
-
+  
   if (@$sources) {
     my @db_names = map { $$external_dbs{$_} } @$sources;
     my $db_names = "'" . join("','", @db_names) . "'";
@@ -315,7 +325,7 @@ sub set_gene_names {
         );
 
         if (defined $$uniprot{synonyms}) {
-          for my $synonym (uniq @{$$uniprot{synonyms}}) {
+          for my $synonym (@{$$uniprot{synonyms}}) {
             $xref->add_synonym($synonym);
           }
         }

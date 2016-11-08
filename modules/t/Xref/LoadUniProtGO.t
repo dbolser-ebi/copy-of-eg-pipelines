@@ -153,7 +153,7 @@ $obj->run();
 
 $go_xrefs = object_xrefs();
 is($$go_xrefs{IEA}{'Interpro'}, 545,                    'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 124, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 118, 'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 401,  'run method: correct number of GO xrefs');
 is($$go_xrefs{IEA}{'null'}, 6,                          'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 4,   'run method: correct number of GO xrefs');
@@ -166,7 +166,7 @@ $obj->run();
 
 $go_xrefs = object_xrefs();
 ok(!defined($$go_xrefs{IEA}{'Interpro'}),              'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 61, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 55, 'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 204, 'run method: correct number of GO xrefs');
 ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,  'run method: correct number of GO xrefs');

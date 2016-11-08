@@ -90,6 +90,7 @@ is_deeply($obj->param('external_dbs'), $external_dbs,   'param_defaults method: 
 is($obj->param('replace_all'), 0,                       'param_defaults method: replace_all');
 is_deeply($obj->param('description_source'), [],        'param_defaults method: description_source');
 is($obj->param('overwrite_description'), 0,             'param_defaults method: overwrite_description');
+is_deeply($obj->param('description_blacklist'), [],     'param_defaults method: description_blacklist');
 is_deeply($obj->param('gene_name_source'), [],          'param_defaults method: gene_name_source');
 is($obj->param('overwrite_gene_name'), 0,               'param_defaults method: overwrite_gene_name');
 is($obj->param('uniparc_external_db'), 'UniParc',       'param_defaults method: uniparc_external_db');
@@ -100,8 +101,7 @@ $obj->param('species', $species);
 $obj->param('uniparc_db', \%uniparc_db);
 $obj->param('uniprot_db', \%uniprot_db);
 
-my $analysis     = $aa->fetch_by_logic_name($obj->param('logic_name'));
-my $external_dbs = $obj->param('external_dbs');
+my $analysis = $aa->fetch_by_logic_name($obj->param('logic_name'));
 
 my $tax_id = $dba->get_MetaContainer->get_taxonomy_id();
 
@@ -172,17 +172,38 @@ my @synonyms = @{$uniprot{synonyms}};
 is($uniprot{ac}, 'A7UUW5', 'get_uniprot_for_upi method: correct accession');
 is($uniprot{name}, 'A7UUW5_ANOGA', 'get_uniprot_for_upi method: correct name');
 is($uniprot{type}, 'unreviewed', 'get_uniprot_for_upi method: correct accession');
-is($uniprot{description}, 'AGAP004716-PA', 'get_uniprot_for_upi method: correct description');
+is($uniprot{description}, 'Gustatory receptor', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 1, 'get_uniprot_for_upi method: correct version');
 is($uniprot{gene_name}, 'GPRGR57', 'get_uniprot_for_upi method: correct gene name');
 is(scalar(@synonyms), 1, 'get_uniprot_for_upi method: one synonym');
 is($synonyms[0], 'AgaP_AGAP004716', 'get_uniprot_for_upi method: correct synonym');
-
 ## add_xref method ignores unreviewed result if not in external_dbs
 my $filtered_external_dbs = {reviewed => 'Uniprot/SWISSPROT'};
 
 my $xref = $obj->add_xref(\%uniprot, $analysis, $filtered_external_dbs);
 ok(!defined($xref), 'add_xref method: no result for unreviewed data');
+}
+
+# Description blacklisting
+{
+my $upi = 'UPI0001538F8D';
+
+$obj->param('description_blacklist', ['Eukaryotic']);
+my $uniprots = $obj->get_uniprot_for_upi($uniparc_dba, $uniprot_dba, $tax_id, $upi);
+my %uniprot = %{$$uniprots[0]};
+is($uniprot{description}, 'Eukaryotic translation initiation factor 3 subunit C', 'description blacklist: no partial match');
+
+$obj->param('description_blacklist', ['Eukaryotic.*']);
+$uniprots = $obj->get_uniprot_for_upi($uniparc_dba, $uniprot_dba, $tax_id, $upi);
+%uniprot = %{$$uniprots[0]};
+ok(!defined($uniprot{description}), 'description blacklist: regex match');
+
+$obj->param('description_blacklist', ['Uncharacterized protein', 'Eukaryotic.*']);
+$uniprots = $obj->get_uniprot_for_upi($uniparc_dba, $uniprot_dba, $tax_id, $upi);
+%uniprot = %{$$uniprots[0]};
+ok(!defined($uniprot{description}), 'description blacklist: regex match');
+
+$obj->param('description_blacklist', []);
 }
 
 # Reviewed UniProt record with name and description
@@ -372,9 +393,9 @@ is_rows(0, $dba,
 $obj->run();
 
 ($reviewed_xrefs, $unreviewed_xrefs) = object_xrefs();
-is(scalar(@$reviewed_xrefs), 31,    'run method: correct number of reviewed UniProt xrefs');
-is(scalar(@$unreviewed_xrefs), 269, 'run method: correct number of unreviewed UniProt xrefs');
-is_rows(144, $dba,
+cmp_ok(scalar(@$reviewed_xrefs), '>=', 31,    'run method: correct number of reviewed UniProt xrefs');
+cmp_ok(scalar(@$unreviewed_xrefs), '>=', 269, 'run method: correct number of unreviewed UniProt xrefs');
+is_rows(145, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]
@@ -385,9 +406,9 @@ $obj->param('replace_all', 1);
 $obj->run();
 
 ($reviewed_xrefs, $unreviewed_xrefs) = object_xrefs();
-is(scalar(@$reviewed_xrefs), 15,    'run method: correct number of reviewed UniProt xrefs');
-is(scalar(@$unreviewed_xrefs), 129, 'run method: correct number of unreviewed UniProt xrefs');
-is_rows(144, $dba,
+cmp_ok(scalar(@$reviewed_xrefs), '>=', 15,    'run method: correct number of reviewed UniProt xrefs');
+cmp_ok(scalar(@$unreviewed_xrefs), '>=', 129, 'run method: correct number of unreviewed UniProt xrefs');
+is_rows(145, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]
@@ -405,7 +426,7 @@ $obj->param('description_source', ['reviewed']);
 $obj->run();
 
 $descriptions = descriptions();
-is($$descriptions{'null'}, 52,                      'run method: correct number of description sources');
+cmp_ok($$descriptions{'null'}, '<=', 52,                      'run method: correct number of description sources');
 ok(!exists($$descriptions{'no source'}),            'run method: correct number of description sources');
 ok(!exists($$descriptions{'UniProtKB/Swiss-Prot'}), 'run method: correct number of description sources');
 is($$descriptions{'VB Community Annotation'}, 26,   'run method: correct number of description sources');
@@ -416,22 +437,22 @@ $obj->param('overwrite_description', 1);
 $obj->run();
 
 $descriptions = descriptions();
-is($$descriptions{'null'}, 52,                    'run method: correct number of description sources');
-ok(!exists($$descriptions{'no source'}),          'run method: correct number of description sources');
-is($$descriptions{'UniProtKB/Swiss-Prot'}, 15,    'run method: correct number of description sources');
-is($$descriptions{'VB Community Annotation'}, 13, 'run method: correct number of description sources');
-is($$descriptions{'VB External Description'}, 61, 'run method: correct number of description sources');
+cmp_ok($$descriptions{'null'}, '<=', 52,                    'run method: correct number of description sources');
+ok(!exists($$descriptions{'no source'}),                    'run method: correct number of description sources');
+cmp_ok($$descriptions{'UniProtKB/Swiss-Prot'}, '>=', 15,    'run method: correct number of description sources');
+cmp_ok($$descriptions{'VB Community Annotation'}, '<=', 13, 'run method: correct number of description sources');
+cmp_ok($$descriptions{'VB External Description'}, '<=', 61, 'run method: correct number of description sources');
 
 $obj->param('description_source', ['reviewed', 'unreviewed']);
 $obj->run();
 
 $descriptions = descriptions();
-is($$descriptions{'null'}, 51,                    'run method: correct number of description sources');
-ok(!exists($$descriptions{'no source'}),          'run method: correct number of description sources');
-is($$descriptions{'UniProtKB/Swiss-Prot'}, 15,    'run method: correct number of description sources');
-is($$descriptions{'UniProtKB/TrEMBL'}, 19,        'run method: correct number of description sources');
-is($$descriptions{'VB Community Annotation'}, 7,  'run method: correct number of description sources');
-is($$descriptions{'VB External Description'}, 49, 'run method: correct number of description sources');
+cmp_ok($$descriptions{'null'}, '<=', 51,                    'run method: correct number of description sources');
+ok(!exists($$descriptions{'no source'}),                    'run method: correct number of description sources');
+cmp_ok($$descriptions{'UniProtKB/Swiss-Prot'}, '>=', 15,    'run method: correct number of description sources');
+cmp_ok($$descriptions{'UniProtKB/TrEMBL'}, '>=', 19,        'run method: correct number of description sources');
+cmp_ok($$descriptions{'VB Community Annotation'}, '<=', 7,  'run method: correct number of description sources');
+cmp_ok($$descriptions{'VB External Description'}, '<=', 49, 'run method: correct number of description sources');
 
 # Add gene names
 my $gene_names = gene_names();
@@ -447,7 +468,7 @@ $gene_names = gene_names();
 is($$gene_names{'null'}, 112,                   'run method: correct number of gene names');
 is($$gene_names{'RFAM'}, 2,                     'run method: correct number of gene names');
 is($$gene_names{'TRNASCAN_SE'}, 23,             'run method: correct number of gene names');
-is($$gene_names{'Uniprot_gn'}, 1,               'run method: correct number of gene names');
+cmp_ok($$gene_names{'Uniprot_gn'}, '>=', 1,     'run method: correct number of gene names');
 is($$gene_names{'VB_Community_Annotation'}, 28, 'run method: correct number of gene names');
 
 # Add genes names with overwriting
@@ -458,7 +479,7 @@ $gene_names = gene_names();
 is($$gene_names{'null'}, 112,                   'run method: correct number of gene names');
 is($$gene_names{'RFAM'}, 2,                     'run method: correct number of gene names');
 is($$gene_names{'TRNASCAN_SE'}, 23,             'run method: correct number of gene names');
-is($$gene_names{'Uniprot_gn'}, 14,              'run method: correct number of gene names');
+cmp_ok($$gene_names{'Uniprot_gn'}, '>=', 14,    'run method: correct number of gene names');
 is($$gene_names{'VB_Community_Annotation'}, 15, 'run method: correct number of gene names');
 }
 
@@ -485,6 +506,7 @@ sub descriptions {
     if (defined $gene->description) {
       if ($gene->description =~ /Source:([^;]+)/) {
         $descriptions{$1}++;
+        say $gene->stable_id.': '.$gene->description;
       } else {
         $descriptions{'no source'}++;
       }
