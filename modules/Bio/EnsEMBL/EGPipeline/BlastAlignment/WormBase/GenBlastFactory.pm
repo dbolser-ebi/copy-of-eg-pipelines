@@ -29,12 +29,19 @@ sub run{
   my $aa = $dba->get_adaptor('Analysis');
   my $analysis = $aa->fetch_by_logic_name('genblast');
 
+  my @files;
+  $self->param('files', \@files);
+
+  # as it will barf the method call below otherwise
+  return undef unless $analysis; 
 
   my $genblast_files = $analysis->db_file;
-  $genblast_files=~s/genome\/genome\.fa/split_wormpep/;
 
-  my @files = glob("$genblast_files/*");
-  $self->param('files', \@files);
+  # species who don't need genblasting will return NULL
+  return undef unless -e $genblast_files;
+
+  $genblast_files=~s/genome\/genome\.fa/split_wormpep/;
+  @files = glob("$genblast_files/*");
 }
 
 sub write_output{

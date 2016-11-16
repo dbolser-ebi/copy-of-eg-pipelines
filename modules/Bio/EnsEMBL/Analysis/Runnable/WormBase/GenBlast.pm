@@ -276,6 +276,7 @@ sub parse_results{
   }
   
   $self->clean_output;
+  map {unlink $_} keys %{$self->files_to_delete};
   $self->output(\@transcripts);
 
 }
