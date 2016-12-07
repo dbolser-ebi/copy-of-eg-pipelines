@@ -114,6 +114,8 @@ sub skip {
   my ($self,$analysis,$aa,$dbh)=@_;
   my $analysis_timestamp = $analysis->db_version;
   my $blast_timestamp = (stat($analysis->db_file))[9];
+  
+  return undef if $self->param('skip_timestamps');
 
   if ($blast_timestamp != $analysis_timestamp) {
     $analysis->db_version($blast_timestamp);

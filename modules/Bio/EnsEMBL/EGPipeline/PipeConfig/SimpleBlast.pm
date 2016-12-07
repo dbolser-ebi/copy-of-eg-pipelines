@@ -57,7 +57,8 @@ sub default_options {
     division     => [],
     run_all      => 0,
     meta_filters => {},
-    
+    skip_timestamps => 1,   
+ 
     # Parameters for dumping and splitting Fasta query files.
     max_seq_length          => 250000,
     max_seq_length_per_file => $self->o('max_seq_length'),
@@ -360,6 +361,7 @@ sub pipeline_analyses {
                             delete_existing    => $self->o('delete_existing'),
                             production_lookup  => $self->o('production_lookup'),
                             production_db      => $self->o('production_db'),
+                            skip_timestamps    => $self->o('skip_timestamps'),
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {
@@ -378,6 +380,7 @@ sub pipeline_analyses {
                             delete_existing    => $self->o('delete_existing'),
                             production_lookup  => $self->o('production_lookup'),
                             production_db      => $self->o('production_db'),
+                            skip_timestamps    => $self->o('skip_timestamps'),
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {
