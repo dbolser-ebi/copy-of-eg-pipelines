@@ -101,10 +101,10 @@ sub run {
 # run the makeblastdb if needed
 sub index_if_needed{
    my ($self,$analysis)=@_;
-   unless -e ($analysis->db_file . '.phr'){
+   unless (-e $analysis->db_file . '.phr'){
        my $cmd = $self->param_required('makeblastdb_exe') . ' -in '. $analysis->db_file . ' -dbtype prot';
        my $out = `$cmd 2>&1`;
-       $self->throw("Error when executing $cmd:\n$out\n") if $out =~ /error/me;
+       $self->throw("Error when executing $cmd:\n$out\n") if $out =~/error/mi;
    }
 }
 
