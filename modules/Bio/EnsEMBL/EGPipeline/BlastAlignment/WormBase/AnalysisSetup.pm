@@ -59,6 +59,8 @@ sub run {
       return; 
     }
 
+    $self->index_if_needed($analysis);
+
     if ($self->param('delete_existing')) {
       my $analysis_id = $analysis->dbID;
       foreach my $table (@{$self->param('linked_tables')}) {
@@ -94,6 +96,16 @@ sub run {
   }
  
   $dba->dbc->disconnect_if_idle(); 
+}
+
+# run the makeblastdb if needed
+sub index_if_needed{
+   my ($self,$analysis)=@_;
+   unless -e ($analysis->db_file . '.phr'){
+       my $cmd = $self->param_required('makeblastdb_exe') . ' -in '. $analysis->db_file . ' -dbtype prot';
+       my $out = `$cmd 2>&1`;
+       $self->throw("Error when executing $cmd:\n$out\n") if $out =~ /error/me;
+   }
 }
 
 # compare timestamps to determine if the analysis needs to be run

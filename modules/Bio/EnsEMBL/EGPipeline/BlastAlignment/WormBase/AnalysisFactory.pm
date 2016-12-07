@@ -38,7 +38,8 @@ sub run {
     my $db_file = $$analysis{db_file};
     $db_file =~ s!.*/([^/]+)$!$1!;
     $$analysis{'description'} .= " Source database: $db_file.";
-    
+    $$analysis{blast_db} = $$analysis{db_file};   
+ 
     if ($filter_top_x) {
       my $top_x;
       if ($$analysis{'program'} =~ /blastp$/) {
