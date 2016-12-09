@@ -44,8 +44,8 @@ sub run {
   my $agp_evidence = $self->param_required('agp_evidence');
   
   my $gap_type = $$agp_gap_type{$species} || 'scaffold';
-  my $linkage  = $$agp_linkage{$species} || 'yes';
-  my $evidence = $$agp_evidence{$species} || 'paired-end';
+  my $linkage  = $$agp_linkage{$species}  || 'yes';
+  my $evidence = $$agp_evidence{$species} || 'paired-ends';
   
   open(my $out_fh, '>', $out_file) or $self->throw("Cannot open file $out_file: $!");
   
