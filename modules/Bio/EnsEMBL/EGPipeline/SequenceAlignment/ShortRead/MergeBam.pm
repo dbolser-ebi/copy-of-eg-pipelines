@@ -33,6 +33,7 @@ sub param_defaults {
   return {
     'samtools_dir' => '/nfs/panda/ensemblgenomes/external/samtools',
     'bcftools_dir' => '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin',
+    'threads'      => 1,
     'clean_up'     => 1,
     'use_csi'      => 0,
     'vcf'          => 0,
