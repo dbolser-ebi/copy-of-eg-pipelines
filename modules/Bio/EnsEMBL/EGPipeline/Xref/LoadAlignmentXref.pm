@@ -200,14 +200,14 @@ sub add_compound_xref {
 
 sub xref_metadata {
   my ($self) = @_;
-  my $db_fasta_file = $self->param_required('db_fasta_file');
+  my $fasta_file = $self->param_required('fasta_file');
   
   my @blacklist = @{$self->param_required('description_blacklist')};
   my $blacklist = join('|', @blacklist);
   
   my %xref_metadata;
 
-  open(F, $db_fasta_file);
+  open(F, $fasta_file);
   my $seq_in = Bio::SeqIO->new(
     -fh     => \*F,
     -format => 'fasta',
