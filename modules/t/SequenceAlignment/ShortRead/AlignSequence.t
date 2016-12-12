@@ -131,7 +131,7 @@ my %aligners =
              },
 );
 
-$obj->param(samtools_dir => '/nfs/panda/ensemblgenomes/external/samtools');
+$obj->param('samtools_dir', '/nfs/panda/ensemblgenomes/external/samtools');
 
 foreach my $aligner (sort keys %aligners) {
   my $class         = $aligners{$aligner}{class};
@@ -180,9 +180,14 @@ foreach my $aligner (sort keys %aligners) {
   
   $obj->run();
   
-  is(-e $obj->param('bam_file'), 1, "run method: $aligner bam_file exists (single read)");
+  is(-e $obj->param('sam_file'), 1, "run method: $aligner sam_file exists (single read)");
   
-  my $single_stats = $aligner_object->get_bam_stats($obj->param('bam_file'));
+  # More than just checking that a file is produced,
+  # check the results by converting to BAM, then pull out stats.
+  $aligner_object->sam_to_bam($obj->param('sam_file'));
+  (my $single_bam_file = $obj->param('sam_file')) =~ s/\.sam$/\.bam/;
+  
+  my $single_stats = $aligner_object->get_bam_stats($single_bam_file);
   my ($total_single_reads)  = $single_stats =~ /^(\d+).*in total/m;
   my ($mapped_single_reads) = $single_stats =~ /^(\d+).*mapped/m;
   
@@ -195,15 +200,20 @@ foreach my $aligner (sort keys %aligners) {
   
   $obj->run();
   
-  is(-e $obj->param('bam_file'), 1, "run method: $aligner bam_file exists (paired read)");
+  is(-e $obj->param('sam_file'), 1, "run method: $aligner sam_file exists (paired read)");
 
-  my $paired_stats = $aligner_object->get_bam_stats($obj->param('bam_file'));
+  # More than just checking that a file is produced,
+  # check the results by converting to BAM, then pull out stats.
+  $aligner_object->sam_to_bam($obj->param('sam_file'));
+  (my $paired_bam_file = $obj->param('sam_file')) =~ s/\.sam$/\.bam/;
+  
+  my $paired_stats = $aligner_object->get_bam_stats($paired_bam_file);
   my ($total_paired_reads)  = $paired_stats =~ /^(\d+).*in total/m;
   my ($mapped_paired_reads) = $paired_stats =~ /^(\d+).*mapped/m;
   
   is($total_paired_reads,  $paired_total,  "run method: $aligner number of reads (paired read)");
   is($mapped_paired_reads, $paired_mapped, "run method: $aligner mapped reads (paired read)");
-
+  
   remove_tree($results_dir);
 
   # STAR puts files in the current dir, and there is no way

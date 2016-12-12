@@ -47,6 +47,7 @@ my $bam_cindex_file = catdir($test_files_dir, 'agam_merged.sorted.csi');
 my $vcf_file        = catdir($test_files_dir, 'agam_merged.sorted.vcf');
 
 my $samtools_dir = '/nfs/panda/ensemblgenomes/external/samtools';
+my $bcftools_dir = '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin';
 
 my $tmp_dir = "/tmp/$ENV{'USER'}/mergebam";
 
@@ -65,10 +66,12 @@ $obj->input_job($job_obj);
 # Set and check default parameters.
 my $param_defaults = $obj->param_defaults();
 $obj->input_job->param_init($param_defaults);
-is($obj->param('samtools_dir'),  $samtools_dir, 'param_defaults method: samtools_dir');
-is($obj->param('clean_up'),      1,             'param_defaults method: clean_up');
-is($obj->param('use_csi'),       0,             'param_defaults method: use_csi');
-is($obj->param('vcf'),           0,             'param_defaults method: vcf');
+is($obj->param('samtools_dir'), $samtools_dir, 'param_defaults method: samtools_dir');
+is($obj->param('bcftools_dir'), $bcftools_dir, 'param_defaults method: bcftools_dir');
+is($obj->param('threads'),      1,             'param_defaults method: threads');
+is($obj->param('clean_up'),     1,             'param_defaults method: clean_up');
+is($obj->param('use_csi'),      0,             'param_defaults method: use_csi');
+is($obj->param('vcf'),          0,             'param_defaults method: vcf');
 
 # Set some params that would otherwise come via the pipeline.
 $obj->param('species', $species);
