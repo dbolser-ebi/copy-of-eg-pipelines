@@ -36,14 +36,14 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   
-  my $samtools_dir  = $self->param_required('samtools_dir');
-  my $threads       = $self->param_required('threads');
-  my $memory        = $self->param_required('memory');
+  my $samtools_dir = $self->param_required('samtools_dir');
+  my $threads      = $self->param_required('threads');
+  my $memory       = $self->param_required('memory');
   
   my $aligner_object = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
-    -samtools_dir      => $samtools_dir,
-    -threads           => $threads,
-    -memory            => $memory,
+    -samtools_dir => $samtools_dir,
+    -threads      => $threads,
+    -memory       => $memory,
   );
   
   $self->param('aligner_object', $aligner_object);
@@ -52,13 +52,13 @@ sub fetch_input {
 sub run {
   my ($self) = @_;
   
-  my $aligner    = $self->param_required('aligner_object');
-  my $sam_file   = $self->param_required('sam_file');
-  my $clean_up   = $self->param_required('clean_up');
+  my $aligner  = $self->param_required('aligner_object');
+  my $sam_file = $self->param_required('sam_file');
+  my $clean_up = $self->param_required('clean_up');
   
-  my $bam_file   = $sam_file;
-  $bam_file =~ s/\.sam$/\.bam/;
-  $bam_file .= '.bam' if not $bam_file =~ /\.bam$/;
+  my $bam_file = $sam_file;
+  $bam_file    =~ s/\.sam$/\.bam/;
+  $bam_file   .= '.bam' if not $bam_file =~ /\.bam$/;
   my $bam_exists = -s $bam_file;
   my $sam_exists = -s $sam_file;
   
