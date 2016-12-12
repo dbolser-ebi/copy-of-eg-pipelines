@@ -41,7 +41,7 @@ sub write_output {
   
   my @logic_names;
   if ($always_use_repbase || (! exists $$rm_library{$species} && ! exists $$rm_library{'all'})) {
-    push @logic_names, 'repeatmask';
+    push @logic_names, 'repeatmask_repbase';
   }
   if (exists $$rm_library{$species} || exists $$rm_library{'all'}) {
     if (exists $$rm_logic_name{$species} || exists $$rm_logic_name{'all'}) {
