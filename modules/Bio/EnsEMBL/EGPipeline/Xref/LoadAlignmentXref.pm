@@ -15,8 +15,9 @@ sub param_defaults {
 
   return {
     %{$self->SUPER::param_defaults},
-    'database_type' => 'pep',
-    'query_type'    => 'pep',
+    'database_type'         => 'pep',
+    'query_type'            => 'pep',
+    'description_blacklist' => [],
   };
 }
 
@@ -200,7 +201,10 @@ sub add_compound_xref {
 sub xref_metadata {
   my ($self) = @_;
   my $db_fasta_file = $self->param_required('db_fasta_file');
-
+  
+  my @blacklist = @{$self->param_required('description_blacklist')};
+  my $blacklist = join('|', @blacklist);
+  
   my %xref_metadata;
 
   open(F, $db_fasta_file);
@@ -211,7 +215,13 @@ sub xref_metadata {
 
   while (my $inseq = $seq_in->next_seq) {
     my ($secondary_id, $desc, $version) = split(/\|/, $inseq->desc);
-
+    
+    if (defined $desc && $desc ne '') {
+      if ($desc =~ /^($blacklist)$/) {
+        $desc = undef;
+      }
+    }
+    
     $xref_metadata{$inseq->display_id} = {
       display_id  => $secondary_id,
       description => $desc,
