@@ -32,9 +32,10 @@ sub param_defaults {
   
   return {
     'samtools_dir' => '/nfs/panda/ensemblgenomes/external/samtools',
-    'vcf'          => 0,
-    'use_csi'      => 0,
+    'bcftools_dir' => '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin',
     'clean_up'     => 1,
+    'use_csi'      => 0,
+    'vcf'          => 0,
   };
 }
 
@@ -59,10 +60,12 @@ sub run {
   foreach my $merge (@$merges) {
     my $merge_id = $$merge{'merge_id'};
     
+    my $bam_files = $self->bam_files_from_db($merge_id);
+    
     my $merged_bam_file = catdir($results_dir, "$merge_id\_$assembly.bam");
     $$merge{'merged_bam_file'} = $merged_bam_file;
     
-    my $cmds = $self->merge_bam($merge_id, $merged_bam_file);
+    my $cmds = $self->merge_bam($bam_files, $merged_bam_file);
     $$merge{'cmds'} = join("; ", @$cmds);
   }
 }
@@ -76,13 +79,43 @@ sub write_output {
 }
 
 sub merge_bam {
-  my ($self, $merge_id, $merged_bam_file) = @_;
+  my ($self, $bam_files, $merged_bam_file) = @_;
   
   my $samtools_dir = $self->param_required('samtools_dir');
+  my $bcftools_dir = $self->param_required('bcftools_dir');
   my $threads      = $self->param_required("threads");
-  my $vcf          = $self->param_required("vcf");
-  my $use_csi      = $self->param_required("use_csi");
   my $clean_up     = $self->param_required('clean_up');
+  my $use_csi      = $self->param_required("use_csi");
+  my $vcf          = $self->param_required("vcf");
+  my $fasta_file   = $self->param('fasta_file');
+    
+  my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
+    -samtools_dir => $samtools_dir,
+    -bcftools_dir => $bcftools_dir,
+    -threads      => $threads,
+  );
+  $aligner->dummy(1) if -s $merged_bam_file;
+  
+  if (scalar(@$bam_files) == 1) {
+    my ($bam_file) = $$bam_files[0];
+    rename $bam_file, $merged_bam_file;
+  } else {
+    $aligner->merge_bam($bam_files, $merged_bam_file);
+    if ($clean_up) {
+      map { unlink $_ } @$bam_files;
+    }
+  }
+  
+  $aligner->index_bam($merged_bam_file, $use_csi);
+  if ($vcf) {
+    $aligner->generate_vcf($fasta_file, $merged_bam_file);
+  }
+  
+  return $aligner->align_cmds;
+}
+
+sub bam_files_from_db {
+  my ($self, $merge_id) = @_;
   
   my $sql = "SELECT bam_file FROM merge_bam WHERE merge_id = ?;";
   my $sth = $self->hive_dbh->prepare($sql);
@@ -92,30 +125,7 @@ sub merge_bam {
     push @bam_files, $$results[0];
   }
   
-  my $aligner = Bio::EnsEMBL::EGPipeline::Common::Aligner->new(
-    -samtools_dir => $samtools_dir,
-    -threads      => $threads,
-  );
-  $aligner->dummy(1) if -s $merged_bam_file;
-  
-  if (scalar(@bam_files) == 1) {
-    my ($bam_file) = $bam_files[0];
-    rename $bam_file, $merged_bam_file if -s $bam_file;
-  } else {
-    $aligner->merge_bam(\@bam_files, $merged_bam_file);
-    if ($clean_up) {
-      if (-s $merged_bam_file) {
-        unlink @bam_files;
-      }
-    }
-  }
-  
-  $aligner->index_bam($merged_bam_file, $use_csi);
-  if ($vcf) {
-    $aligner->generate_vcf($merged_bam_file);
-  }
-  
-  return $aligner->align_cmds;
+  return \@bam_files;
 }
 
 1;
