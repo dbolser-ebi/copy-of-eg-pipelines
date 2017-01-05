@@ -40,7 +40,6 @@ use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use List::MoreUtils qw(uniq);
 
 sub param_defaults {
   my ($self) = @_;
