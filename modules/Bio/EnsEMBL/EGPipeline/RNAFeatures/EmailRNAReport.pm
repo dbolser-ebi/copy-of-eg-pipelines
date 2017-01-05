@@ -36,19 +36,30 @@ use strict;
 use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
-use MIME::Lite;
+use Email::MIME;
+use Email::Sender::Simple;
+use Path::Tiny;
 
 sub fetch_input {
   my ($self) = @_;
-  my $run_cmscan    = $self->param_required('run_cmscan');
-  my $run_trnascan  = $self->param_required('run_trnascan');
-  my $pipeline_dir  = $self->param_required('pipeline_dir');
-  my $evalue_levels = $self->param_required('evalue_levels');
+  my $run_cmscan         = $self->param_required('run_cmscan');
+  my $run_trnascan       = $self->param_required('run_trnascan');
+  my $cmscan_threshold   = $self->param_required('cmscan_threshold');
+  my $trnascan_threshold = $self->param_required('trnascan_threshold');
+  my $pipeline_dir       = $self->param_required('pipeline_dir');
+  my $evalue_levels      = $self->param_required('evalue_levels');
   
   my $text = "The RNA Features pipeline has completed.\n";
   
   if ($run_cmscan) {
     my @evalue_levels = keys %$evalue_levels;
+    foreach my $evalue_level (@evalue_levels) {
+      if ($evalue_level > $cmscan_threshold) {
+        delete $$evalue_levels{$evalue_level};
+      }
+    }
+    @evalue_levels = keys %$evalue_levels;
+    
     my $cmscan_file = "$pipeline_dir/cmscan.txt";
     $text .= "\nThe cmscan alignments are summarised in the table below, and in the attached plots.";
     $text .= $self->summarise($cmscan_file, 'E-value', \@evalue_levels);
@@ -56,9 +67,14 @@ sub fetch_input {
   }
   
   if ($run_trnascan) {
+    my $scores = [40];
+    if ($trnascan_threshold < 40) {
+      $scores = [0, 40];
+    }
+    
     my $trnascan_file = "$pipeline_dir/trnascan.txt";
     $text .= "\nThe trnascan alignments are summarised in the table below.";
-    $text .= $self->summarise($trnascan_file, 'Score', [0, 40]);
+    $text .= $self->summarise($trnascan_file, 'Score', $scores);
   }
   
   $self->param('text', $text);
@@ -72,17 +88,9 @@ sub run {
   my $pipeline_dir  = $self->param_required('pipeline_dir');
   my $evalue_levels = $self->param_required('evalue_levels');
   
-  my $msg = MIME::Lite->new(
-    From    => $email,
-    To      => $email,
-    Subject => $subject,
-    Type    => 'multipart/mixed',
-  );
+  my @parts;
   
-  $msg->attach(
-    Type => 'TEXT',
-    Data => $text,
-  );
+  push @parts, Email::MIME->create(body => $text);
   
   foreach my $evalue (keys %$evalue_levels) {
     my $biotypes_file = "biotypes_$evalue.svg";
@@ -91,25 +99,44 @@ sub run {
     my $distinct_path = "$pipeline_dir/$distinct_file";
     
     if (-e $biotypes_path) {
-      $msg->attach(
-        Type        => 'image/svg+xml',
-        Path        => $biotypes_path,
-        Filename    => $biotypes_file,
-        Disposition => 'attachment',
+      my $part =
+      Email::MIME->create(
+        body => path($biotypes_path)->slurp_raw,
+        attributes => {
+          filename     => $biotypes_file,
+          content_type => 'image/svg+xml',
+          disposition  => 'attachment',
+        },
       );
+      
+      push @parts, $part;
     }
     
     if (-e $distinct_path) {
-      $msg->attach(
-        Type        => 'image/svg+xml',
-        Path        => $distinct_path,
-        Filename    => $distinct_file,
-        Disposition => 'attachment',
+      my $part =
+      Email::MIME->create(
+        body => path($distinct_path)->slurp_raw,
+        attributes => {
+          filename     => $distinct_file,
+          content_type => 'image/svg+xml',
+          disposition  => 'attachment',
+        },
       );
+      
+      push @parts, $part;
     }
   }
   
-  $msg->send;
+  my $msg = Email::MIME->create(
+    header => [
+      From    => $email,
+      To      => $email,
+      Subject => $subject,
+    ],
+    parts => \@parts,
+  );
+  
+  Email::Sender::Simple->send($msg);
 }
 
 sub summarise {
