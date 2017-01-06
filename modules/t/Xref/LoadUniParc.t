@@ -116,7 +116,7 @@ is(scalar(@$uniparcs), 158, 'run method: correct number of UniParc xrefs');
 $obj->run();
 
 $uniparcs = object_xrefs();
-is(scalar(@$uniparcs), 160, 'run method: correct number of UniParc xrefs');
+is(scalar(@$uniparcs), 161, 'run method: correct number of UniParc xrefs');
 
 done_testing();
 
