@@ -87,10 +87,10 @@ sub retrieve_files {
 	    $self->throw("A paired read experiment can only have 2 files");
     }
     
-    $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq");
-    $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq");
+    $seq_file_1 = catdir($work_dir, "$run_acc\_all_1.fastq.gz");
+    $seq_file_2 = catdir($work_dir, "$run_acc\_all_2.fastq.gz");
   } else {
-    $seq_file_1 = catdir($work_dir, "$run_acc\_all.fastq");
+    $seq_file_1 = catdir($work_dir, "$run_acc\_all.fastq.gz");
   }
   
   # Retrieve each file
@@ -113,25 +113,19 @@ sub retrieve_files {
       }
       
       # Reuse files if possible
-      my $fastq = $seq_file;
-      my $fastq_gz = $fastq;
-      $fastq_gz =~ s/[SED]RR\w+\.fastq$/$file_name/;
-      $self->throw("Warning: can't differenciate fastq and fastq.gz files ($fastq)") if $fastq eq $fastq_gz;
+      my $fastq_final = $seq_file;
+      my $fastq_dl = catdir($work_dir, $file_name);
       
       # Reuse fastq file if it was succesfully unzipped
-      if (-s $fastq and not -s $fastq_gz) {
+      if (-s $seq_file and not -s $fastq_dl) {
         next FILE;
       } else {
-        unlink ($fastq_gz, $fastq);
+        unlink ($seq_file, $fastq_dl);
         $file->retrieve($work_dir);
-        $self->_unzip($fastq_gz, $fastq);
+        rename $fastq_dl, $seq_file;
         
-        if (not -s $fastq) {
-          if (-e $fastq) {
-            $self->throw("Uncompressed file is empty '$fastq'");
-          } else {
-            $self->throw("Cannot get file '$fastq'");
-          }
+        if (not -s $seq_file) {
+          $self->throw("Retrieved file is empty '$fastq_dl'");
         }
       }
     } else {
@@ -140,24 +134,6 @@ sub retrieve_files {
   }
   
   return ($seq_file_1, $seq_file_2, $sam_file);
-}
-
-sub _unzip {
-  my $self = shift;
-  my ($fastq_gz, $fastq) = @_;
-
-  # Check that the file is indeed a .gz file
-  if ($fastq_gz =~ /\.fastq\.gz$/) {
-    gunzip $fastq_gz => $fastq or $self->throw("gunzip failed: $GunzipError\n");
-    unlink $fastq_gz;
-  # Not a fastq.gz, just a fastq: rename
-  } elsif ($fastq_gz =~ /\.fastq$/ and $fastq_gz ne $fastq) {
-    rename $fastq_gz, $fastq;
-  } else {
-    $self->throw("Can't unzip file '$fastq_gz' to '$fastq' (uncompatible format)");
-  }
-  
-  return $fastq;
 }
 
 1;
