@@ -54,6 +54,10 @@ sub run {
     }
   }
   
+  # Get assembly name
+  my $dba = $self->core_dba;
+  my $assembly = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
+  
   $cmds{$merge_id}{'aligner'}         = $aligner;
   $cmds{$merge_id}{'aligner_version'} = join(", ", keys %versions);
   $cmds{$merge_id}{'merge_level'}     = $merge_level;
@@ -62,7 +66,8 @@ sub run {
   
   my $json = to_json( \%cmds, { ascii => 1, pretty => 1 } );
   
-  my $cmds_file = catdir($results_dir, "/$merge_id.cmds.json");
+  my $file_name = sprintf("/%s_%s.cmds.json", $merge_id, $assembly);
+  my $cmds_file = catdir($results_dir, $file_name);
   open (my $fh, '>', $cmds_file) or die "Failed to open file '$cmds_file'";
 	print $fh $json;
   close($fh);
