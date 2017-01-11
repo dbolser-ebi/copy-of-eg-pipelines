@@ -55,28 +55,25 @@ sub run {
   my ($self) = @_;
   
   my $results_dir = $self->param_required('results_dir');
-  my $merges      = $self->param_required('merges');
+  my $merge       = $self->param_required('merge');
   my $assembly    = $self->param('assembly');
   
-  foreach my $merge (@$merges) {
-    my $merge_id = $$merge{'merge_id'};
-    
-    my $bam_files = $self->bam_files_from_db($merge_id);
-    
-    my $merged_bam_file = catdir($results_dir, "$merge_id\_$assembly.bam");
-    $$merge{'merged_bam_file'} = $merged_bam_file;
-    
-    my $cmds = $self->merge_bam($bam_files, $merged_bam_file);
-    $$merge{'cmds'} = join("; ", @$cmds);
-  }
+  my $merge_id = $$merge{'merge_id'};
+
+  my $bam_files = $self->bam_files_from_db($merge_id);
+
+  my $merged_bam_file = catdir($results_dir, "$merge_id\_$assembly.bam");
+  $$merge{'merged_bam_file'} = $merged_bam_file;
+
+  my $cmds = $self->merge_bam($bam_files, $merged_bam_file);
+  $$merge{'cmds'} = join("; ", @$cmds);
 }
 
 sub write_output {
   my ($self) = @_;
   
-  foreach my $merge (@{$self->param_required('merges')}) {
-    $self->dataflow_output_id($merge, 2);
-  }
+  my $merge = $self->param_required('merge');
+  $self->dataflow_output_id($merge, 2);
 }
 
 sub merge_bam {
