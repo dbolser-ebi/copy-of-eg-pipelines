@@ -58,6 +58,7 @@ sub default_options {
     study            => [],
     merge_level      => 'run',
     merge_id         => undef,
+    merge_group      => {},
     tax_id_restrict  => 1,
     
     # RNA-seq options
@@ -389,6 +390,7 @@ sub alignment_analyses {
                               study           => $self->o('study'),
                               merge_level     => $self->o('merge_level'),
                               merge_id        => $self->o('merge_id'),
+                              merge_group     => $self->o('merge_group'),
                               tax_id_restrict => $self->o('tax_id_restrict'),
                               data_type       => $self->o('data_type'),
                             },
@@ -539,6 +541,7 @@ sub alignment_analyses {
     {
       -logic_name        => 'MergeBam',
       -module            => 'Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::MergeBam',
+      -analysis_capacity => 25,
       -max_retry_count   => 1,
       -parameters        => {
                               results_dir  => catdir($results_dir, '#species#'),
@@ -567,6 +570,7 @@ sub alignment_analyses {
       -logic_name        => 'CreateBigWig',
       -module            => 'Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::CreateBigWig',
       -can_be_empty      => 1,
+      -analysis_capacity => 25,
       -max_retry_count   => 1,
       -parameters        => {
                               bedtools_dir  => $self->o('bedtools_dir'),
