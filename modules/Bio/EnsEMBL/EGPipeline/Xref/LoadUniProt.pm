@@ -143,7 +143,7 @@ sub add_xref {
 
   	$xref = Bio::EnsEMBL::DBEntry->new(
       -PRIMARY_ID  => $$uniprot{ac},
-  		-DISPLAY_ID  => $$uniprot{name},
+  		-DISPLAY_ID  => $$uniprot{ac},
       -DESCRIPTION => $$uniprot{description},
       -VERSION     => $$uniprot{version},
   		-DBNAME      => $external_db,
