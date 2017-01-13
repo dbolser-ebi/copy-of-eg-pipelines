@@ -44,6 +44,7 @@ sub fetch_input {
   my ($self) = @_;
   my $run_cmscan         = $self->param_required('run_cmscan');
   my $run_trnascan       = $self->param_required('run_trnascan');
+  my $load_mirbase       = $self->param_required('load_mirbase');
   my $cmscan_threshold   = $self->param_required('cmscan_threshold');
   my $trnascan_threshold = $self->param_required('trnascan_threshold');
   my $pipeline_dir       = $self->param_required('pipeline_dir');
@@ -75,6 +76,12 @@ sub fetch_input {
     my $trnascan_file = "$pipeline_dir/trnascan.txt";
     $text .= "\nThe trnascan alignments are summarised in the table below.";
     $text .= $self->summarise($trnascan_file, 'Score', $scores);
+  }
+  
+  if ($load_mirbase) {
+    my $mirbase_file = "$pipeline_dir/mirbase.txt";
+    $text .= "\nThe mirbase load is summarised in the table below.";
+    $text .= $self->summarise($mirbase_file, 'Score');
   }
   
   $self->param('text', $text);
@@ -150,16 +157,20 @@ sub summarise {
   my %summary;
   foreach my $row (@rows) {
     my ($value, $species, $biotype, $name) = split(/\t/, $row);
-    foreach my $threshold (@$thresholds) {
-      if ($value_type eq 'E-value') {
-        if ($value <= $threshold) {
-          $summary{$species}{$threshold}{$biotype}{$name}++;
-        }
-      } else {
-        if ($value >= $threshold) {
-          $summary{$species}{$threshold}{$biotype}{$name}++;
+    if (defined $thresholds) {
+      foreach my $threshold (@$thresholds) {
+        if ($value_type eq 'E-value') {
+          if ($value <= $threshold) {
+            $summary{$species}{$threshold}{$biotype}{$name}++;
+          }
+        } else {
+          if ($value >= $threshold) {
+            $summary{$species}{$threshold}{$biotype}{$name}++;
+          }
         }
       }
+    } else {
+      $summary{$species}{''}{$biotype}{$name}++;
     }
   }
   

@@ -22,14 +22,15 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes
+Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateGenes
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes;
+package Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateGenes;
 
 use strict;
 use warnings;
+use feature 'say';
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::Gene;
@@ -43,23 +44,23 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 sub param_defaults {
   my ($self) = @_;
   return {
-    'gene_source'      => undef,
-    'stable_id_type'   => 'eg',
-    'evalue_threshold' => 1e-6,
-    'truncated'        => 0,
-    'nonsignificant'   => 0,
-    'bias_threshold'   => 0.3,
-    'within_repeat'    => 0,
-    'within_exon'      => 0,
+    'gene_source'          => undef,
+    'stable_id_type'       => 'eg',
+    'allow_repeat_overlap' => 0,
+    'allow_coding_overlap' => 0,
+    'compare_field'        => 'evalue',
+    'gene_overlap_sources' => [],
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $source_logic_name = $self->param_required('source_logic_name');
-  my $within_repeat     = $self->param_required('within_repeat');
-  my $within_exon       = $self->param_required('within_exon');
-  my $id_db             = $self->param_required('id_db');
+  my $source_logic_name    = $self->param_required('source_logic_name');
+  my $allow_repeat_overlap = $self->param_required('allow_repeat_overlap');
+  my $allow_coding_overlap = $self->param_required('allow_coding_overlap');
+  my $compare_field        = $self->param_required('compare_field');
+  my $gene_overlap_sources = $self->param_required('gene_overlap_sources');
+  my $id_db                = $self->param_required('id_db');
   
   my $dba  = $self->core_dba();
   my $dafa = $dba->get_adaptor('DnaAlignFeature');
@@ -68,13 +69,16 @@ sub run {
   my $aa   = $dba->get_adaptor('Analysis');
   my $ga   = $dba->get_adaptor('Gene');
   my $dbea = $dba->get_adaptor('DBEntry');
+  my $tsfa = $dba->get_adaptor('TranscriptSupportingFeature');
   my $ida  = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$id_db);
   
   my $gene_source = $self->generate_source($dba);
   
   my @features = @{ $dafa->fetch_all_by_logic_name($source_logic_name) };
   
-  my ($overlap_count, $repeat_count, $coding_exon_count, $total_count) = (0, 0, 0, 0);
+  my ($overlap_count, $repeat_count, $coding_exon_count,
+      $rna_gene_count, $thresholds_count,
+      $update_count, $create_count) = (0, 0, 0, 0, 0, 0, 0);
   
   FEATURE: foreach my $feature (@features) {
     if (! defined $feature->db_name) {
@@ -82,35 +86,68 @@ sub run {
       $self->throw("Feature (ID=$dbid) lacks an external_db reference.");
     }
     
-    if ($self->dna_align_feature_overlap($dafa, $feature)) {
+    if ($self->dna_align_feature_overlap($dafa, $feature, $compare_field)) {
       $overlap_count++;
       next FEATURE;
     }
     
-    unless ($within_repeat) {
-      if ($self->within_repeat_feature($ra, $feature)) {
+    if (!$allow_repeat_overlap) {
+      my ($overlap, undef) = $self->repeat_feature_overlap($ra, $feature);
+      if ($overlap) {
         $repeat_count++;
         next FEATURE;
       }
     }
     
-    unless ($within_exon) {
-      if ($self->within_coding_exon($ta, $feature)) {
+    if (!$allow_coding_overlap) {
+      my ($overlap, undef) = $self->coding_exon_overlap($ta, $feature);
+      if ($overlap) {
         $coding_exon_count++;
         next FEATURE;
       }
     }
     
     if ($self->check_thresholds($feature)) {
-      $self->make_gene($dba, $aa, $ga, $dbea, $ida, $gene_source, $feature);
-      $total_count++;
+      my ($overlap, $within, $rna_transcript) =
+        $self->rna_gene_overlap($ta, $feature, $gene_overlap_sources);
+      
+      if ($overlap) {
+        $rna_gene_count++;
+      } elsif ($within) {
+        $self->update_gene($aa, $ga, $dbea, $tsfa, $feature, $rna_transcript);
+        $update_count++;
+      } else {
+        $self->create_gene($dba, $aa, $ga, $dbea, $ida, $gene_source, $feature);
+        $create_count++;
+      }
+    } else {
+      $thresholds_count++;
     }
   }
   
-  my $msg = "$total_count alignments were converted to genes, ".
-            "$overlap_count overlapping alignments were ignored, ".
-            "$repeat_count alignments were wholly within a repeat feature, ".
-            "$coding_exon_count alignments were wholly within a protein-coding region.";
+  my $msg = "$create_count $source_logic_name alignments were converted to genes, ".
+            "$overlap_count overlapping alignments were ignored";
+  
+  if ($repeat_count) {
+    $msg .= ", $repeat_count alignments overlapped a repeat feature";
+  }
+  
+  if ($coding_exon_count) {
+    $msg .= ", $coding_exon_count alignments overlapped a protein-coding region";
+  }
+  
+  if ($rna_gene_count) {
+    $msg .= ", $rna_gene_count alignments overlapped an existing RNA gene";
+  }
+  
+  if ($update_count) {
+    $msg .= ", $update_count alignments were merged with an existing RNA gene";
+  }
+  
+  if ($thresholds_count) {
+    $msg .= ", $thresholds_count alignments failed QC thresholds";
+  }
+  
   $self->warning($msg);
 }
 
@@ -128,22 +165,29 @@ sub generate_source {
 }
 
 sub dna_align_feature_overlap {
-  my ($self, $dafa, $feature) = @_;
+  my ($self, $dafa, $feature, $compare) = @_;
   
   # Check overlaps with other dna_align_features; if a feature with the same
   # hit_name exists in the overlapping set, only make a gene if it
-  # has the lowest E-value.
-
+  # has the lowest E-value (default) or highest score.
+  
+  $compare = 'evalue' unless defined $compare;
   my $overlap = 0;
+  
   my @dafs = @{ $dafa->fetch_all_nearest_by_Feature(-FEATURE => $feature, -RANGE => 0) };
   foreach my $daf (@dafs) {
     my $dna_align_feature = $$daf[0];
     if ($feature->dbID != $dna_align_feature->dbID) {
-      if ($feature->hseqname eq $dna_align_feature->hseqname) {
-        if ($feature->p_value > $dna_align_feature->p_value) {
-          $self->warning("dna_align_feature (ID: ".$dna_align_feature->dbID.") overlaps dna_align_feature (ID:".$feature->dbID.") and has a smaller E-value");
-          $overlap = 1;
-          last;
+      if ($feature->analysis->logic_name eq $dna_align_feature->analysis->logic_name) {
+        if ($feature->hseqname eq $dna_align_feature->hseqname) {
+          if (
+            ($compare eq 'evalue' && $feature->p_value > $dna_align_feature->p_value) ||
+            ($compare eq 'score'  && $feature->score < $dna_align_feature->score)
+          ) {
+              $self->warning("dna_align_feature (ID:".$dna_align_feature->dbID.") overlaps dna_align_feature (ID:".$feature->dbID.") and has a smaller E-value");
+              $overlap = 1;
+              last;
+          }
         }
       }
     }
@@ -152,115 +196,105 @@ sub dna_align_feature_overlap {
   return $overlap;
 }
 
-sub within_repeat_feature {
+sub repeat_feature_overlap {
   my ($self, $ra, $feature) = @_;
+
+  my $f_start = $feature->seq_region_start;
+  my $f_end   = $feature->seq_region_end;
   
-  # Check overlaps with repeat_features; if a dna_align_feature is
-  # wholly within a repeat feature, don't make a gene from it.
-  
-  my $within = 0;
+  my ($overlap, $within) = (0, 0);
   my @repeats = @{ $ra->fetch_all_nearest_by_Feature(-FEATURE => $feature, -RANGE => 0) };
   foreach my $repeat (@repeats) {
     my $repeat_feature = $$repeat[0];
-    if ($repeat_feature->seq_region_start <= $feature->seq_region_start
-     && $repeat_feature->seq_region_end >= $feature->seq_region_end)
-    {
-      $self->warning("Repeat (ID: ".$repeat_feature->dbID.") contains dna_align_feature (ID:".$feature->dbID.")");
+    my $rf_start = $repeat_feature->seq_region_start;
+    my $rf_end   = $repeat_feature->seq_region_end;
+
+    if (between($f_start, $rf_start, $rf_end) && between($f_end, $rf_start, $rf_end)) {
+      $self->warning("Repeat (ID:".$repeat_feature->dbID.") contains dna_align_feature (ID:".$feature->dbID.")");
       $within = 1;
-      last;
+    } else {
+      $self->warning("Repeat (ID:".$repeat_feature->dbID.") overlaps dna_align_feature (ID:".$feature->dbID.")");
+      $overlap = 1;
     }
   }  
   
-  return $within;
+  return ($overlap, $within);
 }
 
-sub within_coding_exon {
+sub coding_exon_overlap {
   my ($self, $ta, $feature) = @_;
   
-  # Check overlaps with exons; if a dna_align_feature is
-  # wholly within a protein-coding region, don't make a gene from it.
+  my $f_start = $feature->seq_region_start;
+  my $f_end   = $feature->seq_region_end;
   
-  my $within = 0;
+  my ($overlap, $within) = (0, 0);
   my @transcripts = @{ $ta->fetch_all_nearest_by_Feature(-FEATURE => $feature, -RANGE => 0) };
   foreach my $t (@transcripts) {
     my $transcript = $$t[0]->transfer($feature->slice->seq_region_Slice());
 
     foreach my $exon (@{ $transcript->get_all_Exons() }) {
       if (defined $exon->coding_region_start($transcript)) {
-        if ($exon->coding_region_start($transcript) <= $feature->seq_region_start
-         && $exon->coding_region_end($transcript) >= $feature->seq_region_end)
-        {
-          $self->warning("Exon (ID: ".$exon->dbID.") contains dna_align_feature (ID:".$feature->dbID.")");
+        my $e_start = $exon->coding_region_start($transcript);
+        my $e_end   = $exon->coding_region_end($transcript);
+
+        if (between($f_start, $e_start, $e_end) && between($f_end, $e_start, $e_end)) {
+          $self->warning("Exon (ID:".$exon->dbID.") contains dna_align_feature (ID:".$feature->dbID.")");
           $within = 1;
-          last;
+        } elsif (between($f_start, $e_start, $e_end) || between($f_end, $e_start, $e_end) || between($e_start, $f_start, $f_end)) {
+          $self->warning("Exon (ID:".$exon->dbID.") overlaps dna_align_feature (ID:".$feature->dbID.")");
+          $overlap = 1;
         }
       }
     }
   }  
   
-  return $within;
+  return ($overlap, $within);
 }
 
-sub check_thresholds {
-  my ($self, $feature) = @_;
-  my $evalue_threshold = $self->param_required('evalue_threshold');
-  my $truncated        = $self->param_required('truncated');
-  my $nonsignificant   = $self->param_required('nonsignificant');
-  my $bias_threshold   = $self->param_required('bias_threshold');
+sub rna_gene_overlap {
+  my ($self, $ta, $feature, $logic_names) = @_;
   
-  my $evalue  = $feature->p_value;
-  my $attribs = $feature->get_all_Attributes;
+  # Check overlaps with other RNA genes; if the feature is entirely within
+  # an existing gene, it is merged, otherwise it is ignored.
   
-  my ($biotype, $cmscan_bias, $cmscan_significant, $cmscan_truncated);
-  foreach my $attrib (@$attribs) {
-    if ($attrib->code eq 'rna_gene_biotype') {
-      $biotype = $attrib->value;
-    }
-    if ($attrib->code eq 'cmscan_bias') {
-      $cmscan_bias = $attrib->value;
-    }
-    if ($attrib->code eq 'cmscan_significant') {
-      $cmscan_significant = 1;
-    }
-    if ($attrib->code eq 'cmscan_truncated') {
-      $cmscan_truncated = 1;
-    }
-  }
+  my $f_start = $feature->seq_region_start;
+  my $f_end   = $feature->seq_region_end;
   
-  my $pass_thresholds = 0;
+  my %logic_names = map { $_ => 1 } @$logic_names;
   
-  if (defined $evalue) {
-    if ($evalue <= $evalue_threshold) {
-      $pass_thresholds = 1;
-    }
-    
-    if ($biotype eq 'misc_RNA') {
-      $pass_thresholds = 0;
-    }
-    
-    if (defined $cmscan_bias) {
-      if ($cmscan_bias > $bias_threshold) {
-        $pass_thresholds = 0;
+  my ($overlap, $within, $rna_transcript) = (0, 0, undef);
+  my @transcripts = @{ $ta->fetch_all_nearest_by_Feature(-FEATURE => $feature, -RANGE => 0) };
+  foreach my $t (@transcripts) {
+    my $transcript = $$t[0]->transfer($feature->slice->seq_region_Slice());
+
+    if (exists $logic_names{$transcript->analysis->logic_name}) {
+      my $t_start = $transcript->seq_region_start;
+      my $t_end   = $transcript->seq_region_end;
+
+      if (between($f_start, $t_start, $t_end) && between($f_end, $t_start, $t_end)) {
+        $self->warning("Transcript (ID:".$transcript->dbID.") contains dna_align_feature (ID:".$feature->dbID.")");
+        $within = 1;
+        $rna_transcript = $transcript;
+      } else {
+        $self->warning("Transcript (ID:".$transcript->dbID.") overlaps dna_align_feature (ID:".$feature->dbID.")");
+        $overlap = 1;
       }
     }
-    
-    if (defined $cmscan_truncated) {
-      if (! $truncated && $cmscan_truncated) {
-        $pass_thresholds = 0;
-      }
-    }
-    
-    if (defined $cmscan_significant) {
-      if (! $nonsignificant && ! $cmscan_significant) {
-        $pass_thresholds = 0;
-      }      
-    }
-  }
+  }  
   
-  return $pass_thresholds;
+  return ($overlap, $within, $rna_transcript);
 }
 
-sub make_gene {
+sub between {
+  my ($a, $x, $y) = @_;
+  my $between = 0;
+  if ($a >= $x && $a <= $y) {
+    $between = 1;
+  }
+  return $between;
+}
+
+sub create_gene {
   my ($self, $dba, $aa, $ga, $dbea, $ida, $gene_source, $feature) = @_;
   my $target_logic_name = $self->param_required('target_logic_name');
   my $stable_id_type    = $self->param_required('stable_id_type');
@@ -286,7 +320,22 @@ sub make_gene {
   $gene->canonical_transcript($transcript);
   $ga->update($gene);
             
-  $self->add_xref($ga, $dbea, $feature, $gene, $analysis);
+  my $xref = $self->add_xref($dbea, $feature, $gene, $analysis);
+  
+  $gene->display_xref($xref);
+  $ga->update($gene);
+}
+
+sub update_gene {
+  my ($self, $aa, $ta, $dbea, $tsfa, $feature, $transcript) = @_;
+  my $target_logic_name = $self->param_required('target_logic_name');
+  
+  my $analysis = $aa->fetch_by_logic_name($target_logic_name);
+  my $gene     = $transcript->get_Gene();
+  
+  $tsfa->store($transcript->dbID, [$feature]);
+  
+  $self->add_xref($dbea, $feature, $gene, $analysis);
 }
 
 sub generate_stable_id {
@@ -335,7 +384,7 @@ sub generate_stable_id {
       my $prefix = $dba->get_MetaContainer->single_value_by_key('species.stable_id_prefix');
       my $select_sql = "SELECT max(stable_id) FROM gene WHERE stable_id LIKE '$prefix%'";
       my $sth = $dba->dbc->prepare($select_sql);
-      $sth->execute($location_id);
+      $sth->execute();
       my ($id) = $sth->fetchrow_array();
       
       if (!$id) {
@@ -406,7 +455,6 @@ sub new_gene {
     -biotype       => $biotype,
     -source        => $source,
     -status        => 'NOVEL',
-    -version       => 1,
     -created_date  => time,
     -modified_date => time,
   );
@@ -439,10 +487,10 @@ sub new_transcript {
     -biotype       => $biotype,
     -source        => $source,
     -status        => 'NOVEL',
-    -version       => 1,
     -created_date  => time,
     -modified_date => time,
   );
+  $transcript->add_supporting_features($feature);
   
   if (defined $structure) {
     my $attrib = Bio::EnsEMBL::Attribute->new(
@@ -467,18 +515,16 @@ sub new_exon {
     -slice           => $feature->slice,
     -phase           => -1,
     -end_phase       => -1,
-    -version         => 1,
     -is_constitutive => 1,
     -created_date    => time,
     -modified_date   => time,
   );
-  $exon->add_supporting_features($feature);
   
   return $exon;
 }
 
 sub add_xref {
-  my ($self, $ga, $dbea, $feature, $gene, $analysis) = @_;
+  my ($self, $dbea, $feature, $gene, $analysis) = @_;
   
   my $hit_name = $feature->hseqname;
   my $db_name  = $feature->db_name;
@@ -506,8 +552,7 @@ sub add_xref {
   
   $dbea->store($xref, $gene->dbID, 'Gene');
   
-  $gene->display_xref($xref);
-  $ga->update($gene);
+  return $xref;
 }
 
 1;

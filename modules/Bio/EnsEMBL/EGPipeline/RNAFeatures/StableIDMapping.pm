@@ -22,11 +22,11 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes
+Bio::EnsEMBL::EGPipeline::RNAFeatures::StableIDMapping
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes;
+package Bio::EnsEMBL::EGPipeline::RNAFeatures::StableIDMapping;
 
 use strict;
 use warnings;
@@ -211,11 +211,8 @@ sub check_thresholds {
   my $evalue  = $feature->p_value;
   my $attribs = $feature->get_all_Attributes;
   
-  my ($biotype, $cmscan_bias, $cmscan_significant, $cmscan_truncated);
+  my ($cmscan_bias, $cmscan_significant, $cmscan_truncated);
   foreach my $attrib (@$attribs) {
-    if ($attrib->code eq 'rna_gene_biotype') {
-      $biotype = $attrib->value;
-    }
     if ($attrib->code eq 'cmscan_bias') {
       $cmscan_bias = $attrib->value;
     }
@@ -232,10 +229,6 @@ sub check_thresholds {
   if (defined $evalue) {
     if ($evalue <= $evalue_threshold) {
       $pass_thresholds = 1;
-    }
-    
-    if ($biotype eq 'misc_RNA') {
-      $pass_thresholds = 0;
     }
     
     if (defined $cmscan_bias) {
