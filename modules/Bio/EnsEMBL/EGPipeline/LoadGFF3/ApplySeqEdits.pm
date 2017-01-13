@@ -64,7 +64,7 @@ sub run {
     $self->seq_edits_from_protein($dba, $logic_name, $protein_fasta_file);
   }
   
-  #$self->set_protein_coding($dba, $logic_name);
+  $self->set_protein_coding($dba, $logic_name);
 }
 
 sub seq_edits_from_genbank {
@@ -271,102 +271,47 @@ sub adjust_three_prime_edit {
 sub seq_edits_from_protein {
   my ($self, $dba, $logic_name, $protein_fasta_file) = @_;
   
-  #my $sa = $dba->get_adaptor("Slice");
   my $ta = $dba->get_adaptor('Transcript');
   my $aa = $dba->get_adaptor("Attribute");
   
   my %protein = $self->load_fasta($protein_fasta_file);
   
   my $transcripts = $ta->fetch_all_by_logic_name($logic_name);
-  #my $transcripts = $ta->fetch_all();
-
-  # Can run into memory problems if trying to iterate over all transcripts,
-  # so break them down by slice.
-  #my $slices = $sa->fetch_all('toplevel');
-  #foreach my $slice (@$slices) {
-  #  my $transcripts = $slice->get_all_Transcripts();
-    
-  foreach my $transcript (@$transcripts) {
-    #next if $transcript->analysis->logic_name ne $logic_name;
+  
+  my @transcript_ids = map {$_->stable_id} @$transcripts;
+  
+  foreach my $transcript_id (sort @transcript_ids) {
+    my $transcript  = $ta->fetch_by_stable_id($transcript_id);
     my $translation = $transcript->translation;
     
     if ($translation && exists $protein{$translation->stable_id}) {
       my $db_seq   = $translation->seq;
       my $file_seq = $protein{$translation->stable_id};
+      $file_seq =~ s/\*$//;
       
       if ($db_seq ne $file_seq) {
+        my @file_seq = split(//, $file_seq);
+        my @atts;
         
-        my $shift_success = $self->shift_translation_start($dba, $transcript, $file_seq);
-        
-        if (! $shift_success) {
-          my @file_seq = split(//, $file_seq);
-          my @atts;
-          
-          if (length($file_seq) == length($db_seq)) {
-            while ((my $pos = index($db_seq, '*')) >= 0) {
-              my $amino_acid = $file_seq[$pos];
-              $db_seq =~ s/\*/$amino_acid/;
-              
-              $pos += 1;      
-              my $att = $self->add_translation_seq_edit($translation, $pos, $pos, $amino_acid);
-              push @atts, $att;
-            }
+        if (length($file_seq) == length($db_seq)) {
+          while ((my $pos = index($db_seq, '*')) >= 0) {
+            my $amino_acid = $file_seq[$pos];
+            $db_seq =~ s/\*/$amino_acid/;
             
-            if ($db_seq eq $file_seq) {
-              $aa->store_on_Translation($translation, \@atts);
-            }
-          } else {
-            $self->warning('Protein sequence length mismatch for '.$translation->stable_id);
+            $pos += 1;      
+            my $att = $self->add_translation_seq_edit($translation, $pos, $pos, $amino_acid);
+            push @atts, $att;
           }
+          
+          if ($db_seq eq $file_seq) {
+            $aa->store_on_Translation($translation, \@atts);
+          }
+        } else {
+          $self->warning('Protein sequence length mismatch for '.$translation->stable_id);
         }
-#return;
       }
-#    }
     }
   }
-}
-
-sub shift_translation_start {
-  my ($self, $dba, $transcript, $target_seq) = @_;
-  
-  my $success = 0;
-  
-  my $dbid = $transcript->translation->dbID;
-  my $original_start = $transcript->translation->start;
-  $self->update_translation_start($dba, $dbid, $original_start + 1);
-  $transcript = $transcript->adaptor->fetch_by_stable_id($transcript->stable_id);
-  
-  if ($transcript->translation->seq eq $target_seq) {
-    $success = 1;
-  } else {
-    $self->update_translation_start($dba, $dbid, $original_start + 2);
-    $transcript = $transcript->adaptor->fetch_by_stable_id($transcript->stable_id);
-    
-    if ($transcript->translation->seq eq $target_seq) {
-      $success = 1;
-    } else {
-      $self->update_translation_start($dba, $dbid, $original_start);
-      $transcript = $transcript->adaptor->fetch_by_stable_id($transcript->stable_id);
-    }
-  }
-  
-  return $success;
-}
-
-sub update_translation_start {
-  my ($self, $dba, $dbid, $start) = @_;
-  
-  my $sql = 'UPDATE translation SET seq_start = ? WHERE translation_id = ?;';
-  my $sth = $dba->dbc->db_handle->prepare($sql);
-  $sth->execute($start, $dbid) or $self->throw("Failed to execute: $sql");
-}
-
-sub update_translation_end {
-  my ($self, $dba, $dbid, $end) = @_;
-  
-  my $sql = 'UPDATE translation SET seq_end = ? WHERE translation_id = ?;';
-  my $sth = $dba->dbc->db_handle->prepare($sql);
-  $sth->execute($end, $dbid) or $self->throw("Failed to execute: $sql");
 }
 
 sub add_transcript_seq_edit {
@@ -404,43 +349,6 @@ sub add_translation_seq_edit {
   $translation->add_Attributes($attribute);
   
   return $attribute;
-}
-
-sub set_protein_coding {
-  my ($self, $dba, $logic_name) = @_;
-  
-  my $ga = $dba->get_adaptor('Gene');
-  my $ta = $dba->get_adaptor('Transcript');
-  
-  my $genes = $ga->fetch_all_by_logic_name($logic_name);
-  
-  foreach my $gene (@$genes) {
-#say $gene->stable_id;
-    my $nontranslating_transcript = 0;
-    my $protein_coding_transcript = 0;
-    
-    foreach my $transcript (@{$gene->get_all_Transcripts}) {
-#say $transcript->stable_id;
-      if ($transcript->translation) {
-        if ($transcript->translation->seq =~ /\*/) {
-          $transcript->biotype('nontranslating_CDS');
-          $nontranslating_transcript++;
-        } else {
-          $transcript->biotype('protein_coding');
-          $protein_coding_transcript++;
-        }
-        $ta->update($transcript);
-      }
-    }
-    
-    if ($protein_coding_transcript) {
-      $gene->biotype('protein_coding');
-      $ga->update($gene);
-    } elsif ($nontranslating_transcript) {
-      $gene->biotype('nontranslating_CDS');
-      $ga->update($gene);
-    }
-  }
 }
 
 1;

@@ -33,9 +33,11 @@ sub fetch_runnable {
   if (%{$self->param('parameters_hash')}) {
     %parameters = %{$self->param('parameters_hash')};
   }
-  unless (exists $parameters{'SETHOME'}) {
-    $parameters{'SETHOME'} = $self->param('workdir');
-  }
+  
+  #my $repeatmasker_cache = $self->param('repeatmasker_cache');
+  #if (defined $repeatmasker_cache && -e $repeatmasker_cache) {
+  #  $ENV{'REPEATMASKER_CACHE'} = $repeatmasker_cache;
+  #}
   
   my $runnable = Bio::EnsEMBL::Analysis::Runnable::RepeatMasker->new
   (

@@ -44,9 +44,8 @@ use File::Basename qw(fileparse);
 
 sub param_defaults {
   return {
-    'blast_type'    => 'ncbi',
     'blast_db'      => undef,
-    'blast_db_type' => 'prot',
+    'database_type' => 'pep',
   };
 }
 
@@ -73,36 +72,32 @@ sub run {
   my $makeblastdb_exe = $self->param('makeblastdb_exe');
   my $db_fasta_file   = $self->param('db_fasta_file');
   my $blast_db        = $self->param('blast_db');
-  my $blast_type      = $self->param('blast_type');
-  my $blast_db_type   = $self->param('blast_db_type');
+  my $database_type   = $self->param('database_type');
   
-  my $cmd;
-  if ($blast_type eq 'wu') {
-    $cmd = "$makeblastdb_exe -i $db_fasta_file -n $blast_db";
-    if ($blast_db_type eq 'prot') {
-      $cmd .= " -p T";
-    } else {
-      $cmd .= " -p F";
-    }
-  } else {
-    $cmd = "$makeblastdb_exe -in $db_fasta_file -out $blast_db -dbtype $blast_db_type";
-  }
+  my $blast_db_type = $database_type eq 'pep' ? 'prot' : 'nucl';
+  
+  my $cmd = "$makeblastdb_exe -in $db_fasta_file -out $blast_db -dbtype $blast_db_type";
   
   my $out = `$cmd 2>&1`;
   if ($out =~ /error/mi) {
     $self->throw("Error when executing $cmd:\n$out");
   } else {
-    if ($blast_type eq 'wu') {
-      if (!(-e "$blast_db.nhr" && -e "$blast_db.nin" && -e "$blast_db.nsq")) {
-        $self->throw("Error when executing $cmd:\n$out");
-      }
-    } else {
-      my $results = (-e "$blast_db.phr" && -e "$blast_db.pin" && -e "$blast_db.psq");
-      my $results_large_file = (-e "$blast_db.00.phr" && -e "$blast_db.00.pin" && -e "$blast_db.00.psq" && -e "$blast_db.pal");
-      
-      if (!$results && !$results_large_file) {
-        $self->throw("Error when executing $cmd:\n$out");
-      }
+    my ($suffix_initial) = $blast_db_type =~ /^(\w)/;
+    
+    my $results = (
+      -e "$blast_db.$suffix_initial".'hr' &&
+      -e "$blast_db.$suffix_initial".'in' &&
+      -e "$blast_db.$suffix_initial".'sq'
+    );
+    my $results_large_file = (
+      -e "$blast_db.00.$suffix_initial".'hr' &&
+      -e "$blast_db.00.$suffix_initial".'in' &&
+      -e "$blast_db.00.$suffix_initial".'sq' &&
+      -e "$blast_db.$suffix_initial".'al'
+    );
+    
+    if (!$results && !$results_large_file) {
+      $self->throw("Error when executing $cmd:\n$out");
     }
   }
   

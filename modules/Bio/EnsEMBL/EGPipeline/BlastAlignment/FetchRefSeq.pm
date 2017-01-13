@@ -50,7 +50,7 @@ sub param_defaults {
   return {
     'ebi_path'     => '/nfs/panda/ensemblgenomes/external/refseq',
     'ftp_uri'      => 'ftp://ftp.ncbi.nlm.nih.gov/refseq/release',
-    'data_type'    => 'protein',
+    'data_type'    => 'pep',
     'file_varname' => 'refseq_fasta_file',
   };
 }
@@ -70,7 +70,7 @@ sub fetch_input {
   $self->param('ftp_uri',  $self->param('ftp_uri') . "/$taxonomic_level");
   
   my $refseq_files;
-  if ($data_type eq 'protein') {
+  if ($data_type eq 'pep') {
     $refseq_files = "$taxonomic_level.*.protein.faa.gz";
   } else {
     $refseq_files = "$taxonomic_level.*.rna.fna.gz";

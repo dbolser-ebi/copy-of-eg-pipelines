@@ -73,4 +73,39 @@ sub load_fasta {
   return %fasta;
 }
 
+sub set_protein_coding {
+  my ($self, $dba, $logic_name) = @_;
+  
+  my $ga = $dba->get_adaptor('Gene');
+  my $ta = $dba->get_adaptor('Transcript');
+  
+  my $genes = $ga->fetch_all_by_logic_name($logic_name);
+  
+  foreach my $gene (@$genes) {
+    my $nontranslating_transcript = 0;
+    my $protein_coding_transcript = 0;
+    
+    foreach my $transcript (@{$gene->get_all_Transcripts}) {
+      if ($transcript->translation) {
+        if ($transcript->translation->seq =~ /\*/) {
+          $transcript->biotype('nontranslating_CDS');
+          $nontranslating_transcript++;
+        } else {
+          $transcript->biotype('protein_coding');
+          $protein_coding_transcript++;
+        }
+        $ta->update($transcript);
+      }
+    }
+    
+    if ($protein_coding_transcript) {
+      $gene->biotype('protein_coding');
+      $ga->update($gene);
+    } elsif ($nontranslating_transcript) {
+      $gene->biotype('nontranslating_CDS');
+      $ga->update($gene);
+    }
+  }
+}
+
 1;

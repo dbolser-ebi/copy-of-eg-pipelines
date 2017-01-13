@@ -76,6 +76,10 @@ sub slice_synonyms {
     if (! exists $$slices{$fasta_id}) {
       $self->warning("Warning: Fasta sequence $fasta_id does not exist in database.");
       
+      # Leading Ns are sometimes in the source data, but
+      # will have been stripped out by INSDC.
+      $$fasta{$fasta_id} =~ s/^N*//;
+      
       my $length = length($$fasta{$fasta_id});
       my %sr_ids;
       
