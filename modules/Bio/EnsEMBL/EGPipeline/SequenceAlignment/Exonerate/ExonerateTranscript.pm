@@ -88,6 +88,7 @@ sub fetch_runnable {
     $self->throw($program." is not executable.") unless($program && -x $program);
     
     $self->resultsfile($self->query_file.'.out');
+    my $err_file = $self->query_file.'.err';
     
     my $command = $program." ";
     $command .= $self->options." " if($self->options);
@@ -96,9 +97,10 @@ sub fetch_runnable {
     $command .= " --query ".      $self->query_file;
     $command .= " --target ".     $self->target_file;
     $command .= " > ".            $self->resultsfile;
+    $command .= " 2> ".           $err_file;
     
     if (!-e $self->resultsfile) {
-      system("exec $command") == 0 or $self->throw("Failed to run ".$command);
+      system("exec $command") == 0 or $self->throw("Failed to run $command, errors in $err_file");
     }
   }
   
