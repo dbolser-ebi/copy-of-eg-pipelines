@@ -43,16 +43,18 @@ sub run {
   $sth->execute($merge_id);
   
   my %versions;
+  my %run_ids;
   while (my $results = $sth->fetch) {
     my ($run_id, $cmds, $version) = @$results;
     
+    $run_ids{$run_id}++ if $run_id;
     my @cmds = split(/\s*;\s*/, $cmds);
     foreach my $cmd (@cmds) {
-      push @{$cmds{$merge_id}{'run_ids'}}, $run_id;
       push @{$cmds{$merge_id}{'cmds'}}, $cmd;
       $versions{$version}++ if $version;
     }
   }
+  push @{$cmds{$merge_id}{'run_ids'}}, sort keys %run_ids;
   
   # Get assembly name
   my $dba = $self->core_dba;
