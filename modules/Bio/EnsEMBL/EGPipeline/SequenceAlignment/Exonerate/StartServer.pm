@@ -83,8 +83,8 @@ sub start_server {
   
   my ($server_starting, $cycles) = (1, 0);
   while ($server_starting) {
-    if ($cycles < 20) {
-      sleep 5;
+    if ($cycles < 50) {
+      sleep 30;
       $cycles++;
       my $started_message = `tail -1 $log_file`;
       if ($started_message =~ /Message: listening on port/) {
