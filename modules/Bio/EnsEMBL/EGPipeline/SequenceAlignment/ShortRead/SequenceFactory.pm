@@ -70,6 +70,7 @@ sub write_output {
   }
   
   my %merge_ids = %{$self->param('merge_ids')};
+  $self->throw("No run to align. Abort.") if keys %merge_ids == 0;
   
   my @output;
   foreach my $merge_id (keys %merge_ids) {
