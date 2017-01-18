@@ -43,16 +43,22 @@ sub run {
   $sth->execute($merge_id);
   
   my %versions;
+  my %run_ids;
   while (my $results = $sth->fetch) {
     my ($run_id, $cmds, $version) = @$results;
     
+    $run_ids{$run_id}++ if $run_id;
     my @cmds = split(/\s*;\s*/, $cmds);
     foreach my $cmd (@cmds) {
-      push @{$cmds{$merge_id}{'run_ids'}}, $run_id;
       push @{$cmds{$merge_id}{'cmds'}}, $cmd;
       $versions{$version}++ if $version;
     }
   }
+  push @{$cmds{$merge_id}{'run_ids'}}, sort keys %run_ids;
+  
+  # Get assembly name
+  my $dba = $self->core_dba;
+  my $assembly = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
   
   $cmds{$merge_id}{'aligner'}         = $aligner;
   $cmds{$merge_id}{'aligner_version'} = join(", ", keys %versions);
@@ -62,7 +68,8 @@ sub run {
   
   my $json = to_json( \%cmds, { ascii => 1, pretty => 1 } );
   
-  my $cmds_file = catdir($results_dir, "/$merge_id.cmds.json");
+  my $file_name = sprintf("/%s_%s.cmds.json", $merge_id, $assembly);
+  my $cmds_file = catdir($results_dir, $file_name);
   open (my $fh, '>', $cmds_file) or die "Failed to open file '$cmds_file'";
 	print $fh $json;
   close($fh);

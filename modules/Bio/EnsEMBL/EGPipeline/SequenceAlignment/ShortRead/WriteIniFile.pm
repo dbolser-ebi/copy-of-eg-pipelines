@@ -45,6 +45,10 @@ sub run {
   my $merge_label = $self->param_required('merge_label');
   my $run_ids     = $self->param_required('run_ids');
   
+  # Get assembly name
+  my $dba = $self->core_dba;
+  my $assembly = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
+  
   my ($name, $description) = ($merge_label, '');
   my $caption = $ini_type eq 'rnaseq_align' ? 'RNA-seq alignment' : $name;
   
@@ -73,7 +77,8 @@ sub run {
     "source_type = $source_type\n".
     "display     = off\n";
   
-  my $ini_file = catdir($results_dir, "/$merge_id.ini");
+  my $file_name = sprintf("/%s_%s.ini", $merge_id, $assembly);
+  my $ini_file = catdir($results_dir, $file_name);
   open (my $fh, '>', $ini_file) or die "Failed to open file '$ini_file'";
 	print $fh "$header\n$body\n";
   close($fh);
