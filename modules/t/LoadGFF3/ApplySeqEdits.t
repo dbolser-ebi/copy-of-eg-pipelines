@@ -34,10 +34,10 @@ my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
 my $ta     = $dba->get_adaptor('Transcript');
 
-my $gff3_file    = $FindBin::Bin.'/../test-files/agam_seqedits.gff3';
-my $fasta_file   = $FindBin::Bin.'/../test-files/agam.fa';
-my $genbank_file = $FindBin::Bin.'/../test-files/agam_seqedits.gbff';
-my $protein_file = $FindBin::Bin.'/../test-files/agam_protein.fa';
+my $gff3_file    = $FindBin::Bin.'/../test-files/LoadGFF3/agam_seqedits.gff3';
+my $fasta_file   = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
+my $genbank_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam_seqedits.gbff';
+my $protein_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam_protein.fa';
 
 my $gene_source = 'Ensembl';
 my $logic_name  = 'gff3_test';

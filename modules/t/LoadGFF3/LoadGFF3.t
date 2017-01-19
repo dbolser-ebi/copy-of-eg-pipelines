@@ -35,11 +35,11 @@ my $dba    = $testdb->get_DBAdaptor($dbtype);
 my $ga     = $dba->get_adaptor('Gene');
 my $pta    = $dba->get_adaptor('PredictionTranscript');
 
-my $gff3_file        = $FindBin::Bin.'/../test-files/agam.gff3';
-my $ncrna_gff3_file  = $FindBin::Bin.'/../test-files/agam_ncrna.gff3';
-my $pseudo_gff3_file = $FindBin::Bin.'/../test-files/agam_pseudo.gff3';
-my $transl_gff3_file = $FindBin::Bin.'/../test-files/agam_transl.gff3';
-my $fasta_file       = $FindBin::Bin.'/../test-files/agam.fa';
+my $gff3_file        = $FindBin::Bin.'/../test-files/LoadGFF3/agam.gff3';
+my $ncrna_gff3_file  = $FindBin::Bin.'/../test-files/LoadGFF3/agam_ncrna.gff3';
+my $pseudo_gff3_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam_pseudo.gff3';
+my $transl_gff3_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam_transl.gff3';
+my $fasta_file       = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
 
 
 my $gene_types   = ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene', 'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ];

@@ -32,7 +32,7 @@ my $testdb = Bio::EnsEMBL::Test::MultiTestDB->new($species, $curr_dir);
 my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
 
-my $fasta_file = $FindBin::Bin.'/../test-files/agam.fa';
+my $fasta_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);

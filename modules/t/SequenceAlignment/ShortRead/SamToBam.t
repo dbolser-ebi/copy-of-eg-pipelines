@@ -39,7 +39,7 @@ my $testdb = Bio::EnsEMBL::Test::MultiTestDB->new($species, $curr_dir);
 my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
 
-my $test_files_dir = catdir($FindBin::Bin, '../../test-files');
+my $test_files_dir = catdir($FindBin::Bin, '../../test-files/ShortReadAlignment');
 my $test_sam_file  = catdir($test_files_dir, 'agam_single_read.sam');
 
 my $tmp_dir = "/tmp/$ENV{'USER'}/samtobam";

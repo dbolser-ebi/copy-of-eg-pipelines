@@ -37,7 +37,7 @@ my $testdb = Bio::EnsEMBL::Test::MultiTestDB->new($species, $curr_dir);
 my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
 
-my $test_files_dir = catdir($FindBin::Bin, '../../test-files');
+my $test_files_dir = catdir($FindBin::Bin, '../../test-files/ShortReadAlignment');
 my $genome_file    = catdir($test_files_dir, 'agam_genome.fa');
 my $length_file   = catdir($test_files_dir, 'agam_length.txt');
 
