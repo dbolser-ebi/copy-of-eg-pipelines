@@ -45,8 +45,10 @@ my $logic_name  = 'gff3_test';
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::ApplySeqEdits';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
 my @module_methods = qw(
-  add_transcript_seq_edit add_translation_seq_edit extract_edits extract_seq 
-  load_fasta seq_edits_from_genbank seq_edits_from_protein set_protein_coding);
+  adjust_five_prime_edit adjust_three_prime_edit
+  add_transcript_seq_edit add_translation_seq_edit
+  extract_edits extract_seq seq_edits_from_genbank seq_edits_from_protein
+  load_fasta set_protein_coding update_translation_start);
 can_ok($module_name, @hive_methods);
 can_ok($module_name, @module_methods);
 
@@ -90,8 +92,9 @@ my $param_defaults = $ase_obj->param_defaults();
 $ase_obj->input_job->param_init($param_defaults);
 is($ase_obj->param('db_type'), 'core', 'param_defaults method: db_type');
 
-# Species is a mandatory parameter.
-$ase_obj->param('species', $species);
+# Species and logic_name are mandatory parameters.
+$ase_obj->param('species',    $species);
+$ase_obj->param('logic_name', $logic_name);
 
 # seq_edits_from_genbank method
 $testdb->hide($dbtype, qw(transcript_attrib translation_attrib));
@@ -251,7 +254,6 @@ $testdb->hide($dbtype, qw(transcript_attrib translation_attrib));
 {
 my $transcript_1 = $ta->fetch_by_stable_id('test_protein_edits-RA');
 my $transcript_2 = $ta->fetch_by_stable_id('test_protein_edits_fail-RA');
-my $transcript_3 = $ta->fetch_by_stable_id('test_protein_shift_start-RA');
 
 my $coding_seq_1_before = 'ATGAAAAAAGGTGTAACATTTCTAGCCTGTTTCATTGTCTGCCTCAAAGTCGCTTGCTCTGAAGCAGAAGTTCGAAAACTTTTTAACATTAGTCATGTTAATTCATCGGATTACATGCGATATCATGCATTACATTTGTTTAATAATGATCATCCAAACCGACTACGACCTGCATTAAAAAAATGTCCCATGTCAAATATGCTCTTTCCGGTGAAGATATTTTCTACCGAAGAACCATACTTTTGTTCCGCGGTGTTCATAAGCGCTGATTTTTTGCTAGCACCAGCGATGTGTCTGAAACTTATGCAACCGGTTGATGACCATCCCTCGAGTCATATGTTTGTTTTAATCGAGGCGGAACACGTATTCTATTACGAAGGTGGTCGCCGGTACATAAACAAAATTTTTTATCATCCTAAGCTAGAGGAAGAACCAGTGTACCATAATCTAGCCGTTGTGAAGTTGCGCAATCCAATTCGTGAAACGGTGATGGCAAATGGTCAAAGTATTGTTGCTTGTCTATGGTCTGAAATAAAGCTGCGCAATAACAAAGTTTACTTGGGCGAATGGTTTAAGTATCATCCTGAACAAAATCCTGCCTTTCGTTGGCTTGATGTTCCAGTCATAACGAGGAAGGAATGTCGCGAGGAGCTTTCGAAAAATAAAGTAATCATACCAGAATTTGATCGCGGAGTAGCTGAAACACAACTATGTGTTAAGGACAAGAAAAATAGTACCATGATTGAGTTTTGTGAACCTCGTTCGTCAGGACCATTATTTATGACCCTCGGTAACACAGTTTACGTGGTAGGGATGCCTACAGTTCATATTGATGATTGTAATGTGCAAATTGAGGTGTTTAATCAGGTTTCATCATTTTTGGATTGGATTGAAGCAATCGTATGGCCCCATTTTGAACCTCTGTAGAAAGTAGTGCATACAAACTGGTTAGGTTTGATGTGCAACATTCGTACTAAGTTGATAGTGATTTTGTAAATTTCACTAAGATTTCAACGGTTCCCTGTAATATAAAAGTATGAAATTATAGGCATTACTATATTATCAAATCATTGATTAACAAAATCGATAATTTAA';
 my $coding_seq_1_after  = $coding_seq_1_before;
@@ -260,9 +262,6 @@ my $aa_seq_1_after      = 'MKKGVTFLACFIVCLKVACSEAEVRKLFNISHVNSSDYMRYHALHLFNNDHPN
 
 my $aa_seq_2_before = 'HEKRCNISSLFHCLPQSRLL*SRSSKTF*H*SC*FIGLHAISCITFV***SSKPTTTCIKKMSHVKYALSGEDIFYRRTILLFRGVHKR*FFASTSDVSETYATG**PSLESYVCFNRGGTRILLRRWSPVHKQNFLSS*ARGRTSVP*SSRCEVAQSNS*NGDGKWSKYCCLSMV*NKAAQ*QSLLGRMV*VSS*TKSCLSLA*CSSHNEEGMSRGAFEK*SNHTRI*SRSS*NTTMC*GQEK*YHD*VL*TSFVRTIIYDPR*HSLRGRDAYSSY**L*CAN*GV*SGFIIFGLD*SNRMAPF*TSVESSAYKLVRFDVQHSY*VDSDFVNFTKISTVPCNIKV*NYRHYYIIKSLINKIDNL';
 my $aa_seq_2_after  = $aa_seq_2_before;
-
-my $aa_seq_3_before = '*KKV*HF*PVSLSASKSLALKQKFENFLTLVMLIHRITCDIMHYICLIMIIQTDYDLH*KNVPCQICSFR*RYFLPKNHTFVPRCS*ALIFC*HQRCV*NLCNRLMTIPRVICLF*SRRNTYSITKVVAGT*TKFFIILS*RKNQCTII*PL*SCAIQFVKR*WQMVKVLLLVYGLK*SCAITKFTWANGLSIILNKILPFVGLMFQS*RGRNVARSFRKIK*SYQNLIAE*LKHNYVLRTRKIVP*LSFVNLVRQDHYL*PSVTQFTW*GCLQFILMIVMCKLRCLIRFHHFWIGLKQSYGPILNLC';
-my $aa_seq_3_after  = 'KKGVTFLACFIVCLKVACSEAEVRKLFNISHVNSSDYMRYHALHLFNNDHPNRLRPALKKCPMSNMLFPVKIFSTEEPYFCSAVFISADFLLAPAMCLKLMQPVDDHPSSHMFVLIEAEHVFYYEGGRRYINKIFYHPKLEEEPVYHNLAVVKLRNPIRETVMANGQSIVACLWSEIKLRNNKVYLGEWFKYHPEQNPAFRWLDVPVITRKECREELSKNKVIIPEFDRGVAETQLCVKDKKNSTMIEFCEPRSSGPLFMTLGNTVYVVGMPTVHIDDCNVQIEVFNQVSSFLDWIEAIVWPHFEPL';
 
 my @seq_edits_1 = (
   'amino_acid_sub 309 309 X',
@@ -276,15 +275,11 @@ is($transcript_1->translate->seq(), $aa_seq_1_before, 'seq_edits_from_protein me
 
 is($transcript_2->translate->seq(), $aa_seq_2_before, 'seq_edits_from_protein method (before): amino acid sequence as expected');
 
-is($transcript_3->translate->seq(), $aa_seq_3_before, 'seq_edits_from_protein method (before): amino acid sequence as expected');
-is($transcript_3->translation->start(), 95, 'set_protein_coding method (before): sequence start correct');
-
-$ase_obj->seq_edits_from_protein($dba, $protein_file);
+$ase_obj->seq_edits_from_protein($dba, $logic_name, $protein_file);
 
 # Need to re-fetch from the database.
 $transcript_1 = $ta->fetch_by_stable_id('test_protein_edits-RA');
 $transcript_2 = $ta->fetch_by_stable_id('test_protein_edits_fail-RA');
-$transcript_3 = $ta->fetch_by_stable_id('test_protein_shift_start-RA');
 
 is($transcript_1->translateable_seq(), $coding_seq_1_after, 'seq_edits_from_protein method (after): coding sequence as expected');
 is($transcript_1->translate->seq(), $aa_seq_1_after, 'seq_edits_from_protein method (after): amino acid sequence as expected');
@@ -314,14 +309,6 @@ is(scalar(@$transcript_2_seq_edits), 0, 'seq_edits_from_protein method: no tranc
 my $translation_2_seq_edits = $transcript_2->translation->get_all_SeqEdits();
 is(scalar(@$translation_2_seq_edits), 0, 'seq_edits_from_protein method: no translation-level seq edits');
 
-is($transcript_3->translate->seq(), $aa_seq_3_after, 'seq_edits_from_protein method (after): amino acid sequence as expected');
-
-my $transcript_3_seq_edits = $transcript_3->get_all_SeqEdits();
-is(scalar(@$transcript_3_seq_edits), 0, 'seq_edits_from_protein method: no trancript-level seq edits');
-
-my $translation_3_seq_edits = $transcript_3->translation->get_all_SeqEdits();
-is(scalar(@$translation_3_seq_edits), 0, 'seq_edits_from_protein method: no translation-level seq edits');
-
 # set_protein_coding method
 is($transcript_1->get_Gene->biotype, 'nontranslating_CDS', 'set_protein_coding method (before): gene biotype correct');
 is($transcript_1->biotype, 'nontranslating_CDS', 'set_protein_coding method (before): transcript biotype correct');
@@ -331,16 +318,12 @@ $ase_obj->set_protein_coding($dba, $logic_name);
 # Need to re-fetch from the database.
 $transcript_1 = $ta->fetch_by_stable_id('test_protein_edits-RA');
 $transcript_2 = $ta->fetch_by_stable_id('test_protein_edits_fail-RA');
-$transcript_3 = $ta->fetch_by_stable_id('test_protein_shift_start-RA');
 
 is($transcript_1->get_Gene->biotype, 'protein_coding', 'set_protein_coding method (after): gene biotype correct');
 is($transcript_1->biotype, 'protein_coding', 'set_protein_coding method (after): transcript biotype correct');
 
 is($transcript_2->get_Gene->biotype, 'nontranslating_CDS', 'set_protein_coding method (after): gene biotype correct');
 is($transcript_2->biotype, 'nontranslating_CDS', 'set_protein_coding method (after): transcript biotype correct');
-
-is($transcript_3->translation->start, 97, 'set_protein_coding method (after): sequence start shifted correctly');
-is($transcript_3->biotype, 'protein_coding', 'set_protein_coding method (after): transcript biotype correct');
 }
 
 $testdb->restore($dbtype, qw(transcript_attrib translation_attrib));
@@ -384,7 +367,7 @@ is(scalar(@$transcript_3_seq_edits), 1, 'run method: one trancript-level seq edi
 my $translation_3_seq_edits = $transcript_3->translation->get_all_SeqEdits();
 is(scalar(@$translation_3_seq_edits), 1, 'run method: one translation-level seq edit');
 
-$ase_obj->set_protein_coding($dba);
+$ase_obj->set_protein_coding($dba, $logic_name);
 
 # Need to re-fetch from the database.
 $transcript_1 = $ta->fetch_by_stable_id('test_gbff_1-RA');
