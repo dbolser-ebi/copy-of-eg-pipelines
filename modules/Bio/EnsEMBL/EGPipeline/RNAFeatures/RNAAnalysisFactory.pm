@@ -26,12 +26,15 @@ sub run {
   my ($self) = @_;
   my $species             = $self->param_required('species');
   my $analyses            = $self->param_required('analyses');
-  my $run_cmscan          = $self->param_required('run_cmscan'),
-  my $run_trnascan        = $self->param_required('run_trnascan'),
-  my $rfam_logic_name     = $self->param_required('rfam_logic_name'),
-  my $trnascan_logic_name = $self->param_required('trnascan_logic_name'),
+  my $run_cmscan          = $self->param_required('run_cmscan');
+  my $run_trnascan        = $self->param_required('run_trnascan');
+  my $load_mirbase        = $self->param_required('load_mirbase');
+  my $rfam_logic_name     = $self->param_required('rfam_logic_name');
   my $cmscan_cm_file      = $self->param_required('cmscan_cm_file');
   my $cmscan_logic_name   = $self->param_required('cmscan_logic_name');
+  my $trnascan_logic_name = $self->param_required('trnascan_logic_name');
+  my $mirbase_logic_name  = $self->param_required('mirbase_logic_name');
+  my $mirbase_files       = $self->param_required('mirbase_files');
   my $pipeline_dir        = $self->param_required('pipeline_dir');
   my $db_backup_file      = $self->param('db_backup_file');
   
@@ -65,6 +68,15 @@ sub run {
     if ($run_trnascan) {
       if ($logic_name eq $trnascan_logic_name) {
         push @$filtered_analyses, $analysis;
+      }
+    }
+    
+    if ($load_mirbase) {
+      if ($logic_name eq $mirbase_logic_name) {
+        if (exists $$mirbase_files{$species}) {
+          $$analysis{'db_file'} = $$mirbase_files{$species};
+          push @$filtered_analyses, $analysis;
+        }
       }
     }
   }

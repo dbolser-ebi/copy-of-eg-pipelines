@@ -1,0 +1,36 @@
+##gff-version   3
+##sequence-region   2L 1 4000000
+2L	VectorBase	chromosome	1	4000000	.	.	.	ID=2L;Alias=CM000356.1
+###
+2L	VectorBase	pseudogene	2439935	2440006	.	+	.	ID=pseudo_test_1
+2L	VectorBase	transcript	2439935	2440006	.	+	.	ID=pseudo_test_1-RA;Parent=pseudo_test_1
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_1-RA
+###
+2L	VectorBase	pseudogene	2439935	2440006	.	+	.	ID=pseudo_test_2
+2L	VectorBase	pseudogenic_transcript	2439935	2440006	.	+	.	ID=pseudo_test_2-RA;Parent=pseudo_test_2
+2L	VectorBase	pseudogenic_exon	2439935	2440006	.	+	.	Parent=pseudo_test_2-RA
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_3
+2L	VectorBase	pseudogenic_transcript	2439935	2440006	.	+	.	ID=pseudo_test_3-RA;Parent=pseudo_test_3
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_3-RA
+###
+2L	VectorBase	pseudogene	2439935	2440006	.	+	.	ID=pseudo_test_4
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_4
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_5
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_5
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_6;pseudo=true
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_6
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_7;pseudo=true
+2L	VectorBase	transcript	2439935	2440006	.	+	.	ID=pseudo_test_7-RA
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_7-RA
+###
+2L	VectorBase	pseudogene	2439935	2440006	.	+	.	ID=pseudo_test_8
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_9;pseudo=true
+###
+2L	VectorBase	gene	2439935	2440006	.	+	.	ID=pseudo_test_10
+2L	VectorBase	transcript	2439935	2440006	.	+	.	ID=pseudo_test_10-RA;Parent=pseudo_test_10
+2L	VectorBase	exon	2439935	2440006	.	+	.	Parent=pseudo_test_10-RA

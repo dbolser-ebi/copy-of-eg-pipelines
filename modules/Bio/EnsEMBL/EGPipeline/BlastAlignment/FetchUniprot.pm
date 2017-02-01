@@ -49,7 +49,7 @@ sub param_defaults {
   return {
     'ebi_path'     => '/ebi/ftp/pub/databases/uniprot/current_release/knowledgebase',
     'ftp_uri'      => 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase',
-    'data_source'  => 'sprot',
+    'uniprot_db'   => 'sprot',
     'file_varname' => 'uniprot_fasta_file',
   };
 }
@@ -57,7 +57,7 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   my $out_dir         = $self->param_required('out_dir');
-  my $data_source     = $self->param_required('data_source');
+  my $uniprot_db      = $self->param_required('uniprot_db');
   my $taxonomic_level = $self->param('taxonomic_level');
   
   if (!-e $out_dir) {
@@ -67,11 +67,11 @@ sub fetch_input {
   
   my ($uniprot_file, $output_file);
   if ($taxonomic_level) {
-    $uniprot_file = "uniprot_$data_source\_$taxonomic_level.dat.gz";
-    $output_file  = catdir($out_dir, "$data_source\_$taxonomic_level.fa");
+    $uniprot_file = "uniprot_$uniprot_db\_$taxonomic_level.dat.gz";
+    $output_file  = catdir($out_dir, "$uniprot_db\_$taxonomic_level.fa");
   } else {
-    $uniprot_file = "uniprot_$data_source.fasta.gz";
-    $output_file  = catdir($out_dir, "uniprot_$data_source.fasta");
+    $uniprot_file = "uniprot_$uniprot_db.fasta.gz";
+    $output_file  = catdir($out_dir, "uniprot_$uniprot_db.fasta");
   }
   
   $self->param('uniprot_file', $uniprot_file);

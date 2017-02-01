@@ -30,33 +30,32 @@ sub run {
   my $id_prefixes      = $self->param_required('id_prefixes');
   my $linked_tables    = $self->param_required('linked_tables');
   my $db_type          = $self->param_required('db_type');
-  
+
   my $sql_commands = [];
-  
+
   foreach my $table (@{$linked_tables}) {
     foreach my $group (keys %{$analysis_groups}) {
       foreach my $name (@{$$analysis_groups{$group}}) {
         if (! $self->has_data($db_type, $table, "$name\_$program")) {
-          print "alrighty\n";
           my $sql = $self->update_sql($table, "$group\_$program", "$name\_$program", $external_db_name, $$id_prefixes{$name});
           push @$sql_commands, {sql => $sql};
         }
       }
     }
   }
-  
+
   $self->param('sql_commands', $sql_commands);
 }
 
 sub write_output {
   my ($self) = @_;
-  
+
   $self->dataflow_output_id($self->param('sql_commands'), 2);
 }
 
 sub has_data {
   my ($self, $db_type, $table, $logic_name) = @_;
-  
+
   my $dba = $self->get_DBAdaptor($db_type);
   my $dbh = $dba->dbc->db_handle();
   my $sql = "
@@ -64,13 +63,13 @@ sub has_data {
     WHERE logic_name = '$logic_name';
   ";
   my ($count) = $dbh->selectrow_array($sql);
-  
+
   return $count ? 1 : 0;
 }
 
 sub update_sql {
   my ($self, $table, $from, $to, $external_db_name, $prefix) = @_;
-  
+
   my $sql = "
     UPDATE
       $table        t INNER JOIN
@@ -86,9 +85,8 @@ sub update_sql {
       edb.db_name   = '$external_db_name' AND
       t.hit_name LIKE '$prefix\%';
   ";
-  
+
   return $sql;
 }
 
 1;
-

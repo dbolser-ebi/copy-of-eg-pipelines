@@ -16,78 +16,80 @@ limitations under the License.
 
 =cut
 
-
-=pod
-
-=head1 CONTACT
-
-  Please email comments or questions to the public Ensembl
-  developers list at <dev@ensembl.org>.
-
-  Questions may also be sent to the Ensembl help desk at
-  <helpdesk@ensembl.org>.
- 
-=cut
-
 package Bio::EnsEMBL::EGPipeline::Common::Aligner::GsnapAligner;
-use Log::Log4perl qw(:easy);
-use Bio::EnsEMBL::Utils::Argument qw( rearrange );
-use Bio::EnsEMBL::Utils::Exception qw(throw warning);
-use base qw(Bio::EnsEMBL::EGPipeline::Common::Aligner);
-use File::Basename;
 
-my $logger = get_logger();
-# gmap_build -D directory -d genome_name -k kmer_size fastafile
-my $build_map = '%s -D %s -d %s -k %d %s';
-# gsnap -N 1 -t nb_threads -A sam -D directory -d genome_name fastq1 fastq2
-my $gsnap_pe = '%s -N 1 -t %s -A sam -D %s -d %s %s %s > %s';
-my $gsnap_se = '%s -N 1 -t %s -A sam -D %s -d %s %s > %s';
+use strict;
+use warnings;
+use base qw(Bio::EnsEMBL::EGPipeline::Common::Aligner);
+
+use Bio::EnsEMBL::Utils::Argument qw(rearrange);
+use Bio::EnsEMBL::Utils::Exception qw(throw);
+
+use File::Basename;
+use File::Spec::Functions qw(catdir);
 
 sub new {
   my ($class, @args) = @_;
   my $self = $class->SUPER::new(@args);
-  ($self->{gmap_build}, $self->{gsnap}, $self->{kmer}, $self->{nb_threads}) = rearrange(['GMAP_BUILD', 'GSNAP', 'KMER', 'NB_THREADS'], @args);
-  $self->{gmap_build} ||= 'gmap_build';
-  $self->{gsnap}      ||= 'gsnap';
-  $self->{kmer}       ||= 15;
-  $self->{nb_threads} ||= '1';
+  
+  ($self->{kmer}) = rearrange(['KMER'], @args);
+  $self->{kmer} ||= 15;
+  
+  $self->{index_program} = 'gmap_build';
+  $self->{align_program} = 'gsnap';
+  
+  if ($self->{aligner_dir}) {
+    $self->{index_program} = catdir($self->{aligner_dir}, $self->{index_program});
+    $self->{align_program} = catdir($self->{aligner_dir}, $self->{align_program});
+  }
+  
   return $self;
 }
 
 sub index_file {
   my ($self, $file) = @_;
-  my ($name, $directories, $suffix) = fileparse($file,qr/\.[^.]*/);
-  my $comm = sprintf($build_map, $self->{gmap_build}, $directories, $name, $self->{kmer}, $file);
-  $logger->debug("Executing $comm");
-  system($comm) == 0 || throw "Cannot execute $comm";
-  return;
+  
+  my ($name, $path, undef) = fileparse($file, qr/\.[^.]*/);
+  
+  my $index_cmd  = $self->{index_program};
+  $index_cmd    .= " -D $path -d $name -k $self->{kmer} ";
+  $index_cmd    .= " $file ";
+  
+  $self->run_cmd($index_cmd, 'index');
+}
+
+sub index_exists {
+  my ($self, $file) = @_;
+  
+  (my $index_name = $file) =~ s/\.\w+$//;
+  my $exists = -e $index_name ? 1 : 0;
+  
+  return $exists;
 }
 
 sub align {
   my ($self, $ref, $sam, $file1, $file2) = @_;
-  my ($refname, $refdir, $refsuffix) = fileparse($ref,qr/\.[^.]*/);
-
-  if(defined $file2) {
-   	$self->pairedend_to_sam($refname,$refdir,$sam,$file1,$file2);
+  
+  my ($name, $path, undef) = fileparse($ref, qr/\.[^.]*/);
+  
+  if (defined $file2) {
+   	$sam = $self->align_file($name, $path, $sam, "$file1 $file2");
   } else {
-   	$self->single_to_sam($refname,$refdir,$sam,$file1);  	
+   	$sam = $self->align_file($name, $path, $sam, $file1);
   }
+  
   return $sam;
 }
 
-sub pairedend_to_sam {
-  my ($self, $refname,$refdir, $sam, $file1, $file2) = @_;
-    my $comm = sprintf($gsnap_pe, $self->{gsnap}, $self->{nb_threads}, $refdir, $refname, $file1, $file2, $sam);
-  $logger->debug("Executing $comm");
-  system($comm) == 0 || throw "Cannot execute $comm";
-  return $sam;
-}
-
-sub single_to_sam {
-  my ($self, $refname,$refdir, $sam, $file1) = @_;
-    my $comm = sprintf($gsnap_se, $self->{gsnap}, $self->{nb_threads}, $refdir, $refname, $file1, $sam);
-  $logger->debug("Executing $comm");
-  system($comm) == 0 || throw "Cannot execute $comm";
+sub align_file {
+  my ($self, $name, $path, $sam, $files) = @_;
+  
+  my $align_cmd = $self->{align_program};
+  $align_cmd   .= " -D $path -d $name -N 1 -t $self->{threads} -A sam ";
+  $align_cmd   .= " $files > $sam ";
+  
+  $self->run_cmd($align_cmd, 'align');
+  
   return $sam;
 }
 

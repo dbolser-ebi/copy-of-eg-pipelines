@@ -52,9 +52,9 @@ sub param_defaults {
     'db_type'          => 'core',
     'querylocation'    => undef,
     'queryfile'        => undef,
-    'bindir'           => '/nfs/panda/ensemblgenomes/external/bin',
+    'bindir'           => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
     'datadir'          => '/nfs/panda/ensemblgenomes/external/data',
-    'libdir'           => '/nfs/panda/ensemblgenomes/external/lib',
+    'libdir'           => '/nfs/software/ensembl/RHEL7/linuxbrew/lib',
     'workdir'          => '/tmp',
     'parameters_hash'  => {},
     'results_index'    => 'slice',
@@ -349,21 +349,6 @@ sub save_to_db {
   $adaptor->dbc && $adaptor->dbc->disconnect_if_idle();
   
   return;
-}
-
-sub fetch_external_db_id {
-  my ($self, $db_name) = @_;
-  
-  my $sql = 'SELECT external_db_id FROM external_db WHERE db_name = ?';
-  
-  my $dba = $self->get_DBAdaptor($self->param('db_type'));
-  my $dbh = $dba->dbc->db_handle;
-  my $sth = $dbh->prepare($sql);
-  $sth->execute($db_name);
-  
-  my ($external_db_id) = $sth->fetchrow_array;
-  
-  return $external_db_id;
 }
 
 1;

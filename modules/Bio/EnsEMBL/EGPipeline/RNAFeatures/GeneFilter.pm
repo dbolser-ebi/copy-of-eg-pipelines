@@ -22,15 +22,11 @@ limitations under the License.
 
 =head1 NAME
 
-Bio::EnsEMBL::EGPipeline::RNAFeatures::GeneFilter
-
-=head1 Author
-
-Naveen Kumar
+Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::RNAFeatures::GeneFilter;
+package Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateRfamGenes;
 
 use strict;
 use warnings;
@@ -106,7 +102,7 @@ sub run {
     }
     
     if ($self->check_thresholds($feature)) {
-      $self->make_gene($aa, $ga, $dbea, $ida, $gene_source, $feature);
+      $self->make_gene($dba, $aa, $ga, $dbea, $ida, $gene_source, $feature);
       $total_count++;
     }
   }
@@ -215,8 +211,11 @@ sub check_thresholds {
   my $evalue  = $feature->p_value;
   my $attribs = $feature->get_all_Attributes;
   
-  my ($cmscan_bias, $cmscan_significant, $cmscan_truncated);
+  my ($biotype, $cmscan_bias, $cmscan_significant, $cmscan_truncated);
   foreach my $attrib (@$attribs) {
+    if ($attrib->code eq 'rna_gene_biotype') {
+      $biotype = $attrib->value;
+    }
     if ($attrib->code eq 'cmscan_bias') {
       $cmscan_bias = $attrib->value;
     }
@@ -233,6 +232,10 @@ sub check_thresholds {
   if (defined $evalue) {
     if ($evalue <= $evalue_threshold) {
       $pass_thresholds = 1;
+    }
+    
+    if ($biotype eq 'misc_RNA') {
+      $pass_thresholds = 0;
     }
     
     if (defined $cmscan_bias) {
@@ -258,21 +261,22 @@ sub check_thresholds {
 }
 
 sub make_gene {
-  my ($self, $aa, $ga, $dbea, $ida, $gene_source, $feature) = @_;
+  my ($self, $dba, $aa, $ga, $dbea, $ida, $gene_source, $feature) = @_;
   my $target_logic_name = $self->param_required('target_logic_name');
   my $stable_id_type    = $self->param_required('stable_id_type');
   
   my $analysis = $aa->fetch_by_logic_name($target_logic_name);
   
-  my $stable_id = $self->generate_stable_id($ida, $stable_id_type, $feature);
+  my ($gene_stable_id, $transcript_stable_id) =
+    $self->generate_stable_id($dba, $ga, $ida, $stable_id_type, $feature);
   
-  my $gene = $self->new_gene($feature, $stable_id, $gene_source);
+  my $gene = $self->new_gene($feature, $gene_stable_id, $gene_source);
   $gene->analysis($analysis);
   
-  my $transcript = $self->new_transcript($feature, $stable_id, $gene_source);
+  my $transcript = $self->new_transcript($feature, $transcript_stable_id, $gene_source);
   $transcript->analysis($analysis);
   
-  my $exon = $self->new_exon($feature, $stable_id);
+  my $exon = $self->new_exon($feature, $gene_stable_id);
   
   $transcript->add_Exon($exon);
   $gene->add_Transcript($transcript);
@@ -286,8 +290,8 @@ sub make_gene {
 }
 
 sub generate_stable_id {
-  my ($self, $ida, $stable_id_type, $feature) = @_;
-  my $stable_id = '';
+  my ($self, $dba, $ga, $ida, $stable_id_type, $feature) = @_;
+  my ($gene_stable_id, $transcript_stable_id);
   
   if ($stable_id_type eq 'eg') {
     my $location_id = $self->feature_location_id($feature);
@@ -308,14 +312,52 @@ sub generate_stable_id {
       $self->throw("Numeric portion of identifier exceeds 9 characters");
     }
     
-    $stable_id .= 'ENSRNA';
-    $stable_id .= substr(($id + 1e9), 1);
+    $gene_stable_id  = 'ENSRNA';
+    $gene_stable_id .= substr(($id + 1e9), 1);
+    $transcript_stable_id = "$gene_stable_id-T1";
+    
+  } elsif ($stable_id_type eq 'vb') {
+    my $genes = $ga->fetch_all_by_Slice($feature->slice);
+    my $exists = 0;
+    foreach my $gene (@$genes) {
+      if (
+        $gene->seq_region_start  == $feature->start &&
+        $gene->seq_region_end    == $feature->end &&
+        $gene->seq_region_strand == $feature->strand
+      ) {
+        $gene_stable_id = $gene->stable_id;
+        $exists = 1;
+        last;
+      }
+    }
+    
+    if (!$exists) {
+      my $prefix = $dba->get_MetaContainer->single_value_by_key('species.stable_id_prefix');
+      my $select_sql = "SELECT max(stable_id) FROM gene WHERE stable_id LIKE '$prefix%'";
+      my $sth = $dba->dbc->prepare($select_sql);
+      $sth->execute($location_id);
+      my ($id) = $sth->fetchrow_array();
+      
+      if (!$id) {
+        $gene_stable_id = $prefix.'000001';
+      } else {
+        $id =~ s/$prefix//;
+        my $old_length = length($id);
+        $id++;
+        my $new_length = length($id);
+        my $leading_zeros = ($old_length - $new_length) x '0' || '';
+        
+        $gene_stable_id = "$prefix$leading_zeros$id";
+      }
+    }
+    
+    $transcript_stable_id = "$gene_stable_id-RA";
     
   } else {
     $self->throw("Unknown stable_id_type: $stable_id_type");
   }
   
-  return $stable_id;
+  return ($gene_stable_id, $transcript_stable_id);
 }
 
 sub feature_location_id {
@@ -389,7 +431,7 @@ sub new_transcript {
   
   my $transcript = Bio::EnsEMBL::Transcript->new
   (
-    -stable_id     => "$stable_id-T1",
+    -stable_id     => $stable_id,
     -start         => $feature->start,
     -end           => $feature->end,
     -strand        => $feature->strand,
@@ -414,11 +456,11 @@ sub new_transcript {
 }
 
 sub new_exon {
-  my ($self, $feature, $stable_id) = @_;
+  my ($self, $feature, $gene_stable_id) = @_;
   
   my $exon = Bio::EnsEMBL::Exon->new
   (
-    -stable_id       => "$stable_id-E1",
+    -stable_id       => "$gene_stable_id-E1",
     -start           => $feature->start,
     -end             => $feature->end,
     -strand          => $feature->strand,

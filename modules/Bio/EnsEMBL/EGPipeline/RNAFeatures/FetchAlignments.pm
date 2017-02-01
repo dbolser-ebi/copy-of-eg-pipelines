@@ -50,6 +50,7 @@ sub run {
   my $species       = $self->param_required('species');
   my $run_cmscan    = $self->param_required('run_cmscan');
   my $run_trnascan  = $self->param_required('run_trnascan');
+  my $load_mirbase  = $self->param_required('load_mirbase');
   my $alignment_dir = $self->param_required('alignment_dir');
   
   my $dba = $self->get_DBAdaptor($self->param_required('db_type'));
@@ -82,6 +83,15 @@ sub run {
     
     my $trnascan_file = "$alignment_dir/trnascan.txt";
     open(my $fh, '>', $trnascan_file) or $self->throw("Failed to open $trnascan_file: $!");
+    $self->fetch_alignments($dbh, $logic_name, 'score', $fh);
+    close($fh);
+  }
+  
+  if ($load_mirbase) {    
+    my $logic_name = $self->param_required('mirbase_logic_name');
+    
+    my $mirbase_file = "$alignment_dir/mirbase.txt";
+    open(my $fh, '>', $mirbase_file) or $self->throw("Failed to open $mirbase_file: $!");
     $self->fetch_alignments($dbh, $logic_name, 'score', $fh);
     close($fh);
   }

@@ -24,10 +24,10 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 sub param_defaults {
   return {
-    'no_dust'         => 0,
-    'no_repeatmasker' => 0,
-    'no_trf'          => 0,
-    'max_seq_length'  => 1000000,
+    'dust'           => 1,
+    'repeatmasker'   => 1,
+    'trf'            => 1,
+    'max_seq_length' => 1000000,
   };
 }
 
@@ -50,10 +50,10 @@ sub run {
     my $logic_name = $$analysis{'logic_name'};
     
     if ($logic_name eq 'dust') {
-      push @$filtered_analyses, $analysis unless $self->param('no_dust');
+      push @$filtered_analyses, $analysis if $self->param('dust');
       
-    } elsif ($logic_name eq 'repeatmask') {
-      unless ($self->param('no_repeatmasker')) {
+    } elsif ($logic_name eq 'repeatmask_repbase') {
+      if ($self->param('repeatmasker')) {
         # This is analysis with the repbase library. If the sensitivity is
         # given then use that setting, otherwise the default is 'medium'.
         
@@ -77,7 +77,7 @@ sub run {
       }
       
     } elsif ($logic_name eq 'repeatmask_customlib') {
-      unless ($self->param('no_repeatmasker')) {
+      if ($self->param('repeatmasker')) {
         # This is analysis with a custom repeat library. Such a library
         # can be species-specific, or a single library can be used against
         # all species to which the pipeline is applied.
@@ -112,7 +112,7 @@ sub run {
       }
       
     } elsif ($logic_name eq 'trf') {
-      push @$filtered_analyses, $analysis unless $self->param('no_trf');
+      push @$filtered_analyses, $analysis if $self->param('trf');
     } else {
       $self->warning("Unrecognised analysis '$logic_name' in 'dna_analyses' parameter.");
     }
@@ -220,4 +220,3 @@ sub set_sensitivity {
 }
 
 1;
-

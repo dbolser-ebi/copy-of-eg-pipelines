@@ -32,7 +32,7 @@ my $testdb = Bio::EnsEMBL::Test::MultiTestDB->new($species, $curr_dir);
 my $dbtype = 'core';
 my $dba    = $testdb->get_DBAdaptor($dbtype);
 
-my $fasta_file = $FindBin::Bin.'/../test-files/agam.fa';
+my $fasta_file = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
@@ -46,9 +46,11 @@ my $as_obj  = Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms->new;
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $as_obj->input_job($job_obj);
 
-# These are the modules param_defaults.
-$as_obj->param('db_type', 'core');
-$as_obj->param('synonym_external_db', 'ensembl_internal_synonym');
+# Set and check default parameters.
+my $param_defaults = $as_obj->param_defaults();
+$as_obj->input_job->param_init($param_defaults);
+is($as_obj->param('db_type'),             'core',                     'param_defaults method: db_type');
+is($as_obj->param('synonym_external_db'), 'ensembl_internal_synonym', 'param_defaults method: synonym_external_db');
 
 # fetch_slices method
 my %slices = $as_obj->fetch_slices($dba);
@@ -80,13 +82,6 @@ $testdb->restore($dbtype, 'seq_region_synonym');
 $as_obj->param('synonym_external_db', 'mystery');
 dies_ok { $as_obj->slice_synonyms($dba, \%slices, \%fasta) } 'Synonym requires extant external_db';
 $as_obj->param('synonym_external_db', 'ensembl_internal_synonym');
-
-# Synonyms not added for multiple matches.
-$fasta{'L20934.1'} = $fasta{'L20934'};
-$as_obj->slice_synonyms($dba, \%slices, \%fasta);
-is_rows(0, $dba, 'seq_region_synonym', 'where synonym = ? ', ['L20934']);
-is_rows(0, $dba, 'seq_region_synonym', 'where synonym = ? ', ['L20934.1']);
-delete $fasta{'L20934.1'};
 
 # Synonym not added unless sequence matches exactly.
 $fasta{'L20934'} .= 'A';
