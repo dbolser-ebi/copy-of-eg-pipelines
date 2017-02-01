@@ -33,7 +33,6 @@ sub run {
   my $db_file           = $self->param_required('db_fasta_file');
   my $blastp            = $self->param_required('blastp');
   my $blastx            = $self->param_required('blastx');
-  my $filter_top_x      = $self->param('filter_top_x');
   my $source_species    = $self->param('source_species');
   
   my $proteomic_analyses = [];
@@ -57,13 +56,13 @@ sub run {
       $$analysis{'description'} .= " Source database: $db_file.";
     }
     
-    if ($filter_top_x) {
-      my $top_x;
-      if ($$analysis{'logic_name'} =~ /blastp$/) {
-        $top_x = $self->param_required('blastp_top_x');
-      } elsif ($$analysis{'logic_name'} =~ /blastx$/) {
-        $top_x = $self->param_required('blastx_top_x');
-      }
+    my $top_x;
+    if ($$analysis{'logic_name'} =~ /blastp$/) {
+      $top_x = $self->param('blastp_top_x');
+    } elsif ($$analysis{'logic_name'} =~ /blastx$/) {
+      $top_x = $self->param('blastx_top_x');
+    }
+    if (defined $top_x) {
       if ($top_x eq 1) {
         $$analysis{'description'} .= " Results are filtered to show the best unique hit, based on E-value.";
       } else {
@@ -100,4 +99,3 @@ sub write_output {
 }
 
 1;
-

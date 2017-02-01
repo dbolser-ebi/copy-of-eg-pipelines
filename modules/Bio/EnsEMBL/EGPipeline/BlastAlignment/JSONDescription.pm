@@ -37,24 +37,26 @@ sub run {
   my $db_type     = $self->param_required('db_type');
   my $logic_name  = $self->param_required('logic_name')->[0];
   my $results_dir = $self->param_required('results_dir');
-  
+
   my $dba = $self->get_DBAdaptor($db_type);
   my $aa = $dba->get_adaptor('Analysis');
   my $analysis = $aa->fetch_by_logic_name($logic_name);
-  
+
   my $json_file = catdir($results_dir, "$species.$logic_name.json");
-  
+
   open(my $fh, '>', $json_file) or $self->throw("Cannot open file $json_file: $!");
-  
-  print $fh 
+
+  print $fh
     '{
       "category":"protein_alignment",
       "version":"'.$analysis->db_version.'",
       "description":"'.$analysis->description.'",
       "source":"VectorBase"
     }';
-  
+
   close($fh);
+
+  $dba->dbc->disconnect_if_idle();
 }
 
 1;

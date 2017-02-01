@@ -31,17 +31,13 @@ sub param_defaults {
   
   return {
     %{$self->SUPER::param_defaults},
-    'trnascan_dir' => '/nfs/panda/ensemblgenomes/external/tRNAscan-SE-1.3.1/bin',
-    'pseudo'       => 0,
+    'pseudo'    => 0,
+    'threshold' => 20,
   };
 }
 
 sub fetch_runnable {
   my ($self) = @_;
-  
-  my $trnascan_dir = $self->param_required('trnascan_dir');
-  $ENV{'PATH'} .= ":$trnascan_dir";
-  $ENV{'PERL5LIB'} .= ":$trnascan_dir";
   
   my %parameters;
   if (%{$self->param('parameters_hash')}) {
@@ -63,6 +59,7 @@ sub fetch_runnable {
     -workdir        => $self->param('workdir'),
     -external_db_id => $external_db_id,
     -pseudo         => $self->param('pseudo'),
+    -threshold      => $self->param('threshold'),
     %parameters,
   );
   

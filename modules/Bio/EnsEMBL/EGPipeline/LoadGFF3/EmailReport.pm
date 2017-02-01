@@ -36,8 +36,8 @@ use strict;
 use warnings;
 
 use base qw(
-  Bio::EnsEMBL::EGPipeline::LoadGFF3::Base
   Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport
+  Bio::EnsEMBL::EGPipeline::LoadGFF3::Base
 );
 
 sub fetch_input {
@@ -54,9 +54,9 @@ sub fetch_input {
   $report   .= $self->seq_edit_tt_report($dbh, $logic_name);
   $report   .= $self->seq_edit_tn_report($dbh, $logic_name);
   if ($protein_fasta_file && -e $protein_fasta_file) {
-    #my ($seq_report, $fixes) = $self->protein_seq_report($dba, $logic_name, $protein_fasta_file);
-    #$report .= $seq_report;
-    #$report .= $fixes;
+    my ($seq_report, $fixes) = $self->protein_seq_report($dba, $logic_name, $protein_fasta_file);
+    $report .= $seq_report;
+    $report .= $fixes;
   }
   print "$report\n";
   $self->param('text', $report);
@@ -186,6 +186,7 @@ sub protein_seq_report {
         $translations{$tn_id} = 1;
         
         my $file_seq = $protein{$tn_id};
+        $file_seq =~ s/\*$//;
         
         if ($db_seq ne $file_seq) {
           my $length = length($db_seq);

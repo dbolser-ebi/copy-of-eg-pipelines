@@ -28,10 +28,6 @@ Bio::EnsEMBL::EGPipeline::PipeConfig::RNAGenes_conf
 Configuration for generating RNA genes from alignments of RNA covariance
 models (probably from Rfam).
 
-=head1 Author
-
-Naveen Kumar
-
 =cut
 
 package Bio::EnsEMBL::EGPipeline::PipeConfig::RNAGenes_conf;
@@ -54,21 +50,34 @@ sub default_options {
     
     pipeline_name => 'rna_genes_'.$self->o('ensembl_release'),
 
-    species => [],
-    antispecies => [],
-    division => [],
-    run_all => 0,
+    species      => [],
+    antispecies  => [],
+    division     => [],
+    run_all      => 0,
     meta_filters => {},
     
+    use_mirbase  => 1,
+    use_trnascan => 1,
+    use_cmscan   => 1,
+    
+    run_context => 'eg',
+    
     # Analysis settings
-    rfam_version      => '12.1',
-    source_logic_name => 'cmscan_rfam_'.$self->o('rfam_version'),
-    target_logic_name => 'rfam_'.$self->o('rfam_version').'_gene',
-    analysis_module   => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::GeneFilter',
+    mirbase_source_logic_name => 'mirbase',
+    mirbase_target_logic_name => 'mirbase_gene',
+    mirbase_analysis_module   => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateMirbaseGenes',
+        
+    trnascan_source_logic_name => 'trnascan_align',
+    trnascan_target_logic_name => 'trnascan_gene',
+    trnascan_analysis_module   => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateTrnascanGenes',
+
+    rfam_version             => '12.1',
+    cmscan_source_logic_name => 'cmscan_rfam_'.$self->o('rfam_version'),
+    cmscan_target_logic_name => 'rfam_'.$self->o('rfam_version').'_gene',
+    cmscan_analysis_module   => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateCmscanGenes',
 
     # Config for genes
-    gene_source      => undef,
-    stable_id_type   => 'eg',
+    gene_source => undef,
     
     # Remove existing genes; if => 0 then existing analyses
     # and their features will remain, with the logic_name suffixed by '_bkp'.
@@ -78,22 +87,25 @@ sub default_options {
     # the supplied registry file will need the relevant server details.
     production_lookup => 1,
     
-    # Filter thresholds
-    evalue_threshold => 1e-6,
-    truncated        => 0,
-    nonsignificant   => 0,
-    bias_threshold   => 0.3,
+    # tRNAscan-specific thresholds (note that we could provide the option
+    # to allow overlap with repeat features or coding exons; but tRNA genes
+    # are almost always overpredicted, so we don't bother adding the extra
+    # complexity)
+    score_threshold => 40,
     
-    # Allow gene creation within a repeat feature
-    within_repeat => 0,
-    
-    # Allow gene creation within an exon
-    within_exon => 0,
+    # CMScan-specific thresholds
+    evalue_threshold     => 1e-6,
+    truncated            => 0,
+    nonsignificant       => 0,
+    bias_threshold       => 0.3,
+    allow_repeat_overlap => 1,
+    allow_coding_overlap => 0,
     
     # Connection details for database that tracks IDs
     id_db_host   => 'mysql-eg-pan-prod.ebi.ac.uk',
     id_db_port   => 4276,
     id_db_user   => 'ensrw',
+    id_db_pass   => undef,
     id_db_dbname => 'ena_identifiers',
     id_db => {
       -driver => $self->o('hive_driver'),
@@ -104,6 +116,8 @@ sub default_options {
       -dbname => $self->o('id_db_dbname'),
     },
     
+    # Registry for core dbs from previous release, for stable ID mapping
+    old_registry => undef,
   };
 }
 
@@ -141,6 +155,9 @@ sub pipeline_wide_parameters {
  
  return {
    %{$self->SUPER::pipeline_wide_parameters},
+   'use_cmscan'      => $self->o('use_cmscan'),
+   'use_trnascan'    => $self->o('use_trnascan'),
+   'use_mirbase'     => $self->o('use_mirbase'),
    'delete_existing' => $self->o('delete_existing'),
  };
 }
@@ -179,7 +196,7 @@ sub pipeline_analyses {
       -parameters        => {
                               output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             },
-      -rc_name           => 'normal',
+      -rc_name           => 'normal-rh7',
       -flow_into         => {
                               '1' => WHEN('#delete_existing#' =>
                                       ['DeleteGenes'],
@@ -190,55 +207,235 @@ sub pipeline_analyses {
 
     {
       -logic_name        => 'DeleteGenes',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -flow_into         => {
+                              '1->A' => WHEN(
+                                '#use_mirbase#'  => ['DeleteMirbaseGenes'],
+                                '#use_trnascan#' => ['DeleteTrnascanGenes'],
+                                '#use_cmscan#'   => ['DeleteCmscanGenes'],
+                              ),
+                              'A->1' => ['AnalysisSetup'],
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'DeleteMirbaseGenes',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::DeleteGenes',
       -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
-                              logic_name => $self->o('target_logic_name'),
+                              logic_name => $self->o('mirbase_target_logic_name'),
                             },
-      -rc_name           => 'normal',
-      -flow_into         => ['AnalysisSetup'],
+      -rc_name           => 'normal-rh7',
+
+    },
+
+    {
+      -logic_name        => 'DeleteTrnascanGenes',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::DeleteGenes',
+      -analysis_capacity => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              logic_name => $self->o('trnascan_target_logic_name'),
+                            },
+      -rc_name           => 'normal-rh7',
+
+    },
+
+    {
+      -logic_name        => 'DeleteCmscanGenes',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::DeleteGenes',
+      -analysis_capacity => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              logic_name => $self->o('cmscan_target_logic_name'),
+                            },
+      -rc_name           => 'normal-rh7',
 
     },
 
     {
       -logic_name        => 'AnalysisSetup',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -flow_into         => {
+                              '1->A' => WHEN(
+                                '#use_mirbase#'  => ['AnalysisSetupMirbase'],
+                                '#use_trnascan#' => ['AnalysisSetupTrnascan'],
+                                '#use_cmscan#'   => ['AnalysisSetupCmscan'],
+                              ),
+                              'A->1' => ['CheckMirbase'],
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'AnalysisSetupMirbase',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
       -max_retry_count   => 0,
       -batch_size        => 10,
       -parameters        => {
                               db_backup_required => 1,
                               db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
-                              logic_name         => $self->o('target_logic_name'), 
-                              module             => $self->o('analysis_module'), 
+                              logic_name         => $self->o('mirbase_target_logic_name'), 
+                              module             => $self->o('mirbase_analysis_module'), 
                               delete_existing    => $self->o('delete_existing'),
                               production_lookup  => $self->o('production_lookup'),
                               production_db      => $self->o('production_db'),
                             },
       -meadow_type       => 'LOCAL',
-      -flow_into         => {
-                              '1' => ['GeneFilter'],
-                            },
     },
 
     {
-      -logic_name        => 'GeneFilter',
-      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::GeneFilter',
+      -logic_name        => 'AnalysisSetupTrnascan',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count   => 0,
+      -batch_size        => 10,
+      -parameters        => {
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              logic_name         => $self->o('trnascan_target_logic_name'), 
+                              module             => $self->o('trnascan_analysis_module'), 
+                              delete_existing    => $self->o('delete_existing'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'AnalysisSetupCmscan',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -max_retry_count   => 0,
+      -batch_size        => 10,
+      -parameters        => {
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              logic_name         => $self->o('cmscan_target_logic_name'), 
+                              module             => $self->o('cmscan_analysis_module'), 
+                              delete_existing    => $self->o('delete_existing'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'CheckMirbase',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -flow_into         => {
+                              '1->A' => WHEN(
+                                '#use_mirbase#'  => ['CreateMirbaseGenes'],
+                              ),
+                              'A->1' => ['CheckTrnascan'],
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'CreateMirbaseGenes',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateMirbaseGenes',
       -max_retry_count   => 1,
       -parameters        => {
-                              source_logic_name => $self->o('source_logic_name'),
-                              target_logic_name => $self->o('target_logic_name'),
+                              source_logic_name => $self->o('mirbase_source_logic_name'),
+                              target_logic_name => $self->o('mirbase_target_logic_name'),
                               gene_source       => $self->o('gene_source'),
-                              stable_id_type    => $self->o('stable_id_type'),
-                              evalue_threshold  => $self->o('evalue_threshold'),
-                              truncated         => $self->o('truncated'),
-                              nonsignificant    => $self->o('nonsignificant'),
-                              bias_threshold    => $self->o('bias_threshold'),
-                              within_repeat     => $self->o('within_repeat'),
-                              within_exon       => $self->o('within_exon'),
+                              stable_id_type    => $self->o('run_context'),
                               id_db             => $self->o('id_db'),
                             },
-      -rc_name           => 'normal',
+      -rc_name           => 'normal-rh7',
+
+    },
+
+    {
+      -logic_name        => 'CheckTrnascan',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -flow_into         => {
+                              '1->A' => WHEN(
+                                '#use_trnascan#'  => ['CreateTrnascanGenes'],
+                              ),
+                              'A->1' => ['CheckCmscan'],
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'CreateTrnascanGenes',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateTrnascanGenes',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              source_logic_name    => $self->o('trnascan_source_logic_name'),
+                              target_logic_name    => $self->o('trnascan_target_logic_name'),
+                              gene_source          => $self->o('gene_source'),
+                              stable_id_type       => $self->o('stable_id_type'),
+                              id_db                => $self->o('id_db'),
+                              score_threshold      => $self->o('score_threshold'),
+                              allow_repeat_overlap => 0,
+                              allow_coding_overlap => 0,
+                            },
+      -rc_name           => 'normal-rh7',
+
+    },
+
+    {
+      -logic_name        => 'CheckCmscan',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -flow_into         => {
+                              '1->A' => WHEN(
+                                '#use_cmscan#'  => ['CreateCmscanGenes'],
+                              ),
+                              'A->1' => ['OldDatabaseParams'],
+                            },
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'CreateCmscanGenes',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateCmscanGenes',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              source_logic_name    => $self->o('cmscan_source_logic_name'),
+                              target_logic_name    => $self->o('cmscan_target_logic_name'),
+                              gene_source          => $self->o('gene_source'),
+                              stable_id_type       => $self->o('stable_id_type'),
+                              id_db                => $self->o('id_db'),
+                              evalue_threshold     => $self->o('evalue_threshold'),
+                              truncated            => $self->o('truncated'),
+                              nonsignificant       => $self->o('nonsignificant'),
+                              bias_threshold       => $self->o('bias_threshold'),
+                              allow_repeat_overlap => $self->o('allow_repeat_overlap'),
+                              allow_coding_overlap => $self->o('allow_coding_overlap'),
+                            },
+      -rc_name           => 'normal-rh7',
+
+    },
+
+    {
+      -logic_name        => 'OldDatabaseParams',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::OldDatabaseParams',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              old_reg_conf => $self->o('old_reg_conf'),
+                            },
+      -rc_name           => 'normal-rh7',
+      -flow_into         => ['StableIDMapping'],
+
+    },
+
+    {
+      -logic_name        => 'StableIDMapping',
+      -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::OldDatabaseParams',
+      -max_retry_count   => 1,
+      -parameters        => {
+                              report_style => $self->o('run_context'),
+                              report_dir   => $self->o('pipeline_dir'),
+                            },
+      -rc_name           => 'normal-rh7',
 
     },
 
@@ -247,7 +444,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::EGPipeline::CoreStatistics::MetaCoords',
       -max_retry_count   => 1,
       -parameters        => {},
-      -rc_name           => 'normal',
+      -rc_name           => 'normal-rh7',
       -flow_into         => ['EmailRNAGenesReport'],
     },
 
@@ -256,11 +453,13 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::EmailRNAGenesReport',
       -max_retry_count   => 1,
       -parameters        => {
-                              email      => $self->o('email'),
-                              subject    => 'RNA genes pipeline has completed',
-                              logic_name => $self->o('target_logic_name'),
+                              email               => $self->o('email'),
+                              subject             => 'RNA genes pipeline has completed for #species#',
+                              mirbase_logic_name  => $self->o('mirbase_target_logic_name'),
+                              trnascan_logic_name => $self->o('trnascan_target_logic_name'),
+                              cmscan_logic_name   => $self->o('cmscan_target_logic_name'),
                             },
-      -rc_name           => 'normal',
+      -rc_name           => 'normal-rh7',
     },
 
   ];

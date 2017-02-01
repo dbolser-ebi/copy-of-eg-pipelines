@@ -58,8 +58,8 @@ sub run {
   my $logic_name  = $self->param_required('logic_name');
   my $external_db = $self->param_required('external_db');
 
-  my $dba  = $self->get_DBAdaptor($db_type);
-  my $aa   = $dba->get_adaptor('Analysis');
+  my $dba = $self->get_DBAdaptor($db_type);
+  my $aa  = $dba->get_adaptor('Analysis');
 
   my $analysis = $aa->fetch_by_logic_name($logic_name);
 

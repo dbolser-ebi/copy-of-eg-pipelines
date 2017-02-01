@@ -27,10 +27,23 @@ sub write_output {
   my $logic_name  = $self->param_required('logic_name');
   my $external_db = $self->param_required('external_db');
 
+  my ($database_type, $query_type, $data_source);
+  
+  if ($external_db =~ /^Uniprot/) {
+    ($database_type, $query_type, $data_source) = ('pep', 'pep', 'uniprot');
+  } elsif ($external_db eq 'RefSeq_peptide') {
+    ($database_type, $query_type, $data_source) = ('pep', 'pep', 'refseq');
+  } elsif ($external_db eq 'RefSeq_dna') {
+    ($database_type, $query_type, $data_source) = ('dna', 'dna', 'refseq');
+  }
+  
   $self->dataflow_output_id(
     {
-      'logic_name'  => $logic_name,
-      'external_db' => $external_db,
+      'logic_name'    => $logic_name,
+      'external_db'   => $external_db,
+      'database_type' => $database_type,
+      'query_type'    => $query_type,
+      'data_source'   => $data_source,
     }, 1);
 }
 

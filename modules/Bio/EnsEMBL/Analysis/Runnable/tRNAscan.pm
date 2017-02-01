@@ -72,14 +72,16 @@ sub new {
   my ($class,@args) = @_;
   my $self = $class->SUPER::new(@args);
   
-  my ($pseudo, $search_mode, $external_db_id) =
-    rearrange(['PSEUDO', 'SEARCH_MODE', 'EXTERNAL_DB_ID',], @args);
+  my ($pseudo, $threshold, $search_mode, $external_db_id) =
+    rearrange(['PSEUDO', 'THRESHOLD', 'SEARCH_MODE', 'EXTERNAL_DB_ID',], @args);
   
   $self->program('tRNAscan-SE') if (!$self->program);
   $self->options(' -Q ') if (!$self->options);
   
   $pseudo = 0 unless $pseudo;
   $self->pseudo($pseudo);
+  
+  $self->threshold($threshold);
   
   $self->search_mode($search_mode);
   
@@ -92,6 +94,12 @@ sub pseudo {
   my $self = shift;
   $self->{'pseudo'} = shift if (@_);
   return $self->{'pseudo'};
+}
+
+sub threshold {
+  my $self = shift;
+  $self->{'threshold'} = shift if (@_);
+  return $self->{'threshold'};
 }
 
 sub search_mode {
@@ -126,17 +134,20 @@ sub run_analysis {
   
   my $options = $self->options;
   unless ($self->pseudo) {
-    $options .= " --nopseudo ";
+    $options .= " -D ";
+  }
+  if (defined $self->threshold) {
+    $options .= " -X " . $self->threshold;
   }
   if ($self->search_mode) {
     if ($self->search_mode =~ /arch/i) {
-      $options .= " --arch ";
+      $options .= " -A ";
     } elsif ($self->search_mode =~ /bact/i) {
-      $options .= " --bact ";
+      $options .= " -B ";
     } elsif ($self->search_mode =~ /general/i) {
-      $options .= " --general ";
+      $options .= " -G ";
     } elsif ($self->search_mode =~ /organ/i) {
-      $options .= " --organ ";
+      $options .= " -O ";
     }
   }
   $self->options($options);
@@ -146,6 +157,7 @@ sub run_analysis {
   $self->resultsfile($out_file);
   
   my $cmd = "$program $options -o $out_file $in_file";
+  
   system($cmd) == 0 or throw("Failed to run: $cmd");
 }
 

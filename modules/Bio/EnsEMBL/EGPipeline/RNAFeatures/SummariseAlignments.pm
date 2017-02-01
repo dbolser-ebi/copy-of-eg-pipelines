@@ -40,6 +40,7 @@ sub run {
   my ($self) = @_;
   my $run_cmscan   = $self->param_required('run_cmscan');
   my $run_trnascan = $self->param_required('run_trnascan');
+  my $load_mirbase = $self->param_required('load_mirbase');
   my $pipeline_dir = $self->param_required('pipeline_dir');
   
   if ($run_cmscan) {
@@ -51,6 +52,12 @@ sub run {
     my $cmd = "cat $pipeline_dir/*/trnascan.txt > $pipeline_dir/trnascan.txt";
     system($cmd) == 0 || $self->throw("Failed to execute $cmd");
   }
+  
+  if ($load_mirbase) {
+    my $cmd = "cat $pipeline_dir/*/mirbase.txt > $pipeline_dir/mirbase.txt";
+    system($cmd) == 0 || $self->throw("Failed to execute $cmd");
+  }
+  
 }
 
 sub write_output {

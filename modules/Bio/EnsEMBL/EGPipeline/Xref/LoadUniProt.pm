@@ -40,7 +40,6 @@ use warnings;
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
-use List::MoreUtils qw(uniq);
 
 sub param_defaults {
   my ($self) = @_;
@@ -50,10 +49,11 @@ sub param_defaults {
     'logic_name'             => 'xrefuniparc',
     'external_dbs'           => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
     'replace_all'            => 0,
-    'description_source'     => [],
-    'overwrite_description'  => 0,
     'gene_name_source'       => [],
     'overwrite_gene_name'    => 0,
+    'description_source'     => [],
+    'overwrite_description'  => 0,
+    'description_blacklist'  => [],
     'uniparc_external_db'    => 'UniParc',
     'uniprot_gn_external_db' => 'Uniprot_gn',
   };
@@ -116,8 +116,14 @@ sub add_xrefs {
       my $uniprots = $self->get_uniprot_for_upi($uniparc_dba, $uniprot_dba, $tax_id, $upi_xref->primary_id);
 
       foreach my $uniprot (@$uniprots) {
+        if (defined $$uniprot{description} && $$uniprot{description} eq $translation->stable_id) {
+          delete $$uniprot{description};
+        }
+
         my $xref = $self->add_xref($uniprot, $analysis, $external_dbs);
-     	  $dbea->store($xref, $translation->dbID(), 'Translation');
+        if (defined $xref) {
+     	    $dbea->store($xref, $translation->dbID(), 'Translation', undef, $upi_xref);
+        }
       }
 
       push @all_uniprots, @$uniprots;
@@ -130,25 +136,32 @@ sub add_xrefs {
 sub add_xref {
   my ($self, $uniprot, $analysis, $external_dbs) = @_;
 
-  my $external_db = $$external_dbs{$uniprot->{type}};
+  my $xref;
 
-	my $xref = Bio::EnsEMBL::DBEntry->new(
-    -PRIMARY_ID  => $uniprot->{ac},
-		-DISPLAY_ID  => join("; ", keys %{$uniprot->{name}}),
-    -DESCRIPTION => $uniprot->{description},
-    -VERSION     => $uniprot->{version},
-		-DBNAME      => $external_db,
-		-INFO_TYPE   => 'DEPENDENT',
-  );
-	$xref->analysis($analysis);
+  if (exists $$external_dbs{$$uniprot{type}}) {
+    my $external_db = $$external_dbs{$$uniprot{type}};
+
+  	$xref = Bio::EnsEMBL::DBEntry->new(
+      -PRIMARY_ID  => $$uniprot{ac},
+  		-DISPLAY_ID  => $$uniprot{ac},
+      -DESCRIPTION => $$uniprot{description},
+      -VERSION     => $$uniprot{version},
+  		-DBNAME      => $external_db,
+  		-INFO_TYPE   => 'DEPENDENT',
+    );
+  	$xref->analysis($analysis);
+  }
 
   return $xref;
 }
 
 sub get_uniprot_for_upi {
   my ($self, $uniparc_dba, $uniprot_dba, $tax_id, $upi) = @_;
+  
+  my @blacklist = @{$self->param_required('description_blacklist')};
+  my $blacklist = join('|', @blacklist);
 
-  my @uniprots;
+  my %uniprots;
 
   my $uniparc_sql = q/
     SELECT ac FROM
@@ -196,33 +209,42 @@ sub get_uniprot_for_upi {
   my $uniparc_results = $uniparc_sth->fetchall_arrayref();
   foreach my $uniparc_result (@$uniparc_results) {
     my $ac = $$uniparc_result[0];
-    my %uniprot;
+    my %synonyms;
 
     $uniprot_sth->execute($ac);
     my $uniprot_results = $uniprot_sth->fetchall_arrayref();
     foreach my $uniprot_result (@$uniprot_results) {
       my ($name, $desc, $type, $version, $gene_name, $gene_name_type) = @$uniprot_result;
+      
+      if (!exists $uniprots{$ac}) {
+        $uniprots{$ac}{ac}   = $ac;
+        $uniprots{$ac}{name} = $name;
+        $uniprots{$ac}{type} = $type == 0 ? 'reviewed' : 'unreviewed';
+        if (defined $desc && $desc ne '') {
+          if ($desc !~ /^($blacklist)$/) {
+            $uniprots{$ac}{description} = $desc;
+          }
+        }
+        if (defined $version && $version ne '') {
+          $uniprots{$ac}{version} = $version;
+        }
+      }
 
-      $uniprot{ac}          = $ac;
-      $uniprot{name}{$name} = 1;
-      $uniprot{type}        = $type == 0 ? 'reviewed' : 'unreviewed';
-      if (defined $desc && $desc ne '' && $desc ne 'Uncharacterized protein') {
-        $uniprot{description} = $desc;
-      }
-      if (defined $version && $version ne '') {
-        $uniprot{version} = $version;
-      }
+
       if (defined $gene_name) {
-        if ($gene_name_type eq 'Name') {
-          $uniprot{gene_name} = $gene_name;
-        } else {
-          push @{$uniprot{synonyms}}, $gene_name;
-         }
+        if (!exists $synonyms{$gene_name}) {
+          if ($gene_name_type eq 'Name') {
+            $uniprots{$ac}{gene_name} = $gene_name;
+          } else {
+            push @{$uniprots{$ac}{synonyms}}, $gene_name;
+          }
+          $synonyms{$gene_name}++;
+        }
       }
-
-      push @uniprots, \%uniprot;
     }
   }
+
+  my @uniprots = values %uniprots;
 
   return \@uniprots;
 }
@@ -231,10 +253,14 @@ sub set_descriptions {
   my ($self, $dba, $analysis, $external_dbs) = @_;
   my $sources   = $self->param_required('description_source');
   my $overwrite = $self->param_required('overwrite_description');
-
+  
   if (@$sources) {
     my @db_names = map { $$external_dbs{$_} } @$sources;
     my $db_names = "'" . join("','", @db_names) . "'";
+
+    foreach my $external_db (@db_names) {
+      $self->remove_descriptions($dba, $external_db);
+    }
 
     my $sql = q/
       UPDATE
@@ -246,6 +272,7 @@ sub set_descriptions {
       SET
         g.description = CONCAT(x.description, " [Source:", edb.db_display_name, ";Acc:", x.dbprimary_acc, "]")
       WHERE
+        x.description IS NOT NULL AND
         ox.ensembl_object_type = 'Translation' AND
         ox.analysis_id = ? AND
     /;
@@ -257,28 +284,47 @@ sub set_descriptions {
   }
 }
 
+sub remove_descriptions {
+  my ($self, $dba, $external_db) = @_;
+
+  my $sql = q/
+    UPDATE
+      gene g,
+      external_db edb
+    SET
+      g.description = NULL
+    WHERE
+      edb.db_name = ? AND
+      g.description LIKE CONCAT('%', ' [Source:', edb.db_display_name, '%')
+  /;
+  my $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($external_db);
+}
+
 sub set_gene_names {
   my ($self, $dba, $analysis, $all_uniprots) = @_;
   my $sources     = $self->param_required('gene_name_source');
   my $overwrite   = $self->param_required('overwrite_gene_name');
   my $external_db = $self->param_required('uniprot_gn_external_db');
 
-  my $dbea = $dba->get_adaptor('DBEntry');
-
   if (@$sources) {
+    $self->remove_gene_names($dba, $external_db);
+
+    my $dbea = $dba->get_adaptor('DBEntry');
+
     my %sources = map { $_ => 1 } @$sources;
 
     foreach my $uniprot (@$all_uniprots) {
-      if (defined $uniprot->{gene_name} && exists $sources{$uniprot->{type}}) {
+      if (defined $$uniprot{gene_name} && exists $sources{$$uniprot{type}}) {
         my $xref = Bio::EnsEMBL::DBEntry->new(
-          -PRIMARY_ID  => $uniprot->{gene_name},
-        	-DISPLAY_ID  => $uniprot->{gene_name},
+          -PRIMARY_ID  => $$uniprot{gene_name},
+        	-DISPLAY_ID  => $$uniprot{gene_name},
         	-DBNAME      => $external_db,
         	-INFO_TYPE   => 'DEPENDENT',
         );
 
-        if (defined $uniprot->{synonyms}) {
-          for my $synonym (uniq @{$uniprot->{synonyms}}) {
+        if (defined $$uniprot{synonyms}) {
+          for my $synonym (@{$$uniprot{synonyms}}) {
             $xref->add_synonym($synonym);
           }
         }
@@ -300,11 +346,28 @@ sub set_gene_names {
         /;
         $sql .= " AND g.display_xref_id IS NULL " unless $overwrite;
 
-        my $sth = $dbea->dbc->db_handle->prepare($sql);
+        my $sth = $dba->dbc->db_handle->prepare($sql);
         $sth->execute($xref->dbID, $analysis->dbID, $uniprot->{ac});
       }
     }
   }
+}
+
+sub remove_gene_names {
+  my ($self, $dba, $external_db) = @_;
+
+  my $sql = q/
+    UPDATE
+      gene g INNER JOIN
+      xref x ON g.display_xref_id = x.xref_id INNER JOIN
+      external_db edb USING (external_db_id)
+    SET
+      g.display_xref_id = NULL
+    WHERE
+      edb.db_name = ?
+  /;
+  my $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($external_db);
 }
 
 1;
