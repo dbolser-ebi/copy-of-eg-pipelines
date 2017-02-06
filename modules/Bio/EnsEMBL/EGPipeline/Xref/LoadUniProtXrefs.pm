@@ -46,21 +46,24 @@ sub param_defaults {
 
   return {
     %{$self->SUPER::param_defaults},
-    'logic_name'           => 'xrefuniprot',
-    'external_dbs'         => {},
-    'uniprot_external_dbs' => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
-    'replace_all'          => 0,
+    'logic_name'             => 'xrefuniprot',
+    'external_dbs'           => {},
+    'secondary_external_dbs' => {},
+    'uniprot_external_dbs'   => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
+    'replace_all'            => 0,
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $db_type      = $self->param_required('db_type');
-  my $logic_name   = $self->param_required('logic_name');
-  my $external_dbs = $self->param_required('external_dbs');
-  my $replace_all  = $self->param_required('replace_all');
+  my $db_type                = $self->param_required('db_type');
+  my $logic_name             = $self->param_required('logic_name');
+  my $external_dbs           = $self->param_required('external_dbs');
+  my $secondary_external_dbs = $self->param_required('secondary_external_dbs');
+  my $replace_all            = $self->param_required('replace_all');
 
   my @external_dbs = values %$external_dbs;
+  push @external_dbs, values %$secondary_external_dbs;
   push @external_dbs, 'protein_id' if exists($$external_dbs{'EMBL'});
 
   my $dba = $self->get_DBAdaptor($db_type);
@@ -85,8 +88,9 @@ sub run {
 
 sub add_xrefs {
   my ($self, $dba, $analysis, $external_dbs) = @_;
-  my $uniprot_db           = $self->param_required('uniprot_db');
-  my $uniprot_external_dbs = $self->param_required('uniprot_external_dbs');
+  my $uniprot_db             = $self->param_required('uniprot_db');
+  my $uniprot_external_dbs   = $self->param_required('uniprot_external_dbs');
+  my $secondary_external_dbs = $self->param_required('secondary_external_dbs');
 
   my $uniprot_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$uniprot_db);
 
@@ -108,6 +112,18 @@ sub add_xrefs {
               $dbea->store($xref, $translation->transcript->get_Gene->dbID(), 'Gene', 0, $uniprot_xref);
             } else {
        	      $dbea->store($xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+              if (exists($$secondary_external_dbs{$xref->dbname})) {
+                if ($$transitive_xref[2] && $$transitive_xref[2] ne '-') {
+                  $$transitive_xref[0] = $$secondary_external_dbs{$xref->dbname};
+                  $$transitive_xref[1] = $$transitive_xref[2];
+                  my $sec_xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
+                  if ($sec_xref->dbname eq 'RefSeq_dna') {
+                    $dbea->store($sec_xref, $translation->transcript->dbID(), 'Transcript', 0, $uniprot_xref);
+                  } else {
+             	      $dbea->store($sec_xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+                  }
+                }
+              }
             }
           }
         }
@@ -117,6 +133,36 @@ sub add_xrefs {
 }
 
 sub add_xref {
+  my ($self, $transitive_xref, $analysis, $external_dbs) = @_;
+
+  my ($dbname, $primary_id, $secondary_id, $quaternary_id) = @$transitive_xref;
+  my $xref;
+
+  if (exists $$external_dbs{$dbname}) {
+    my $external_db = $$external_dbs{$dbname};
+
+    # For ENA we don't want genomic references where we have the CDS
+    if ($dbname eq 'EMBL'    &&
+      defined $secondary_id  && $secondary_id ne '-' &&
+		  defined $quaternary_id && $quaternary_id eq 'Genomic_DNA')
+    {
+      $primary_id  = $secondary_id;
+      $external_db = 'protein_id';
+    }
+
+  	$xref = Bio::EnsEMBL::DBEntry->new(
+      -PRIMARY_ID  => $primary_id,
+  		-DISPLAY_ID  => $primary_id,
+  		-DBNAME      => $external_db,
+  		-INFO_TYPE   => 'DEPENDENT',
+    );
+  	$xref->analysis($analysis);
+  }
+
+  return $xref;
+}
+
+sub add_secondary_xref {
   my ($self, $transitive_xref, $analysis, $external_dbs) = @_;
 
   my ($dbname, $primary_id, $secondary_id, $quaternary_id) = @$transitive_xref;

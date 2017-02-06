@@ -51,13 +51,14 @@ sub param_defaults {
 
 sub fetch_input {
   my ($self) = @_;
-  my $species                       = $self->param_required('species');
-  my $load_uniprot                  = $self->param('load_uniprot');
-  my $load_uniprot_go               = $self->param('load_uniprot_go');
-  my $load_uniprot_xrefs            = $self->param('load_uniprot_xrefs');
-  my $checksum_logic_name           = $self->param('checksum_logic_name');
-  my $uniparc_transitive_logic_name = $self->param('uniparc_transitive_logic_name');
-  my $uniprot_transitive_logic_name = $self->param('uniprot_transitive_logic_name');
+  my $species                          = $self->param_required('species');
+  my $load_uniprot                     = $self->param('load_uniprot');
+  my $load_uniprot_go                  = $self->param('load_uniprot_go');
+  my $load_uniprot_xrefs               = $self->param('load_uniprot_xrefs');
+  my $checksum_logic_name              = $self->param('checksum_logic_name');
+  my $uniparc_transitive_logic_name    = $self->param('uniparc_transitive_logic_name');
+  my $uniprot_transitive_logic_name    = $self->param('uniprot_transitive_logic_name');
+  my $uniprot_transitive_go_logic_name = $self->param('uniprot_transitive_go_logic_name');
 
   my $dba = $self->get_DBAdaptor($self->param('db_type'));
   my $dbh = $dba->dbc->db_handle;
@@ -75,9 +76,14 @@ sub fetch_input {
     $reports .= $self->xref_summary(
       $dbh, $uniparc_transitive_logic_name, 'UniProt xrefs assigned transitively via UniParc:');
     
-    if ($load_uniprot_go || $load_uniprot_xrefs) {
+    if ($load_uniprot_xrefs) {
       $reports .= $self->xref_summary(
         $dbh, $uniprot_transitive_logic_name, 'Xrefs assigned transitively via UniProt:');
+    }
+    
+    if ($load_uniprot_go) {
+      $reports .= $self->xref_summary(
+        $dbh, $uniprot_transitive_go_logic_name, 'GO xrefs assigned transitively via UniProt:');
     }
   }
 
