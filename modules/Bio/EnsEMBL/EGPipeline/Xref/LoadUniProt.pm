@@ -308,6 +308,9 @@ sub set_gene_names {
   my $external_db = $self->param_required('uniprot_gn_external_db');
 
   if (@$sources) {
+    my $synonym_sql = 'INSERT IGNORE INTO external_synonym VALUES (?, ?)';
+    my $synonym_sth = $dba->dbc->db_handle->prepare($synonym_sql);
+  
     $self->remove_gene_names($dba, $external_db);
 
     my $dbea = $dba->get_adaptor('DBEntry');
@@ -323,13 +326,17 @@ sub set_gene_names {
         	-INFO_TYPE   => 'DEPENDENT',
         );
 
+        $dbea->store($xref);
+        
+        # Synonyms are only added by the '$dbea->store' method if
+        # the xref doesn't already exist...
         if (defined $$uniprot{synonyms}) {
           for my $synonym (@{$$uniprot{synonyms}}) {
-            $xref->add_synonym($synonym);
+            $synonym_sth->execute($xref->dbID, $synonym)
+              or $self->throw("Failed to add synonym '$synonym'");
           }
         }
-        $dbea->store($xref);
-
+        
         my $sql = q/
           UPDATE
             gene g INNER JOIN
