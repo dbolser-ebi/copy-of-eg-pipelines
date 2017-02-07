@@ -47,7 +47,11 @@ sub param_defaults {
   return {
     %{$self->SUPER::param_defaults},
     'logic_name'             => 'xrefuniparc',
-    'external_dbs'           => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
+    'external_dbs'           => {
+                                  reviewed   => 'Uniprot/SWISSPROT',
+                                  unreviewed => 'Uniprot/SPTREMBL',
+                                  splicevar  => 'Uniprot/Varsplic',
+                                },
     'replace_all'            => 0,
     'gene_name_source'       => [],
     'overwrite_gene_name'    => 0,
@@ -170,7 +174,7 @@ sub get_uniprot_for_upi {
     WHERE
       taxid = ? AND
       upi = ? AND
-      descr IN ('TREMBL','SWISSPROT') AND
+      descr IN ('TREMBL','SWISSPROT', 'SWISSPROT_VARSPLIC') AND
       deleted='N'
   /;
   my $uniparc_sth = $uniparc_dba->dbc->db_handle->prepare($uniparc_sql);
@@ -214,12 +218,23 @@ sub get_uniprot_for_upi {
     $uniprot_sth->execute($ac);
     my $uniprot_results = $uniprot_sth->fetchall_arrayref();
     foreach my $uniprot_result (@$uniprot_results) {
-      my ($name, $desc, $type, $version, $gene_name, $gene_name_type) = @$uniprot_result;
+      my ($name, $desc, $type_code, $version, $gene_name, $gene_name_type) = @$uniprot_result;
       
       if (!exists $uniprots{$ac}) {
+        my $type;
+        if ($type_code == 0) {
+          $type = 'reviewed';
+        } elsif ($type_code == 1) {
+          $type = 'unreviewed';
+        } elsif ($type_code == 13) {
+          $type = 'splicevar';
+        } else {
+          $self->throw("Unrecognised UniProt type code '$type_code' for $ac");
+        } 
+        
         $uniprots{$ac}{ac}   = $ac;
-        $uniprots{$ac}{name} = $name;
-        $uniprots{$ac}{type} = $type == 0 ? 'reviewed' : 'unreviewed';
+        $uniprots{$ac}{name} = $ac;
+        $uniprots{$ac}{type} = $type;
         if (defined $desc && $desc ne '') {
           if ($desc !~ /^($blacklist)$/) {
             $uniprots{$ac}{description} = $desc;
