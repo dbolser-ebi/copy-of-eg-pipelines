@@ -1,4 +1,4 @@
-1	\N	schema_version	85
+1	\N	schema_version	88
 2	1	assembly.default	AgamP4
 3	1	assembly.mapping	scaffold:AgamP4|chunk:AgamP4
 4	1	assembly.mapping	chromosome:AgamP4#scaffold:AgamP4
@@ -172,3 +172,11 @@
 350	1	species.classification	Eukaryota
 351	\N	patch	patch_84_85_a.sql|schema_version
 352	\N	patch	patch_84_85_b.sql|remove_duplicated_key
+360	\N	patch	patch_85_86_a.sql|schema_version
+361	\N	patch	patch_85_86_b.sql|add dna_align_feature_attrib table
+362	\N	patch	patch_85_86_c.sql|meta_case_insensitive
+363	\N	patch	patch_86_87_a.sql|schema_version
+364	\N	patch	patch_86_87_b.sql|meta_value_NOT_NULL
+365	\N	patch	patch_86_87_c.sql|datetime_default_NULL
+366	\N	patch	patch_87_88_a.sql|schema_version
+367	\N	patch	patch_87_88_b.sql|seq_region_name_255
