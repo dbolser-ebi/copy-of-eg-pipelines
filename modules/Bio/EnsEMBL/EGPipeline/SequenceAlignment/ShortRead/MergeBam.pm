@@ -96,7 +96,7 @@ sub merge_bam {
   
   if (scalar(@$bam_files) == 1) {
     my ($bam_file) = $$bam_files[0];
-    rename $bam_file, $merged_bam_file;
+    rename $bam_file, $merged_bam_file || $self->throw("Failed to move file $bam_file to $merged_bam_file");
   } else {
     $aligner->merge_bam($bam_files, $merged_bam_file);
     if ($clean_up) {
