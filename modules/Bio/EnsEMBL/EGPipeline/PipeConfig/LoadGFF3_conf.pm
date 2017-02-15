@@ -358,8 +358,7 @@ sub pipeline_analyses_generic {
       -max_retry_count   => 0,
       -parameters        => {
                               gene_source     => $self->o('gene_source'),
-                              gff3_file       => $self->o('gff3_tidy_file'),
-                              fasta_file      => $self->o('fasta_file'),
+                              gff3_file       => '#gff3_tidy_file#',
                               gene_types      => $self->o('gene_types'),
                               mrna_types      => $self->o('mrna_types'),
                               exon_types      => $self->o('exon_types'),
