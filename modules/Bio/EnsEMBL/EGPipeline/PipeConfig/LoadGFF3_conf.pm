@@ -251,7 +251,6 @@ sub pipeline_analyses_generic {
       -parameters        => {
                               cmd => $self->o('gff3_tidy').' #gff3_file# > #gff3_tidy_file#',
                             },
-      -input_ids         => [ {} ],
       -rc_name           => 'normal',
       -flow_into         => ['GFF3Validate'],
     },
