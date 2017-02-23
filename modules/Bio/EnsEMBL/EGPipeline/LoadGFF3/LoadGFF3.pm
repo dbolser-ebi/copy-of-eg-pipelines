@@ -377,7 +377,7 @@ sub get_cds {
   my @gff_cds = sort sort_genomic $gff_transcript->get_SeqFeatures(@cds_types);
   foreach my $gff_cds (@gff_cds) {
     if (defined $gff_cds->segments && scalar($gff_cds->segments) > 0) {
-      push @cds, $gff_cds->segments;
+      push @cds, sort sort_genomic $gff_cds->segments;
     } else {
       push @cds, $gff_cds;
     }
