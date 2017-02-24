@@ -91,15 +91,10 @@ sub best_dna_dna {
   
   my %grouped_features;
   
-  my $sa = $dba->get_adaptor("Slice");
   my $dafa = $dba->get_adaptor("DNAAlignFeature");
+  my $dafs = $dafa->fetch_all_by_logic_name($logic_name);
   
-  my $slices = $sa->fetch_all('toplevel');
-  foreach my $slice (@$slices) {
-    my $dafs = $dafa->fetch_all_by_Slice($slice, $logic_name);
-    
-    $self->process_features($dafs, \%grouped_features);
-  }
+  $self->process_features($dafs, \%grouped_features);
   
   $self->remove_features($top_x, $dafa, \%grouped_features);
 }
@@ -109,15 +104,10 @@ sub best_pep_dna {
   
   my %grouped_features;
   
-  my $sa = $dba->get_adaptor("Slice");
   my $pafa = $dba->get_adaptor("ProteinAlignFeature");
+  my $pafs = $pafa->fetch_all_by_logic_name($logic_name);
   
-  my $slices = $sa->fetch_all('toplevel');
-  foreach my $slice (@$slices) {
-    my $pafs = $pafa->fetch_all_by_Slice($slice, $logic_name);
-    
-    $self->process_features($pafs, \%grouped_features);
-  }
+  $self->process_features($pafs, \%grouped_features);
   
   $self->remove_features($top_x, $pafa, \%grouped_features);
 }
