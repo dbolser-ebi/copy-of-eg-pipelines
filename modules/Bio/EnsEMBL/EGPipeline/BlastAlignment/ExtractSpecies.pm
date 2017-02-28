@@ -116,13 +116,24 @@ sub write_output {
 
 sub parse_uniprot {
   my ($self, $species, $seq_out, $inseq) = @_;
+  my $full_desc = $inseq->desc;
   
-  if ($inseq->desc =~ /OS=$species/) {
-    my (undef, $primary_id, $secondary_id) = split(/\|/, $inseq->display_id);
+  # Some 'descriptions' have "OS=<species>" embedded within them,
+  # presumably because UniProt records were used as labels, without
+  # appropriate filtering.
+  my @OSs = $full_desc =~ /OS=(\w+)/g;
+  if (scalar(@OSs) == 2) { 
+    $full_desc =~ s/\s+OS=.*?SV=\d+//;
+  } elsif (scalar(@OSs) > 2) { 
+    $self->throw("More than two 'OS=' sections in description: $full_desc");
+  }
+  
+  if ($full_desc =~ /OS=$species/) {
+    my (undef, $primary_id, undef) = split(/\|/, $inseq->display_id);
     $inseq->display_id($primary_id);
 
-    my ($desc, $version) = $inseq->desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
-    $inseq->desc(join('|', map { $_ || '' } ($secondary_id, $desc, $version)));
+    my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
+    $inseq->desc(join('|', map { $_ || '' } ($primary_id, $desc, $version)));
 
     $seq_out->write_seq($inseq);
   }
@@ -134,7 +145,7 @@ sub parse_refseq {
   if ($self->species_match($inseq->desc, $species, $data_type)) {
     my ($primary_id, $version) = $inseq->display_id =~ /(\w+)\.(\d+)|[^\|]+$/;
     $inseq->display_id("$primary_id.$version");
-
+    
     my ($desc) = $inseq->desc =~ /^(.*)\s+(?:\[|\().*/;
     $desc =~ s/PREDICTED:\s+//;
     $inseq->desc(join('|', map { $_ || '' } ("$primary_id.$version", $desc, $version)));

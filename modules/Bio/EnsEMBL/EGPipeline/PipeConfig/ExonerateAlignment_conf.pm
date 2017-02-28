@@ -40,8 +40,11 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::ExonerateAlignment_conf;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Hive::Version 2.3;
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
+
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+use Bio::EnsEMBL::Hive::Version 2.4;
+
 use File::Spec::Functions qw(catdir);
 
 sub default_options {
@@ -87,7 +90,7 @@ sub default_options {
 
     reformat_header => 1,
     trim_est        => 1,
-    trimest_exe     => catdir($self->o('program_dir'), 'EMBOSS/bin/trimest'),
+    trimest_exe     => 'trimest',
 
     # By default, the pipeline assumes EST data, rather than rnaseq or
     # protein data; that genes should not be created based on the alignments;
@@ -228,6 +231,15 @@ sub pipeline_create_commands {
   ];
 }
 
+sub pipeline_wide_parameters {
+ my ($self) = @_;
+ 
+ return {
+   %{$self->SUPER::pipeline_wide_parameters},
+   'make_genes' => $self->o('make_genes'),
+ };
+}
+
 sub pipeline_analyses {
   my ($self) = @_;
   
@@ -290,9 +302,8 @@ sub pipeline_analyses {
       -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => {
-                              '2->A' => ['PreExonerateBackup'],
-                              '3->A' => ['CreateOFDatabase'],
-                              'A->1' => ['AnalysisFactory'],
+                              '2' => ['PreExonerateBackup'],
+                              '3' => ['CreateOFDatabase'],
                             },
       -meadow_type       => 'LOCAL',
     },
@@ -309,6 +320,7 @@ sub pipeline_analyses {
                               output_file => catdir($dir, '#species#', 'pre_exonerate_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
+      -flow_into         => ['AnalysisFactory'],
     },
 
     {
@@ -320,6 +332,7 @@ sub pipeline_analyses {
       -max_retry_count   => 1,
       -parameters        => {},
       -rc_name           => 'normal',
+      -flow_into         => ['PreExonerateBackup'],
     },
 
     {
@@ -518,23 +531,12 @@ sub pipeline_analyses {
                               output_file => catdir($dir, '#species#', 'post_exonerate_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => ['MakeGenesFlowControl'],
-    },
-
-    {
-      -logic_name        => 'MakeGenesFlowControl',
-      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FlowControl',
-      -max_retry_count   => 1,
-      -parameters        => {
-                              control_value => $self->o('make_genes'),
-                              control_flow  => { '0' => '1', '1' => '2', },
-                            },
-      -rc_name           => 'normal',
       -flow_into         => {
-                              '1' => ['MetaCoords'],
-                              '2' => ['Deduplicate'],
+                              '1' => WHEN('#make_genes#' =>
+                                      ['Deduplicate'],
+                                     ELSE
+                                      ['MetaCoords']),
                             },
-      -meadow_type       => 'LOCAL',
     },
 
     {
@@ -662,7 +664,7 @@ sub resource_classes {
 
   return {
     %{$self->SUPER::resource_classes},
-    'server' => {'LSF' => '-q production-rh6 -n ' . ($max_exonerate_jobs + 1) . ' -R "span[hosts=1]" -M ' . $server_memory . ' -R "rusage[mem=' . $server_memory . '] span[hosts=1]"'},
+    'server' => {'LSF' => '-q production-rh6 -n ' . ($max_exonerate_jobs + 1) . ' -M ' . $server_memory . ' -R "rusage[mem=' . $server_memory . ']"'},
   }
 }
 

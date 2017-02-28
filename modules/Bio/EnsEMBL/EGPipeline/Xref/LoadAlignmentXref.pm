@@ -2,13 +2,14 @@ package Bio::EnsEMBL::EGPipeline::Xref::LoadAlignmentXref;
 
 use strict;
 use warnings;
+use feature 'say';
 
 use base ('Bio::EnsEMBL::EGPipeline::Xref::LoadXref');
 
 use Bio::EnsEMBL::DBEntry;
 use Bio::EnsEMBL::IdentityXref;
-use Bio::SeqIO;
 use List::Util qw(min max);
+use Path::Tiny qw(path);
 
 sub param_defaults {
   my ($self) = @_;
@@ -18,6 +19,7 @@ sub param_defaults {
     'database_type'         => 'pep',
     'query_type'            => 'pep',
     'description_blacklist' => [],
+    'preferred_analysis'    => [],
   };
 }
 
@@ -78,16 +80,18 @@ sub add_xrefs {
 
   foreach my $id (keys %$features) {
     foreach my $hit_name (keys %{$$features{$id}}) {
-      my $xref;
+      if (! $self->xref_exists($dbea, $external_db, $id, $object_type, $hit_name, $xref_metadata)) {
+        my $xref;
 
-      my @features = @{$$features{$id}{$hit_name}};
-      if (scalar(@features) == 1) {
-        $xref = $self->add_xref($analysis, $external_db, $hit_name, $features[0], $xref_metadata);
-      } else {
-        $xref = $self->add_compound_xref($analysis, $external_db, $hit_name, \@features, $xref_metadata);
+        my @features = @{$$features{$id}{$hit_name}};
+        if (scalar(@features) == 1) {
+          $xref = $self->add_xref($analysis, $external_db, $hit_name, $features[0], $xref_metadata);
+        } else {
+          $xref = $self->add_compound_xref($analysis, $external_db, $hit_name, \@features, $xref_metadata);
+        }
+
+        $dbea->store($xref, $id, $object_type);
       }
-
-      $dbea->store($xref, $id, $object_type);
     }
   }
 }
@@ -106,6 +110,7 @@ sub fetch_features {
     
     if ($obj_name eq 'ProteinFeature') {
       push @ids, $feature->seqname; # Change this to translation_id, pending Ensembl fix.
+      #push @ids, $feature->translation_id;
     } else {
       my $nearby_transcripts = $ta->fetch_all_nearest_by_Feature(
         -FEATURE => $feature,
@@ -126,6 +131,29 @@ sub fetch_features {
   }
   
   return \%features;
+}
+
+sub xref_exists {
+  my ($self, $dbea, $external_db, $ensembl_id, $object_type, $acc, $xref_metadata) = @_;
+  my $logic_names = $self->param_required('preferred_analysis');
+  
+  my $desc   = $$xref_metadata{$acc}{description} || '';
+  my $exists = 0;
+  
+  my $xrefs = $dbea->_fetch_by_object_type($ensembl_id, $object_type, $external_db);
+  foreach my $xref (@$xrefs) {
+    foreach my $logic_name (@$logic_names) {
+      if ($xref->analysis->logic_name eq $logic_name && $xref->primary_id eq $acc) {
+        if ($desc ne '') { 
+          $xref->description($desc);
+          $dbea->update($xref);
+        }
+        $exists = 1;
+      }
+    }
+  }
+  
+  return $exists;
 }
 
 sub add_xref {
@@ -200,21 +228,20 @@ sub add_compound_xref {
 
 sub xref_metadata {
   my ($self) = @_;
-  my $fasta_file = $self->param_required('fasta_file');
+  my $db_fasta_file = $self->param_required('db_fasta_file');
   
   my @blacklist = @{$self->param_required('description_blacklist')};
   my $blacklist = join('|', @blacklist);
   
   my %xref_metadata;
-
-  open(F, $fasta_file);
-  my $seq_in = Bio::SeqIO->new(
-    -fh     => \*F,
-    -format => 'fasta',
-  );
-
-  while (my $inseq = $seq_in->next_seq) {
-    my ($secondary_id, $desc, $version) = split(/\|/, $inseq->desc);
+  
+  my $path = path($db_fasta_file);
+  my $fasta = $path->slurp;
+  
+  my @headers = $fasta =~ /^>(.*)/gm;
+  foreach my $header (@headers) {
+    my ($accession, $meta_data) = $header =~ /^(\S+)\s+(.*)/;
+    my ($display_id, $desc, $version) = split(/\|/, $meta_data);
     
     if (defined $desc && $desc ne '') {
       if ($desc =~ /^($blacklist)$/) {
@@ -222,13 +249,13 @@ sub xref_metadata {
       }
     }
     
-    $xref_metadata{$inseq->display_id} = {
-      display_id  => $secondary_id,
+    $xref_metadata{$accession} = {
+      display_id  => $display_id,
       description => $desc,
       version     => $version,
     };
   }
-
+  
   return \%xref_metadata;
 }
 
