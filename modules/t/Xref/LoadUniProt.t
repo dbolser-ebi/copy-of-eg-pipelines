@@ -73,7 +73,11 @@ can_ok($module_name, @hive_methods);
 can_ok($module_name, @super_methods);
 can_ok($module_name, @module_methods);
 
-my $external_dbs = {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'};
+my $external_dbs = {
+  reviewed   => 'Uniprot/SWISSPROT',
+  unreviewed => 'Uniprot/SPTREMBL',
+  splicevar  => 'Uniprot/Varsplic',
+};
 
 # Create an instance of the module; a dummy job object is required to
 # prevent errors when the module generates log messages.
@@ -117,7 +121,7 @@ is(scalar(@$uniprots), 1, 'get_uniprot_for_upi method: one uniprot record');
 my %uniprot = %{$$uniprots[0]};
 my @synonyms = @{$uniprot{synonyms}};
 is($uniprot{ac}, 'A0NFG9', 'get_uniprot_for_upi method: correct accession');
-is($uniprot{name}, 'A0NFG9_ANOGA', 'get_uniprot_for_upi method: correct name');
+is($uniprot{name}, 'A0NFG9', 'get_uniprot_for_upi method: correct name');
 is($uniprot{type}, 'unreviewed', 'get_uniprot_for_upi method: correct accession');
 is($uniprot{description}, 'AGAP004700-PA', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 1, 'get_uniprot_for_upi method: correct version');
@@ -170,7 +174,7 @@ is(scalar(@$uniprots), 1, 'get_uniprot_for_upi method: one uniprot record');
 my %uniprot = %{$$uniprots[0]};
 my @synonyms = @{$uniprot{synonyms}};
 is($uniprot{ac}, 'A7UUW5', 'get_uniprot_for_upi method: correct accession');
-is($uniprot{name}, 'A7UUW5_ANOGA', 'get_uniprot_for_upi method: correct name');
+is($uniprot{name}, 'A7UUW5', 'get_uniprot_for_upi method: correct name');
 is($uniprot{type}, 'unreviewed', 'get_uniprot_for_upi method: correct accession');
 is($uniprot{description}, 'Gustatory receptor', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 1, 'get_uniprot_for_upi method: correct version');
@@ -218,7 +222,7 @@ is(scalar(@$uniprots), 1, 'get_uniprot_for_upi method: one uniprot record');
 my %uniprot = %{$$uniprots[0]};
 my @synonyms = @{$uniprot{synonyms}};
 is($uniprot{ac}, 'Q7PMU8', 'get_uniprot_for_upi method: correct accession');
-is($uniprot{name}, 'EIF3C_ANOGA', 'get_uniprot_for_upi method: correct name');
+is($uniprot{name}, 'Q7PMU8', 'get_uniprot_for_upi method: correct name');
 is($uniprot{type}, 'reviewed', 'get_uniprot_for_upi method: correct accession');
 is($uniprot{description}, 'Eukaryotic translation initiation factor 3 subunit C', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 3, 'get_uniprot_for_upi method: correct version');
@@ -304,7 +308,7 @@ $sth->execute();
 is_rows(1, $dba,
   'gene INNER JOIN xref ON display_xref_id = xref_id',
   'WHERE stable_id = ? AND display_label = ?',
-  ['AGAP004725', 'EIF3C_ANOGA']
+  ['AGAP004725', 'Q7PMU8']
 );
 
 $obj->param('gene_name_source', ['reviewed']);
@@ -312,7 +316,7 @@ $obj->set_gene_names($dba, $analysis, $uniprots);
 is_rows(1, $dba,
   'gene INNER JOIN xref ON display_xref_id = xref_id',
   'WHERE stable_id = ? AND display_label = ?',
-  ['AGAP004725', 'EIF3C_ANOGA']
+  ['AGAP004725', 'Q7PMU8']
 );
 is_rows(0, $dba,
   'gene INNER JOIN xref ON display_xref_id = xref_id',
@@ -325,7 +329,7 @@ $obj->set_gene_names($dba, $analysis, $uniprots);
 is_rows(0, $dba,
   'gene INNER JOIN xref ON display_xref_id = xref_id',
   'WHERE stable_id = ? AND display_label = ?',
-  ['AGAP004725', 'EIF3C_ANOGA']
+  ['AGAP004725', 'EIF3C']
 );
 is_rows(1, $dba,
   'gene INNER JOIN xref ON display_xref_id = xref_id',
@@ -506,7 +510,6 @@ sub descriptions {
     if (defined $gene->description) {
       if ($gene->description =~ /Source:([^;]+)/) {
         $descriptions{$1}++;
-        say $gene->stable_id.': '.$gene->description;
       } else {
         $descriptions{'no source'}++;
       }
