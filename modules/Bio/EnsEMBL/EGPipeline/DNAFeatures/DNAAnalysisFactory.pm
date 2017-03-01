@@ -143,7 +143,7 @@ sub check_repeatmasker {
   $parameters .= " -species \"$species_rm\"";
   
   my $test_fasta_file = "$pipeline_dir/rm_test.fa";
-  open (FASTA, '>$test_fasta_file') or die "Failed to create test file '$test_fasta_file'";
+  open (FASTA, ">$test_fasta_file") or die "Failed to create test file '$test_fasta_file'";
   print FASTA ">test\nATTATT\n";
   close (FASTA); 
   my $rm_out = `$program_file $parameters $test_fasta_file 2>&1`;
