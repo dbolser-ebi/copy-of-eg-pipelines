@@ -58,7 +58,7 @@ sub fetch_input {
     $report .= $seq_report;
     $report .= $fixes;
   }
-  print "$report\n";
+  
   $self->param('text', $report);
 }
 
