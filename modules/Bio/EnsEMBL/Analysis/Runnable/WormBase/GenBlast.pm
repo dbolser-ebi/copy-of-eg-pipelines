@@ -139,7 +139,8 @@ sub run_analysis{
   throw($program." is not executable GenBlast::run_analysis ") 
     unless($program && -x $program);
 
-  my $workdir = "/tmp";
+  my $workdir = "/tmp/wormbase";
+  my $exit = system("mkdir -p $workdir");
 
   # set up environment variables
   # we want the path of the program_file
@@ -150,8 +151,11 @@ sub run_analysis{
 
   # link to alignscore.txt if not already linked
   chdir $workdir;
-  my $ln_cmd = "ln -s ".$dir."/alignscore.txt alignscore.txt";
-  my $value = system($ln_cmd) unless (-e "alignscore.txt"); 
+  unlink "$workdir/alignscore.txt" if -l "$workdir/alignscore.txt";
+  my $cp_cmd = "cp $dir/alignscore.txt $workdir/alignscore.txt"; # RHEL uses protected_symlinks on /tmp, so can't link
+  unless(-e "$workdir/alignscore.txt"){
+   $exit = system($cp_cmd);
+  }
 
   # genBlast sticks "_1.1c_2.3_s1_0_16_1" on the end of the output
   # file for some reason - it will probably change in future
