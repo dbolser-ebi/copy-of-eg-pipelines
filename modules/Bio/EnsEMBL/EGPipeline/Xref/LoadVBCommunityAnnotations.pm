@@ -247,8 +247,8 @@ sub add_symbols {
   
   my $synonym_sql = 'INSERT IGNORE INTO external_synonym VALUES (?, ?)';
   my $sth = $dbea->dbc->db_handle->prepare($synonym_sql);
-  # Don't do this for now, but will ultimately need to, I think.
-  # $self->remove_display_xrefs($dba, $external_db);
+  
+  $self->remove_display_xrefs($ga, $external_db);
 
   foreach my $stable_id (keys %$annotations) {
     my $gene = $ga->fetch_by_stable_id($stable_id);
@@ -283,8 +283,7 @@ sub add_symbols {
 sub add_descriptions {
   my ($self, $ga, $analysis, $external_db, $exclude, $annotations) = @_;
   
-  # Don't do this for now, but will ultimately need to, I think.
-  #$self->remove_descriptions($dba, $external_db);
+  $self->remove_descriptions($ga, $external_db);
   
   my $db_display_name = $self->fetch_external_db_display($external_db);
 
@@ -292,8 +291,6 @@ sub add_descriptions {
     my %descs;
     
     foreach my $symbol (keys %{$$annotations{$stable_id}}) {
-      # Keep as is for now, ultimately want to stop using this db name
-      $db_display_name = 'VB External Description' if $symbol eq '';
       my $desc = $$annotations{$stable_id}{$symbol}{desc};
       if ($desc ne '') {
         $descs{$desc}++;
@@ -306,9 +303,8 @@ sub add_descriptions {
       if (defined $gene && ! exists($$exclude{$gene->analysis->logic_name})) {
         my $desc = $descs[0];
         
-        if (! $gene->description || $db_display_name ne 'VB External Description' || $gene->description !~ /^\Q$desc\E/i) {
-          # Include Acc for now, want to drop it since it's meaningless
-          $gene->description("$desc [Source:$db_display_name;Acc:$stable_id]");
+        if (! $gene->description || $gene->description !~ /^\Q$desc\E/i) {
+          $gene->description("$desc [Source:$db_display_name]");
           $ga->update($gene);
         }
       }
@@ -338,7 +334,7 @@ sub add_citations {
 
 sub add_xref {
   my ($self, $acc, $desc, $analysis, $external_db) = @_;
-  say "XXX $acc" if ! defined $desc;
+  
   $desc = undef if $desc eq '';
 
   my $xref = Bio::EnsEMBL::DBEntry->new(
