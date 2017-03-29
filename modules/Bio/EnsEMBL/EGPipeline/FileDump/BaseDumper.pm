@@ -126,7 +126,7 @@ sub generate_vb_filename {
   $species =~ s/[A-Z]+$//;
   my $dba = $self->core_dba;
   my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
-  $strain =~ s/\s+/\-/g;
+  $strain =~ s/[\s\/]+/\-/g;
   my $version;
   if ($gene_centric) {
     $version = $dba->get_MetaContainer()->single_value_by_key('genebuild.version');
