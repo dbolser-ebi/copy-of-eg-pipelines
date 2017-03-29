@@ -54,7 +54,8 @@ sub param_defaults {
     'logic_name'           => 'vb_community_annotation',
     'vb_external_db'       => 'VB_Community_Annotation',
     'citation_external_db' => 'PUBMED',
-    'exclude_logic_name'   => ['mirbase_gene', 'rfam_12.1_gene', 'trnascan_gene'],
+    'exclude_name_source'  => ['mirbase_gene', 'rfam_12.1_gene', 'trnascan_gene'],
+    'exclude_desc_source'  => ['mirbase_gene', 'rfam_12.1_gene', 'trnascan_gene'],
   };
 }
 
@@ -64,7 +65,8 @@ sub run {
   my $logic_name           = $self->param_required('logic_name');
   my $vb_external_db       = $self->param_required('vb_external_db');
   my $citation_external_db = $self->param_required('citation_external_db');
-  my $exclude_logic_name   = $self->param_required('exclude_logic_name');
+  my $exclude_name_source  = $self->param_required('exclude_name_source');
+  my $exclude_desc_source  = $self->param_required('exclude_desc_source');
 
   my $dba  = $self->get_DBAdaptor($db_type);
   my $aa   = $dba->get_adaptor('Analysis');
@@ -77,15 +79,18 @@ sub run {
     $self->external_db_reset($dba, $external_db);
   }
   
-  my %exclude = map {$_ => 1} @{$exclude_logic_name};
+  my %exclude_symbol   = map {$_ => 1} @{$exclude_name_source};
+  my %exclude_desc     = map {$_ => 1} @{$exclude_desc_source};
+  my $exclude_citation = {};
+  
   my $xref_file = $self->fetch_xref_file();
   my ($annotations, $citations) = $self->parse_xref_file($xref_file);
 
-  $self->add_symbols($ga, $dbea, $analysis, $vb_external_db, \%exclude, $annotations);
+  $self->add_symbols($ga, $dbea, $analysis, $vb_external_db, \%exclude_symbol, $annotations);
 
-  $self->add_descriptions($ga, $analysis, $vb_external_db, \%exclude, $annotations);
+  $self->add_descriptions($ga, $analysis, $vb_external_db, \%exclude_desc, $annotations);
   
-  $self->add_citations($ga, $dbea, $analysis, $citation_external_db, \%exclude, $citations);
+  $self->add_citations($ga, $dbea, $analysis, $citation_external_db, $exclude_citation, $citations);
 
   foreach my $external_db ($vb_external_db, $citation_external_db) {
     $self->external_db_update($dba, $external_db);
@@ -165,14 +170,11 @@ sub parse_xref_file {
           $annotations{$stable_id}{$symbol}{synonyms}{$synonym}++;
         }
       } elsif ($synonym ne '') {
-        say $synonym if $synonym eq 'Irk1';
         # In lieu of explicit symbol, add synonym to any existing symbols
         my $added_synonym = 0;
         foreach my $symbol (keys %{$annotations{$stable_id}}) {
-          say $symbol if $synonym eq 'Irk1';
           if ($symbol ne $synonym) {
             $annotations{$stable_id}{$symbol}{synonyms}{$synonym}++;
-            say 'added synonym' if $synonym eq 'Irk1';
             $added_synonym = 1;
           }
         }
@@ -180,7 +182,6 @@ sub parse_xref_file {
         # Synonym without a symbol => treat as a symbol
         if (! $added_synonym) {
           unless (exists $annotations{$stable_id}{$synonym}) {
-          say 'wtf?' if $synonym eq 'Irk1';
             $annotations{$stable_id}{$synonym}{desc} = $description;
           }
         }
@@ -270,7 +271,6 @@ sub add_symbols {
           # the xref doesn't already exist.
           if (exists $$annotations{$stable_id}{$symbol}{synonyms}) {
             for my $synonym (keys %{$$annotations{$stable_id}{$symbol}{synonyms}}) {
-              say "Adding $synonym for $symbol";
               $sth->execute($xref->dbID, $synonym) or $self->throw("Failed to add synonym '$synonym'");
             }
           }
