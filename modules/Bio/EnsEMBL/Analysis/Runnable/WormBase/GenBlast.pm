@@ -141,6 +141,7 @@ sub run_analysis{
 
   my $workdir = "/tmp/wormbase";
   my $exit = system("mkdir -p $workdir");
+  $exit = system("chmod g+w $workdir");
 
   # set up environment variables
   # we want the path of the program_file
