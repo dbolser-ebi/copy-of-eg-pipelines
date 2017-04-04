@@ -146,7 +146,7 @@ sub pipeline_analyses {
                             output_file => catdir('#projection_dir#', '#species#', 'backup.sql.gz'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['GeneDescProjection'],
     },
     
@@ -169,10 +169,10 @@ sub pipeline_analyses {
       -batch_size      =>  5,
       -hive_capacity   => 20,
       -flow_into       => {
-                            1 => [ ':////accu?summary=[]' ],
+                            1 => [ '?accu_name=summary&accu_address=[]' ],
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
@@ -185,7 +185,7 @@ sub pipeline_analyses {
                             store_data     => $self->o('store_data'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
     
 

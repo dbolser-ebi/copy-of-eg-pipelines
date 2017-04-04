@@ -106,28 +106,28 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'InterProXrefs',
-      -module          => 'Bio::EnsEMBL::EGPipeline::InterProPan::InterProXrefs',
+      -module          => 'Bio::EnsEMBL::EGPipeline::ProteinFeatures::DumpInterProXrefs',
       -parameters      => {
                             filename => catdir($self->o('pipeline_dir'), '#species#.xrefs.txt'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
       -flow_into       => {
-                            1 => [ ':////accu?filename=[]' ],
+                            1 => [ '?accu_name=filename&accu_address=[]' ],
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
       -logic_name      => 'Aggregate',
-      -module          => 'Bio::EnsEMBL::EGPipeline::InterProPan::Aggregate',
+      -module          => 'Bio::EnsEMBL::EGPipeline::ProteinFeatures::AggregateInterProXrefs',
       -parameters      => {
                             filenames   => '#filename#',
                             merged_file => $self->o('merged_file'),
                             unique_file => $self->o('unique_file'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['SpeciesForInsert'],
     },
 
@@ -160,7 +160,7 @@ sub pipeline_analyses {
                             output_file => catdir($self->o('pipeline_dir'), 'backup', '#species#.xref.sql'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['DeleteXrefs'],
     },
 
@@ -175,7 +175,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['LoadXrefs'],
     },
 
@@ -194,7 +194,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
   ];

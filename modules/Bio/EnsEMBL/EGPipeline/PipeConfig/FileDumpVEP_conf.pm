@@ -39,7 +39,7 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::FileDumpVEP_conf;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Hive::Version 2.3;
+use Bio::EnsEMBL::Hive::Version 2.4;
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::FileDump_conf');
 
 use File::Spec::Functions qw(catdir);
@@ -112,7 +112,7 @@ sub pipeline_analyses {
                               vep_script => $self->o('vep_script'),
                               vep_params => $self->o('vep_params'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => {
                               '1' => ['ValidateVEP'],
                             },
@@ -127,7 +127,7 @@ sub pipeline_analyses {
                               vep_hc_script => $self->o('vep_hc_script'),
                               vep_hc_params => $self->o('vep_hc_params'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
   ];
 }

@@ -179,12 +179,12 @@ sub update_gene_position {
       exon_transcript et USING (transcript_id) INNER JOIN
       exon e USING (exon_id)
     SET
-      g.seq_region_start = g.seq_region_start + $shift_by,
-      g.seq_region_end   = g.seq_region_end   + $shift_by,
-      t.seq_region_start = t.seq_region_start + $shift_by,
-      t.seq_region_end   = t.seq_region_end   + $shift_by,
-      e.seq_region_start = e.seq_region_start + $shift_by,
-      e.seq_region_end   = e.seq_region_end   + $shift_by
+      g.seq_region_start = cast(g.seq_region_start as signed) + cast($shift_by as signed),
+      g.seq_region_end   = cast(g.seq_region_end as signed)   + cast($shift_by as signed),
+      t.seq_region_start = cast(t.seq_region_start as signed) + cast($shift_by as signed),
+      t.seq_region_end   = cast(t.seq_region_end as signed)   + cast($shift_by as signed),
+      e.seq_region_start = cast(e.seq_region_start as signed) + cast($shift_by as signed),
+      e.seq_region_end   = cast(e.seq_region_end as signed)   + cast($shift_by as signed)
     WHERE gene_id = ?;
   ";
   my $sth = $dba->dbc->db_handle->prepare($sql);
