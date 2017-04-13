@@ -24,15 +24,6 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use File::Spec::Functions qw(catdir);
 
-sub param_defaults {
-  my ($self) = @_;
-  
-  return {
-    %{$self->SUPER::param_defaults},
-    'compara_files' => 0,
-  };
-}
-
 sub run {
   my ($self) = @_;
   my $new_files     = $self->param_required('new_files');
@@ -67,19 +58,20 @@ sub process_new_file {
   
   my $staging_dir   = $self->param_required('staging_dir');
   my $release_date  = $self->param_required('release_date');
-  my $compara_files = $self->param_required('compara_files');
   
-  my ($species, $strain, $data_type, $assembly, $geneset, $dump_type);
-  my ($organism, $file_type, $file_format, $description, $display_version, $xgrid);
+  my ($species, $strain, $data_type, $assembly, $geneset);
+  my ($organism, $description, $display_version, $xgrid);
   
-  if ($compara_files) {
+  # Easiest way to see if it's a compara file is to try to parse
+  # the filename as such, and see if anything is returned.
+  my ($file_type, $file_format, $dump_type) = $self->parse_compara_filename($file);
+  
+  if (defined $file_type) {
     $species = '';
     $organism = '';
-    ($file_type, $file_format) = $self->parse_compara_filename($file);
-    $description = $self->compara_description($file);
+    $description = $self->compara_description($dump_type, $file);
     $display_version = $release_date;
     $xgrid = 0;
-    
   } else {
     ($species, $strain, $data_type, $assembly, $geneset, $dump_type) = $self->parse_filename($file);
     $organism = $self->organism($species);
@@ -261,19 +253,19 @@ sub parse_compara_filename {
   my ($prefix) = $file =~ /^([^_]+)/;
   
   if ($prefix eq 'GENE-TREES-NEWICK') {
-    return ('Gene trees', 'Newick (tar)');
+    return ('Gene trees', 'Newick (tar)', 'gene_trees_newick');
   } elsif ($prefix eq 'GENE-ALIGN-TRANSCRIPTS') {
-    return ('Gene alignments', 'Fasta (tar)');
+    return ('Gene alignments', 'Fasta (tar)', 'gene_alignments_cdna');
   } elsif ($prefix eq 'GENE-ALIGN-PEPTIDES') {
-    return ('Gene alignments', 'Fasta (tar)');
+    return ('Gene alignments', 'Fasta (tar)', 'gene_alignments_aa');
   } elsif ($prefix eq 'GENE-TREES-TRANSCRIPTS') {
-    return ('Gene trees', 'XML (tar)');
+    return ('Gene trees', 'XML (tar)', 'gene_trees_cdna_xml');
   } elsif ($prefix eq 'GENE-TREES-PEPTIDES') {
-    return ('Gene trees', 'XML (tar)');
+    return ('Gene trees', 'XML (tar)', 'gene_trees_aa_xml');
   } elsif ($prefix eq 'HOMOLOGS') {
-    return ('Homologs', 'XML (tar)');
+    return ('Homologs', 'XML (tar)', 'homologs_xml');
   } elsif ($prefix eq 'WG-ALIGN') {
-    return ('Whole genome alignments', 'MAF (tar)');
+    return ('Whole genome alignments', 'MAF (tar)', 'wg_alignments_maf');
   }
 }
 
@@ -343,14 +335,13 @@ sub description {
 }
 
 sub compara_description {
-  my ($self, $file) = @_;
+  my ($self, $dump_type, $file) = @_;
   
   my $drupal_desc = $self->param_required('drupal_desc');
-  my ($prefix) = $file =~ /^([^_]+)/;
-  my $description = $$drupal_desc{$prefix};
+  my $description = $$drupal_desc{$dump_type};
   
-  if ($prefix eq 'WG-ALIGN') {
-    $file =~ /^$prefix\_[\w\-]+_(\w+)\-(\w+)\-(\w+)_(\w+)\-(\w+)\-([a-zA-Z0-9]+)/;
+  if ($dump_type eq 'wg_alignments_maf') {
+    $file =~ /^[\w\-]+\_[\w\-]+_(\w+)\-(\w+)\-(\w+)_(\w+)\-(\w+)\-([a-zA-Z0-9]+)/;
     my $species1 = "$1 $2 ($3)";
     my $species2 = "$4 $5 ($6)";
     

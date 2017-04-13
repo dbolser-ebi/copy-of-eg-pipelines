@@ -21,57 +21,62 @@ package Bio::EnsEMBL::EGPipeline::FileDump::ValidateVEP;
 use strict;
 use warnings;
 
-use base ('Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper');
+use base ('Bio::EnsEMBL::VEP::Pipeline::DumpVEP::QCDump');
 
-use Path::Tiny qw(path);
-use TAP::Harness;
+use File::Path qw(make_path rmtree);
 
-sub param_defaults {
-  my ($self) = @_;
-  
-  return {
-    %{$self->SUPER::param_defaults},
-    'data_type' => 'QC-REPORT',
-    'file_type' => 'txt',
-  };
+# The QC module makes assumptions about what directories have been
+# created by earlier modules, which won't be true for VB.
+sub dump_dir {
+  my $self = shift;
+  return $self->param('pipeline_dir').$self->param('dir_suffix');
 }
 
-sub run {
-  my ($self) = @_;
-  my $vep_hc_script = $self->param_required('vep_hc_script');
-  my $vep_hc_params = $self->param_required('vep_hc_params');
-  my $species       = $self->param_required('species');
-  my $dir           = $self->param_required('results_dir');
-  my $out_file      = $self->param_required('out_file');
+# Override bits of the qc function that assume you have a tarball of the
+# dumps which you need to unpack to test; we have them sitting in a
+# directory already, so just need to point there. (The function makes
+# some assumptions about job input_ids which are violated in the case
+# of VB, so we can't just let it do the tarballing and get on with it...)
+sub qc {
+  my ($self, $mod) = @_;
+
+  my $type      = $self->param('type');
+  my $has_var   = $self->param('variation');
+  my $has_reg   = $self->param('regulation');
+  my $converted = $mod && $mod =~ /tabix/;
+  my $species   = $self->required_param('species');
+  my $assembly  = $self->required_param('assembly');
   
-  my $dbc  = $self->core_dbc();
-  my $host = $dbc->host();
-  my $port = $dbc->port();
+  my $method_name = ($type eq 'core' ? '' : $type.'_').'species_suffix';
+  my $source_dir  = $self->data_dir.'/'.$self->$method_name;
   
-  $vep_hc_params .= " --species $species";
-  $vep_hc_params .= " --dir $dir";
-  $vep_hc_params .= " --host $host";
-  $vep_hc_params .= " --port $port";
-  $vep_hc_params .= " --user ensro";
+  die("ERROR: Expected to find $source_dir\n") unless -d $source_dir;
+  die("ERROR: Expected to find $source_dir/info.txt") unless -e "$source_dir/info.txt";
   
-  $self->warning("Running command $vep_hc_script $vep_hc_params");
-  
-  my @test_args = split(/\s+/, $vep_hc_params);
-  
-  my $fh = path($out_file)->filehandle('>');
-  
-  my $harness = TAP::Harness->new({
-    'test_args' => \@test_args,
-    'stdout'    => $fh,
-  });
-  $harness->runtests($vep_hc_script);
-  
-  close $fh;
-  
-  my $data = path($out_file)->slurp;
-  if ($data !~ /Result:\s+PASS/m) {
-    die "Validation failed, details in: $out_file";
+  my $qc_dir = $self->data_dir."/qc/$species/$assembly";
+  unless(-d $qc_dir) {
+    make_path($qc_dir) or die "Could not make directory $qc_dir";
   }
+  
+  my $config_obj = Bio::EnsEMBL::VEP::Config->new({
+    dir => $source_dir,
+    offline => 1,
+    species => $species,
+    assembly => $assembly,
+    check_existing => 1,
+    regulatory => 1,
+  });
+  my $cache_dir_obj = Bio::EnsEMBL::VEP::CacheDir->new({dir => $source_dir, config => $config_obj});
+
+  $self->check_info($cache_dir_obj, $converted);
+
+  $self->check_annotation_sources($cache_dir_obj, $converted);
+
+  $self->check_dirs($cache_dir_obj, $converted);
+
+  $self->run_test_set($self->data_dir) if $has_var && $type ne 'refseq';
+
+  rmtree($qc_dir);
 }
 
 1;

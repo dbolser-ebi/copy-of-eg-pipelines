@@ -117,22 +117,24 @@ sub generate_eg_filename {
 sub generate_vb_filename {
   my ($self) = @_;
   
-  my $species      = $self->param('species');
   my $data_type    = $self->param('data_type');
   my $file_type    = $self->param('file_type');
   my $gene_centric = $self->param('gene_centric');
   
-  $species =~ s/_/-/;
-  $species =~ s/[A-Z]+$//;
   my $dba = $self->core_dba;
-  my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
+  
+  my $species = $dba->get_MetaContainer()->single_value_by_key('species.vectorbase_name');
+  
+  my $strain  = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/[\s\/]+/\-/g;
+  
   my $version;
   if ($gene_centric) {
     $version = $dba->get_MetaContainer()->single_value_by_key('genebuild.version');
   } else {
     $version = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
   }
+  
   my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$version.$file_type";
   
   $dba->dbc && $dba->dbc->disconnect_if_idle();
