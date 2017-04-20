@@ -108,7 +108,7 @@ sub add_xrefs {
         foreach my $transitive_xref (@$transitive_xrefs) {
           my $xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
           if (defined $xref) {
-            if ($xref->dbname eq 'EntrezGene') {
+            if ($xref->dbname eq 'EntrezGene' || $xref->dbname eq 'UniGene') {
               $dbea->store($xref, $translation->transcript->get_Gene->dbID(), 'Gene', 0, $uniprot_xref);
             } else {
        	      $dbea->store($xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
