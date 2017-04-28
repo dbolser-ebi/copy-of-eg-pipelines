@@ -330,7 +330,7 @@ sub parse_result {
     $subject_seq =~ s/\s+$//;
     $query_seq =~ s/\s+$//;
     
-    my ($ungapped_structure, $cigar) =
+    my ($balanced_structure, $cigar) =
       $self->parse_alignment($structure, $subject_seq, $query_seq);
     
     my @attribs;
@@ -339,7 +339,9 @@ sub parse_result {
     push @attribs, $self->create_attrib('cmscan_accuracy',  $accuracy);
     push @attribs, $self->create_attrib('cmscan_bias',      $bias);
     push @attribs, $self->create_attrib('cmscan_gc',        $gc);
-    push @attribs, $self->create_attrib('ncRNA',            $ungapped_structure);
+    if (defined $balanced_structure) {
+      push @attribs, $self->create_attrib('ncRNA', $balanced_structure);
+    }
     if ($rna_acc && $rna_acc ne '-') {
       push @attribs, $self->create_attrib('rfam_accession', $rna_acc);
     }
@@ -401,29 +403,24 @@ sub parse_alignment {
   $query_seq   = join('', @query_seq);
   
   # ... then expand long insertions and deletions.
-  my @delete_lengths = $subject_seq =~ /\*\[\s*(\d*)\]\*/g;
-  my @insert_lengths = $query_seq =~ /\*\[\s*(\d*)\]\*/g;
-  
-  my $start_q = $query_seq;
-  my $start_struc = $structure;
+  my @delete_lengths = $subject_seq =~ /[\*\<]\[\s*(\d*)\][\*\>]/g;
+  my @insert_lengths = $query_seq =~ /[\*\<]\[\s*(\d*)\][\*\>]/g;
   
   for (my $i=0; $i<scalar(@delete_lengths); $i++) {
     my $delete = $delete_lengths[$i] ? '.' x $delete_lengths[$i] : '';
     my $insert = $insert_lengths[$i] ? '-' x $insert_lengths[$i] : '';
     
-    $query_seq =~ s/(\*\[\s*(\d+)\]\*)/$insert$delete/;
+    $query_seq =~ s/([\*\<]\[\s*(\d+)\][\*\>])/$insert$delete/;
     my $sub_structure = '~' x length($1);
     $structure =~ s/$sub_structure/$insert$delete/;
   }
   
-  @query_seq = split(//, $query_seq);
-  my @structure = split(//, $structure);
-  
   # Keep track of whether we're in a match, insert, or delete state; as long
   # as we stay in that state, increment the counter. When the state changes,
   # write out the current state, then reset the state and counter.
-  my @ungapped_structure;
   my ($cigar, $state, $count) = ('', 'M', 0);
+  
+  @query_seq = split(//, $query_seq);
   
   for (my $i=0; $i<length($query_seq); $i++) {
     if ($query_seq[$i] eq '-') {
@@ -436,8 +433,6 @@ sub parse_alignment {
         $count  = 1;
       }
     } else {
-      push @ungapped_structure, $structure[$i];
-      
       if ($query_seq[$i] eq '.') {
         if ($state eq 'D') {
           $count++;
@@ -462,9 +457,82 @@ sub parse_alignment {
   $cigar .= $count if $count > 1;
   $cigar .= $state;
   
-  my $ungapped_structure = join("", @ungapped_structure);
+  my $new_structure = $self->balance_structure($query_seq, $structure);
   
-  return ($ungapped_structure, $cigar);
+  return ($new_structure, $cigar);
+}
+
+sub balance_structure {
+	my ($self, $seq, $structure) = @_;
+	my @seq = split(//, $seq);
+	my @structure = split(//, $structure);
+	my %stems = %{$self->parse_structure($structure)};
+	while (my ($pos1, $pos2) = each(%stems)) {
+		if ($seq[$pos1] eq '-' && $seq[$pos2] ne '-') {
+			$structure[$pos1] = '.';
+			$structure[$pos2] = '.';
+		} elsif ($seq[$pos2] eq '-' && $seq[$pos1] ne '-') {
+			$structure[$pos1] = '.';
+			$structure[$pos2] = '.';
+		}
+	}
+	
+	my $new_structure;
+	for my $i (0..$#seq) {
+		if ($seq[$i] ne '-') {
+			$new_structure .= $structure[$i];
+		}
+	}
+	
+  if (! $self->check_structure($new_structure)) {
+    $new_structure = undef;
+  }
+  
+  return $new_structure;
+}
+
+sub parse_structure {
+	my ($self, $structure) = @_;
+	my %pairs = ('(' => ')', '<' => '>', '[' => ']', '{' => '}', 'A' => 'a', 'B' => 'b');
+	my %pairs_rev = (')' => '(', '>' => '<', ']' => '[', '}' => '{', 'a' => 'A', 'b' => 'B');
+	
+	my @structure = split(//, $structure);
+	my $position = 0;
+	my (%stems, %stack);
+	foreach my $base (@structure) {
+		if ($base !~ /[\-\.\_\,\:]/) {
+			if (exists($pairs{$base})) {
+				push @{$stack{$base}}, $position;
+			} elsif (exists($pairs_rev{$base})) {
+				my $partner = $pairs_rev{$base};
+				my $paired_position = pop @{$stack{$partner}};
+				$stems{$paired_position} = $position;
+			} else {
+				$self->throw("Unrecognised character '$base' in structure $structure");
+			}
+		}
+		$position++;
+	}
+	
+	return \%stems;
+}
+
+sub check_structure {
+	my ($self, $structure) = @_;
+  
+  my $balanced = 1;
+  my @pairs = (['(', ')'], ['<', '>'], ['[', ']'], ['{', '}']);
+  foreach my $pair (@pairs) {
+    my ($opening, $closing) = @$pair;
+    my $opening_count = ($structure =~ s/\Q$opening\E//g);
+    my $closing_count = ($structure =~ s/\Q$closing\E//g);
+    if ($opening_count != $closing_count) {
+      $balanced = 0;
+      $self->warning("Unbalanced structure\n$structure\n$opening_count $opening $closing_count $closing");
+    }
+  }
+  
+  return $balanced;
 }
 
 sub biotype {
