@@ -339,7 +339,7 @@ sub parse_result {
     push @attribs, $self->create_attrib('cmscan_accuracy',  $accuracy);
     push @attribs, $self->create_attrib('cmscan_bias',      $bias);
     push @attribs, $self->create_attrib('cmscan_gc',        $gc);
-    if (defined $balanced_structure) {
+    if (defined $balanced_structure && length($balanced_structure) > 0) {
       push @attribs, $self->create_attrib('ncRNA', $balanced_structure);
     }
     if ($rna_acc && $rna_acc ne '-') {
