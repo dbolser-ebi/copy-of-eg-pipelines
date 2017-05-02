@@ -325,8 +325,8 @@ sub parse_result {
   if ($significant eq '!') {
     my ($structure) = $result =~ /^\s+(\S+)\s+CS$/m;
     my ($subject, $query) = $result =~ /CS\n\s+(.+)\n.+\n\s+(.+)/m;
-    my ($subject_seq) = $subject =~ /^\s*\S+\s+\d+\s+(.+)\s+\d+\s*$/;
-    my ($query_seq) = $query =~ /^\s*\S+\s+\d+\s+(.+)\s+\d+\s*$/;
+    my ($subject_seq) = $subject =~ /^\s*\S+\s+\-*\d+\s+(.+)\s+\-*\d+\s*$/;
+    my ($query_seq) = $query =~ /^\s*\S+\s+\-*\d+\s+(.+)\s+\-*\d+\s*$/;
     $subject_seq =~ s/\s+$//;
     $query_seq =~ s/\s+$//;
     
@@ -398,7 +398,7 @@ sub parse_alignment {
       $query_seq[$i] = '.';
     }
   }
-
+  
   $subject_seq = join('', @subject_seq);
   $query_seq   = join('', @query_seq);
   
@@ -410,7 +410,7 @@ sub parse_alignment {
     my $delete = $delete_lengths[$i] ? '.' x $delete_lengths[$i] : '';
     my $insert = $insert_lengths[$i] ? '-' x $insert_lengths[$i] : '';
     
-    $query_seq =~ s/([\*\<]\[\s*(\d+)\][\*\>])/$insert$delete/;
+    $query_seq =~ s/([\*\<]\[\s*\d+\][\*\>])/$insert$delete/;
     my $sub_structure = '~' x length($1);
     $structure =~ s/$sub_structure/$insert$delete/;
   }
