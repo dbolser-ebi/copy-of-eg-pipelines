@@ -234,6 +234,7 @@ sub remove_separators {
 
 sub join_align_feature {
   my ($self, $out_file) = @_;
+  my $max_length = 100000;
   
   my $file = path($out_file);
   
@@ -258,18 +259,23 @@ sub join_align_feature {
   }
   
   foreach my $id (keys %matches) {
-    my $match = join("\t",
-      $matches{$id}{'region'},
-      $matches{$id}{'source'},
-      'match',
-      min(@{$matches{$id}{'start'}}),
-      max(@{$matches{$id}{'end'}}),
-      '.',
-      $matches{$id}{'strand'},
-      '.',
-      "ID=$id"
-    );
-    $data .= "$match\n";
+    my $start = min(@{$matches{$id}{'start'}});
+    my $end   = max(@{$matches{$id}{'end'}});
+    
+    if ($end - $start < $max_length) {
+      my $match = join("\t",
+        $matches{$id}{'region'},
+        $matches{$id}{'source'},
+        'match',
+        $start,
+        $end,
+        '.',
+        $matches{$id}{'strand'},
+        '.',
+        "ID=$id"
+      );
+      $data .= "$match\n";
+    }
   }
   
   $file->spew($data);
