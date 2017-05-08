@@ -61,11 +61,13 @@ sub run {
   my $external_dbs           = $self->param_required('external_dbs');
   my $secondary_external_dbs = $self->param_required('secondary_external_dbs');
   my $replace_all            = $self->param_required('replace_all');
-
+  
+  foreach my $secondary (values %$secondary_external_dbs) {
+    $$external_dbs{$secondary} = $secondary;
+  }
   my @external_dbs = values %$external_dbs;
-  push @external_dbs, values %$secondary_external_dbs;
   push @external_dbs, 'protein_id' if exists($$external_dbs{'EMBL'});
-
+  
   my $dba = $self->get_DBAdaptor($db_type);
   my $aa  = $dba->get_adaptor('Analysis');
 
@@ -137,37 +139,7 @@ sub add_xref {
 
   my ($dbname, $primary_id, $secondary_id, $quaternary_id) = @$transitive_xref;
   my $xref;
-
-  if (exists $$external_dbs{$dbname}) {
-    my $external_db = $$external_dbs{$dbname};
-
-    # For ENA we don't want genomic references where we have the CDS
-    if ($dbname eq 'EMBL'    &&
-      defined $secondary_id  && $secondary_id ne '-' &&
-		  defined $quaternary_id && $quaternary_id eq 'Genomic_DNA')
-    {
-      $primary_id  = $secondary_id;
-      $external_db = 'protein_id';
-    }
-
-  	$xref = Bio::EnsEMBL::DBEntry->new(
-      -PRIMARY_ID  => $primary_id,
-  		-DISPLAY_ID  => $primary_id,
-  		-DBNAME      => $external_db,
-  		-INFO_TYPE   => 'DEPENDENT',
-    );
-  	$xref->analysis($analysis);
-  }
-
-  return $xref;
-}
-
-sub add_secondary_xref {
-  my ($self, $transitive_xref, $analysis, $external_dbs) = @_;
-
-  my ($dbname, $primary_id, $secondary_id, $quaternary_id) = @$transitive_xref;
-  my $xref;
-
+  
   if (exists $$external_dbs{$dbname}) {
     my $external_db = $$external_dbs{$dbname};
 
