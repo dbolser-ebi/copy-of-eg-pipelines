@@ -158,7 +158,7 @@ cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 401,  'run method: correct num
 is($$go_xrefs{IEA}{'null'}, 6,                          'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 4,   'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 20,  'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 286,  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 267,  'run method: correct number of GO xrefs');
 
 # Delete all object_xrefs and ontology_xrefs with matching external_db
 $obj->param('replace_all', 1);
@@ -171,7 +171,7 @@ cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 204, 'run method: correct numb
 ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 11, 'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 152, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 132, 'run method: correct number of GO xrefs');
 
 done_testing();
 
