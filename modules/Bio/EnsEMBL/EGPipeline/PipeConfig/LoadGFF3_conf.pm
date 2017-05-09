@@ -381,9 +381,7 @@ sub pipeline_analyses_generic {
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::FixModels',
       -analysis_capacity => 10,
       -max_retry_count   => 0,
-      -parameters        => {
-                              protein_fasta_file => $self->o('protein_fasta_file'),
-                            },
+      -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => {
                               '1' => WHEN('#apply_seq_edits#' =>
@@ -398,10 +396,7 @@ sub pipeline_analyses_generic {
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::ApplySeqEdits',
       -analysis_capacity => 10,
       -max_retry_count   => 0,
-      -parameters        => {
-                              genbank_file       => $self->o('genbank_file'),
-                              protein_fasta_file => $self->o('protein_fasta_file'),
-                            },
+      -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => ['EmailReport'],
     },
