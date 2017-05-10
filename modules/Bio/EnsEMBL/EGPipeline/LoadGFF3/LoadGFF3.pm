@@ -375,7 +375,9 @@ sub get_cds {
     if (defined $gff_cds->segments && scalar($gff_cds->segments) > 0) {
       push @cds, sort sort_genomic $gff_cds->segments;
     } else {
-      push @cds, $gff_cds;
+      if ($gff_cds->start != $gff_cds->end) {
+        push @cds, $gff_cds;
+      }
     }
   }
   
