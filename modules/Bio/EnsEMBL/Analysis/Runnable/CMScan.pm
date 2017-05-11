@@ -611,7 +611,7 @@ sub biotype {
     $biotype = 'telomerase_RNA';
     
   } elsif ($rna_desc =~ /^vault RNA/i) {
-    $biotype = 'vaultRNA';
+    $biotype = 'vault_RNA';
     
   } elsif ($rna_desc =~ /ncRNA/) {
     $biotype = 'ncRNA';
