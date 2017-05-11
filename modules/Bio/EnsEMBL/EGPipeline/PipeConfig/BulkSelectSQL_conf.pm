@@ -105,8 +105,8 @@ sub pipeline_analyses {
     },
     
     {
-      -logic_name      => 'SelectSQL',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlSelect',
+      -logic_name      => 'SqlExecute',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlExecute',
       -max_retry_count => 0,
       -parameters      => {
                             sql_file => $self->o('sql_file'),

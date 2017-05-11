@@ -54,7 +54,7 @@ sub default_options {
     run_all      => 0,
     meta_filters => {},
     
-    sql => [],
+    sql_file => undef,
   };
 }
 
@@ -77,23 +77,22 @@ sub pipeline_analyses {
                        antispecies     => $self->o('antispecies'),
                        division        => $self->o('division'),
                        run_all         => $self->o('run_all'),
-                       core_flow       => $self->o('core_flow'),
                        meta_filters    => $self->o('meta_filters'),
                        chromosome_flow => 0,
                        regulation_flow => 0,
                        variation_flow  => 0,
                       },
       -flow_into   => {
-                       '2' => 'RunSQL',
+                       '2' => 'SqlExecute',
                       },
       -rc_name     => 'normal',
     },
 
     {
-      -logic_name      => 'RunSQL',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -logic_name      => 'SqlExecute',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlExecute',
       -parameters      => {
-                            sql => $self->o('sql'),
+                            sql_file => $self->o('sql_file'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
