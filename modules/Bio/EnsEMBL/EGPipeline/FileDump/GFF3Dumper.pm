@@ -275,6 +275,8 @@ sub join_align_feature {
         "ID=$id"
       );
       $data .= "$match\n";
+    } else {
+      $data =~ s/^.*\tmatch_part\t.*Parent=$id.*\n//gm;
     }
   }
   
