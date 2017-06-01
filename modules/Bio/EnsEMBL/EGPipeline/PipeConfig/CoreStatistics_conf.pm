@@ -63,13 +63,15 @@ sub default_options {
     bin_count => '200',
     max_run   => '100',
     
-    no_pepstats => 0,
+    no_pepstats     => 0,
+    pepstats_binary => 'pepstats',
     
-    emboss_dir => '/nfs/software/ensembl/RHEL7/linuxbrew',
     canonical_transcripts_script => $self->o('ensembl_cvs_root_dir').
      '/ensembl/misc-scripts/canonical_transcripts/select_canonical_transcripts.pl',
     canonical_transcripts_out_dir => undef,
+    
     meta_coord_dir => undef,
+    
     optimize_tables => 0,
   };
 }
@@ -346,9 +348,9 @@ sub pipeline_analyses {
       -logic_name        => 'PepStats',
       -module            => 'Bio::EnsEMBL::Production::Pipeline::Production::PepStatsBatch',
       -parameters        => {
-                              tmpdir  => '/tmp',
-                              binpath => $self->o('emboss_dir'),
-                              dbtype  => 'core',
+                              tmpdir          => '/tmp',
+                              pepstats_binary => $self->o('pepstats_binary'),
+                              dbtype          => 'core',
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
