@@ -53,7 +53,7 @@ sub write_output {
         old_dbname => $old_dba->dbc->dbname,
       };
       
-      $self->dataflow_output_id($old_db_params, 1);
+      $self->dataflow_output_id($old_db_params, 2);
     } else {
       $self->warning("No old database found for $species, therefore no stable ID mapping was done.");
     }

@@ -376,8 +376,9 @@ sub pipeline_analyses {
                               old_reg_conf    => $self->o('old_registry'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => ['StableIDMapping'],
-
+      -flow_into         => {
+                              '2' => ['StableIDMapping'],
+                            },
     },
 
     {
