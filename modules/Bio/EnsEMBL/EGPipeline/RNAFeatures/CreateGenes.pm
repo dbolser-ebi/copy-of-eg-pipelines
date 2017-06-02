@@ -455,10 +455,10 @@ sub new_gene {
     -biotype       => $biotype,
     -source        => $source,
     -status        => 'NOVEL',
-    -version       => undef,
     -created_date  => time,
     -modified_date => time,
   );
+  $gene->version(undef);
   
   return $gene;
 }
@@ -488,10 +488,10 @@ sub new_transcript {
     -biotype       => $biotype,
     -source        => $source,
     -status        => 'NOVEL',
-    -version       => undef,
     -created_date  => time,
     -modified_date => time,
   );
+  $transcript->version(undef);
   $transcript->add_supporting_features($feature);
   
   if (defined $structure) {
@@ -518,10 +518,10 @@ sub new_exon {
     -phase           => -1,
     -end_phase       => -1,
     -is_constitutive => 1,
-    -version         => undef,
     -created_date    => time,
     -modified_date   => time,
   );
+  $exon->version(undef);
   
   return $exon;
 }
