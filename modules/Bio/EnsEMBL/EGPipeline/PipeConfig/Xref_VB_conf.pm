@@ -84,6 +84,7 @@ sub default_options {
       'anopheles_sinensis'        => '1NQL-9mmykZ0fWls6405mhCKSxIVfE2kvxaFRogb1tXY',
       'anopheles_stephensi'       => '1ZVMIQ_tr3zJBMuk-KdUcEXSIqVOjL8jANc_SKqQAlkU',
       'biomphalaria_glabrata'     => '1PPSMgx2-z6CPa4Cit5Kh1IUCa9i7Z6Rpnv4H5ks38UA',
+      'cimex_lectularius'         => '1h_Sx0lWt8m-epGXSzBDkP3qAT7Gkn1C-wAbgCW5KdoI',
       'culex_quinquefasciatus'    => '1_6KHioJdjHYroDooP48FavcclKs1D2vqxPZvJzcTq_U',
       'glossina_austeni'          => '1VWQ8g_JXkz8L4XLvJJ5AVGwjhr4NP5am25-DUtJcjc0',
       'glossina_brevipalpis'      => '1n8LzP0VOEUbgsFtkr2rX6FJNUEfr9CGCfKikrI0WdVo',
