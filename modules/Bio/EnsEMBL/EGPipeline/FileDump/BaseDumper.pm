@@ -90,9 +90,9 @@ sub generate_filename {
   
   if (!$filename) {
     if ($eg_filename_format) {
-      $filename = $self->generate_eg_filename();
+      $filename = $self->generate_eg_filename($species, $file_type);
     } else {
-      $filename = $self->generate_vb_filename();
+      $filename = $self->generate_vb_filename($species, $file_type);
     }
   }
   
@@ -100,10 +100,7 @@ sub generate_filename {
 }
 
 sub generate_eg_filename {
-  my ($self) = @_;
-  
-  my $species   = $self->param('species');
-  my $file_type = $self->param('file_type');
+  my ($self, $species, $file_type) = @_;
   
   my $dba = $self->core_dba;
   my $dbname = $dba->dbc->dbname();
@@ -115,15 +112,15 @@ sub generate_eg_filename {
 }
 
 sub generate_vb_filename {
-  my ($self) = @_;
+  my ($self, $species, $file_type) = @_;
   
   my $data_type    = $self->param('data_type');
-  my $file_type    = $self->param('file_type');
   my $gene_centric = $self->param('gene_centric');
   
   my $dba = $self->core_dba;
   
-  my $species = $dba->get_MetaContainer()->single_value_by_key('species.vectorbase_name');
+  $species =~ s/_/-/;		
+  $species =~ s/[A-Z]+$//;
   
   my $strain  = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/[\s\/]+/\-/g;

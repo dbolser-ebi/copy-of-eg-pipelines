@@ -266,6 +266,8 @@ sub parse_compara_filename {
     return ('Homologs', 'XML (tar)', 'homologs_xml');
   } elsif ($prefix eq 'WG-ALIGN') {
     return ('Whole genome alignments', 'MAF (tar)', 'wg_alignments_maf');
+  } else {
+    return (undef, undef, undef);
   }
 }
 
