@@ -185,11 +185,14 @@ sub pipeline_wide_parameters {
 
   return {
     %{$self->SUPER::pipeline_wide_parameters},
-    results_dir     => $self->o('results_dir'),
-    pipeline_dir    => $self->o('vep_dir'),
-    ensembl_release => $self->o('ensembl_release'),
-    eg_version      => $self->o('eg_version'),
-    region_size     => $self->o('region_size'),
+    results_dir      => $self->o('results_dir'),
+    pipeline_dir     => $self->o('vep_dump_dir'),
+    embl_dump_dir    => $self->o('embl_dump_dir'),
+    uniprot_dump_dir => $self->o('uniprot_dump_dir'),
+    vep_dump_dir     => $self->o('vep_dump_dir'),
+    ensembl_release  => $self->o('ensembl_release'),
+    eg_version       => $self->o('eg_version'),
+    region_size      => $self->o('region_size'),
   };
 }
 
