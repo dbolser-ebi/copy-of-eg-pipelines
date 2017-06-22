@@ -314,6 +314,12 @@ sub pipeline_analyses {
       -analysis_capacity => 5,
       -max_retry_count   => 1,
       -parameters        => {
+                              table_list  => [
+                                'analysis',
+                                'analysis_description',
+                                'dna_align_feature',
+                                'dna_align_feature_attrib',
+                              ],
                               output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
