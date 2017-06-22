@@ -40,7 +40,7 @@ package Bio::EnsEMBL::EGPipeline::CoreStatistics::CanonicalTranscripts;
 use strict;
 use warnings;
 
-use base qw/Bio::EnsEMBL::Production::Pipeline::Base/;
+use base qw(Bio::EnsEMBL::Production::Pipeline::Common::Base);
 
 sub run {
   my ($self) = @_;
