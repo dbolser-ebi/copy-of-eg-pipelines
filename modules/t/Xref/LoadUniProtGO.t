@@ -122,18 +122,18 @@ foreach my $go (@$gos) {
   is($$linkage_info[0][1]->dbname, 'Uniprot/SPTREMBL', 'add_xref method: master external_db correct');
 
   my $ignore_release = 1;
-  $dbea->store($xref, $translation->dbID(), 'Translation', $ignore_release);
+  $dbea->store($xref, $translation->transcript->dbID(), 'Transcript', $ignore_release);
 
   is_rows(1, $dba, 'xref', 'WHERE dbprimary_acc = ? ', [$term]);
   is_rows(1, $dba,
     'xref INNER JOIN object_xref USING (xref_id)',
-    'WHERE dbprimary_acc = ? AND ensembl_id = ? AND analysis_id = ? AND ensembl_object_type = "Translation"',
-    [$term, $translation->dbID(), $analysis->dbID()]
+    'WHERE dbprimary_acc = ? AND ensembl_id = ? AND analysis_id = ? AND ensembl_object_type = "Transcript"',
+    [$term, $translation->transcript->dbID(), $analysis->dbID()]
   );
   is_rows(1, $dba,
     'xref INNER JOIN object_xref USING (xref_id) INNER JOIN ontology_xref USING (object_xref_id)',
-    'WHERE dbprimary_acc = ? AND ensembl_id = ? AND analysis_id = ? AND source_xref_id =? AND linkage_type = ? AND ensembl_object_type = "Translation"',
-    [$term, $translation->dbID(), $analysis->dbID(), $uniprot_xref->dbID(), $evidence]
+    'WHERE dbprimary_acc = ? AND ensembl_id = ? AND analysis_id = ? AND source_xref_id =? AND linkage_type = ? AND ensembl_object_type = "Transcript"',
+    [$term, $translation->transcript->dbID(), $analysis->dbID(), $uniprot_xref->dbID(), $evidence]
   );
 }
 
@@ -158,7 +158,7 @@ cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 401,  'run method: correct num
 is($$go_xrefs{IEA}{'null'}, 6,                          'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 4,   'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 20,  'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 286,  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 267,  'run method: correct number of GO xrefs');
 
 # Delete all object_xrefs and ontology_xrefs with matching external_db
 $obj->param('replace_all', 1);
@@ -171,7 +171,7 @@ cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 204, 'run method: correct numb
 ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 11, 'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 152, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 132, 'run method: correct number of GO xrefs');
 
 done_testing();
 
@@ -180,7 +180,7 @@ sub object_xrefs {
   my $translations = $ta->fetch_all();
 
   foreach my $translation (@$translations) {
-    my $go_xrefs = $translation->get_all_DBEntries('GO');
+    my $go_xrefs = $translation->transcript->get_all_DBEntries('GO');
     foreach my $go_xref (@$go_xrefs) {
       my $linkages = $go_xref->get_all_linkage_info();
       foreach my $linkage (@$linkages) {

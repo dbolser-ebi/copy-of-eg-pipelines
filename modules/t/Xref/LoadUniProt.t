@@ -399,7 +399,7 @@ $obj->run();
 ($reviewed_xrefs, $unreviewed_xrefs) = object_xrefs();
 cmp_ok(scalar(@$reviewed_xrefs), '>=', 31,    'run method: correct number of reviewed UniProt xrefs');
 cmp_ok(scalar(@$unreviewed_xrefs), '>=', 269, 'run method: correct number of unreviewed UniProt xrefs');
-is_rows(145, $dba,
+is_rows(158, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]
@@ -412,7 +412,7 @@ $obj->run();
 ($reviewed_xrefs, $unreviewed_xrefs) = object_xrefs();
 cmp_ok(scalar(@$reviewed_xrefs), '>=', 15,    'run method: correct number of reviewed UniProt xrefs');
 cmp_ok(scalar(@$unreviewed_xrefs), '>=', 129, 'run method: correct number of unreviewed UniProt xrefs');
-is_rows(145, $dba,
+is_rows(158, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]

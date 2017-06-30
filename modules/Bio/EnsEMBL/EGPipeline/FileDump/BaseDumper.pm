@@ -90,9 +90,9 @@ sub generate_filename {
   
   if (!$filename) {
     if ($eg_filename_format) {
-      $filename = $self->generate_eg_filename();
+      $filename = $self->generate_eg_filename($species, $file_type);
     } else {
-      $filename = $self->generate_vb_filename();
+      $filename = $self->generate_vb_filename($species, $file_type);
     }
   }
   
@@ -100,10 +100,7 @@ sub generate_filename {
 }
 
 sub generate_eg_filename {
-  my ($self) = @_;
-  
-  my $species   = $self->param('species');
-  my $file_type = $self->param('file_type');
+  my ($self, $species, $file_type) = @_;
   
   my $dba = $self->core_dba;
   my $dbname = $dba->dbc->dbname();
@@ -115,24 +112,26 @@ sub generate_eg_filename {
 }
 
 sub generate_vb_filename {
-  my ($self) = @_;
+  my ($self, $species, $file_type) = @_;
   
-  my $species      = $self->param('species');
   my $data_type    = $self->param('data_type');
-  my $file_type    = $self->param('file_type');
   my $gene_centric = $self->param('gene_centric');
   
-  $species =~ s/_/-/;
-  $species =~ s/[A-Z]+$//;
   my $dba = $self->core_dba;
-  my $strain = $dba->get_MetaContainer()->single_value_by_key('species.strain');
+  
+  $species =~ s/_/-/;		
+  $species =~ s/[A-Z]+$//;
+  
+  my $strain  = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/[\s\/]+/\-/g;
+  
   my $version;
   if ($gene_centric) {
     $version = $dba->get_MetaContainer()->single_value_by_key('genebuild.version');
   } else {
     $version = $dba->get_MetaContainer()->single_value_by_key('assembly.default');
   }
+  
   my $filename = ucfirst($species).'-'.$strain.'_'.uc($data_type).'_'."$version.$file_type";
   
   $dba->dbc && $dba->dbc->disconnect_if_idle();

@@ -281,9 +281,9 @@ sub add_gene_archive {
   $sth->execute(
     $mapping_session_id,
     $old_g_stable_id,
-    $old_g_version,
+    $old_g_version || 1,
     $old_t_stable_id,
-    $old_t_version
+    $old_t_version || 1
   ) or $self->throw($sth->errstr);
 }
 

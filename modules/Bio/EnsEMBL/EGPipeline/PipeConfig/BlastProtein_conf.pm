@@ -53,11 +53,11 @@ sub default_options {
     
     pipeline_name => 'blast_protein_'.$self->o('ensembl_release'),
     
-    target_species      => [],
-    target_antispecies  => [],
-    target_division     => [],
-    target_run_all      => 0,
-    target_meta_filters => {},
+    species      => [],
+    antispecies  => [],
+    division     => [],
+    run_all      => 0,
+    meta_filters => {},
     
     # Parameters for dumping and splitting Fasta query files.
     max_seq_length          => 10000000,
@@ -115,6 +115,9 @@ sub default_options {
     blastp_top_x => 1,
     blastx_top_x => 10,
     
+    # blastx results go in an otherfeatures db by default.
+    blastx_db_type => 'otherfeatures',
+    
     # Generate a GFF file for loading into, e.g., WebApollo
     create_gff    => 0,
     gt_exe        => 'gt',
@@ -153,7 +156,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'gff_source'    => $self->o('gff_source'),
         'linked_tables' => ['protein_align_feature'],
-        'db_type'       => 'otherfeatures',
+        'db_type'       => $self->o('blastx_db_type'),
       },
       
     ],
@@ -205,6 +208,9 @@ sub pipeline_wide_parameters {
  
  return {
    %{$self->SUPER::pipeline_wide_parameters},
+   'blastp'         => $self->o('blastp'),
+   'blastx'         => $self->o('blastx'),
+   'blastx_db_type' => $self->o('blastx_db_type'),
    'uniprot_source' => $self->o('uniprot_source'),
  };
 }
@@ -230,11 +236,11 @@ sub pipeline_analyses {
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
       -max_retry_count => 1,
       -parameters      => {
-                            species         => $self->o('target_species'),
-                            antispecies     => $self->o('target_antispecies'),
-                            division        => $self->o('target_division'),
-                            run_all         => $self->o('target_run_all'),
-                            meta_filters    => $self->o('target_meta_filters'),
+                            species         => $self->o('species'),
+                            antispecies     => $self->o('antispecies'),
+                            division        => $self->o('division'),
+                            run_all         => $self->o('run_all'),
+                            meta_filters    => $self->o('meta_filters'),
                             chromosome_flow => 0,
                             regulation_flow => 0,
                             variation_flow  => 0,
@@ -248,19 +254,16 @@ sub pipeline_analyses {
 
     {
       -logic_name      => 'TargetDatabase',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::TargetDatabase',
-      -max_retry_count => 1,
-      -parameters      => {
-                            blastp => $self->o('blastp'),
-                            blastx => $self->o('blastx'),
-                          },
+      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count => 0,
+      -parameters      => {},
       -rc_name         => 'normal',
-      -flow_into       => {
-                            '2->A' => ['BackupCoreDatabase'],
-                            'A->2' => ['DumpProteome'],
-                            '3->B' => ['CheckOFDatabase'],
-                            'B->3' => ['DumpGenome'],
-                          },
+      -flow_into       => WHEN(
+                            '#blastp#' => ['DumpProteome'],
+                            '#blastx#' => ['DumpGenome'],
+                            '#blastp# || (#blastx# && #blastx_db_type# eq "core")' => ['BackupCoreDatabase'],
+                            '#blastx# && #blastx_db_type# eq "otherfeatures"' => ['CheckOFDatabase'],
+                          ),
       -meadow_type     => 'LOCAL',
     },
 
@@ -296,7 +299,7 @@ sub pipeline_analyses {
       -max_retry_count => 1,
       -parameters      => {
                             db_type     => 'otherfeatures',
-                            output_file => catdir($self->o('pipeline_dir'), '#species#', 'of_bkp.sql.gz'),
+                            output_file => catdir($self->o('pipeline_dir'), '#species#', 'otherfeatures_bkp.sql.gz'),
                           },
       -rc_name         => 'normal',
     },
@@ -491,11 +494,11 @@ sub pipeline_analyses {
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
       -max_retry_count => 1,
       -parameters      => {
-                            species         => $self->o('target_species'),
-                            antispecies     => $self->o('target_antispecies'),
-                            division        => $self->o('target_division'),
-                            run_all         => $self->o('target_run_all'),
-                            meta_filters    => $self->o('target_meta_filters'),
+                            species         => $self->o('species'),
+                            antispecies     => $self->o('antispecies'),
+                            division        => $self->o('division'),
+                            run_all         => $self->o('run_all'),
+                            meta_filters    => $self->o('meta_filters'),
                             chromosome_flow => 0,
                             variation_flow  => 0,
                           },
@@ -520,16 +523,16 @@ sub pipeline_analyses {
                           },
       -rc_name         => 'normal',
       -flow_into       => {
-                            '2->A' => ['AnalysisSetupCore'],
+                            '2->A' => ['AnalysisSetupBlastP'],
                             'A->4' => ['FetchProteomeFiles'],
-                            '3->B' => ['AnalysisSetupOF'],
+                            '3->B' => ['AnalysisSetupBlastX'],
                             'B->5' => ['FetchGenomeFiles'],
                           },
       -meadow_type     => 'LOCAL',
     },
 
     {
-      -logic_name      => 'AnalysisSetupCore',
+      -logic_name      => 'AnalysisSetupBlastP',
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
       -can_be_empty    => 1,
       -max_retry_count => 0,
@@ -545,15 +548,15 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'AnalysisSetupOF',
+      -logic_name      => 'AnalysisSetupBlastX',
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
       -can_be_empty    => 1,
       -max_retry_count => 0,
       -batch_size      => 10,
       -parameters      => {
-                            db_type            => 'otherfeatures',
+                            db_type            => $self->o('blastx_db_type'),
                             db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'of_bkp.sql.gz'),
+                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', '#blastx_db_type#_bkp.sql.gz'),
                             delete_existing    => $self->o('delete_existing'),
                             production_lookup  => $self->o('production_lookup'),
                             production_db      => $self->o('production_db'),
@@ -694,7 +697,7 @@ sub pipeline_analyses {
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
       -parameters      => {
-                            db_type          => 'otherfeatures',
+                            db_type          => $self->o('blastx_db_type'),
                             logic_name       => '#logic_name_prefix#_blastx',
                             query_type       => 'dna',
                             database_type    => 'pep',
@@ -717,7 +720,7 @@ sub pipeline_analyses {
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
       -parameters      => {
-                            db_type          => 'otherfeatures',
+                            db_type          => $self->o('blastx_db_type'),
                             logic_name       => '#logic_name_prefix#_blastx',
                             query_type       => 'dna',
                             database_type    => 'pep',
@@ -740,7 +743,7 @@ sub pipeline_analyses {
       -hive_capacity   => $self->o('max_hive_capacity'),
       -max_retry_count => 1,
       -parameters      => {
-                            db_type          => 'otherfeatures',
+                            db_type          => $self->o('blastx_db_type'),
                             logic_name       => '#logic_name_prefix#_blastx',
                             query_type       => 'dna',
                             database_type    => 'pep',
@@ -771,7 +774,7 @@ sub pipeline_analyses {
       -can_be_empty    => 1,
       -max_retry_count => 1,
       -parameters      => {
-                            db_type      => 'otherfeatures',
+                            db_type      => $self->o('blastx_db_type'),
                             filter_top_x => $self->o('blastx_top_x'),
                             logic_name   => '#logic_name_prefix#_blastx',
                             create_gff   => $self->o('create_gff'),
@@ -789,7 +792,7 @@ sub pipeline_analyses {
       -can_be_empty    => 1,
       -max_retry_count => 1,
       -parameters      => {
-                            db_type            => 'otherfeatures',
+                            db_type            => $self->o('blastx_db_type'),
                             feature_type       => ['ProteinAlignFeature'],
                             include_scaffold   => 0,
                             remove_separators  => 1,
@@ -834,7 +837,7 @@ sub pipeline_analyses {
       -batch_size      => 10,
       -max_retry_count => 0,
       -parameters      => {
-                            db_type     => 'otherfeatures',
+                            db_type     => $self->o('blastx_db_type'),
                             logic_name  => '#logic_name_prefix#_blastx',
                             results_dir => catdir($self->o('pipeline_dir'), '#species#'),
                           },

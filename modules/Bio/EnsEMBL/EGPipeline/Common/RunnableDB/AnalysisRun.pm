@@ -61,6 +61,7 @@ sub param_defaults {
     'parse_filehandle' => 0,
     'output_not_set'   => 0,
     'save_object_type' => undef,
+    'parsing_only'     => 0,
   };
 }
 
@@ -124,6 +125,7 @@ sub fetch_input {
 
 sub run {
   my $self = shift @_;
+  my $parsing_only = $self->param_required('parsing_only');
   
   my $runnable = $self->fetch_runnable();
   
@@ -143,7 +145,9 @@ sub run {
   # Recommended Hive trick for potentially long-running analyses.
   $self->dbc && $self->dbc->disconnect_if_idle();
   $self->dbc->reconnect_when_lost(1);
-  $runnable->run_analysis();
+  if (! $parsing_only) {
+    $runnable->run_analysis();
+  }
   
   $self->update_options($runnable);
   

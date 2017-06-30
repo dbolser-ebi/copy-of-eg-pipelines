@@ -20,6 +20,8 @@ package Bio::EnsEMBL::EGPipeline::FileDump::CheckSumChecking;
 
 use strict;
 use warnings;
+use feature 'say';
+
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
 use File::Copy;
@@ -38,8 +40,8 @@ sub param_defaults {
 sub run {
   my ($self) = @_;
   
-  my ($checking_dir) = $self->create_checking_dir;
-  $self->check_files($checking_dir);
+  my ($checking_dir, $new_files) = $self->create_checking_dir;
+  $self->classify_files($checking_dir, $new_files);
   remove_tree($checking_dir);
   
   $self->copy_new;
@@ -69,16 +71,27 @@ sub create_checking_dir {
   remove_tree($checking_dir);
   make_path($checking_dir);
   
+  # Keep a record of files which are not part of the checksumming;
+  # these will need to be treated as new files.
+  my @new_files;
+  
   # Link to new files
   opendir(my $dh, $results_dir) || die "Failed to open '$results_dir': $!";
   my @file_names = grep { !/.md5/ && !/^\./ && -f "$results_dir/$_" } readdir($dh);
   closedir $dh;
   
-  FILE: foreach my $file_name (@file_names) {
+  foreach my $file_name (@file_names) {
+    my $do_checksum = 1;
     foreach my $match (@$skip_file_match) {
-      next FILE if $file_name =~ /\Q$match\E/;
+      if ($file_name =~ /\Q$match\E/) {
+        $do_checksum = 0;
+      }
     }
-    symlink "$results_dir/$file_name", "$checking_dir/$file_name" or die $!;
+    if ($do_checksum) {
+      symlink "$results_dir/$file_name", "$checking_dir/$file_name" or die $!;
+    } else {
+      push @new_files, $file_name;
+    }
   }
   
   # Link to old checksums
@@ -93,11 +106,11 @@ sub create_checking_dir {
     }
   }
   
-  return $checking_dir;
+  return ($checking_dir, \@new_files);
 }
 
-sub check_files {
-  my ($self, $checking_dir) = @_;
+sub classify_files {
+  my ($self, $checking_dir, $new_files) = @_;
   
   opendir(my $dh, $checking_dir) || die "Failed to open '$checking_dir': $!";
   my @files = grep { !/.md5/ && !/^\./ } readdir($dh);
@@ -110,7 +123,6 @@ sub check_files {
   my %files = map { $_ => 1 } @files;
   my %md5_files = map { $_ => 1 } @md5_files;
   
-  my @new_files = ();
   my @missing_files = ();
   my @changed_files = ();
   
@@ -130,27 +142,37 @@ sub check_files {
   
   foreach my $file (sort @files) {
     if (! -e "$checking_dir/$file.md5") {
-      push @new_files, $file;
+      push @$new_files, $file;
     }
   }
   
-  $self->param('new_files', \@new_files);
+  $self->param('new_files', $new_files);
   $self->param('missing_files', \@missing_files);
   $self->param('changed_files', \@changed_files);
 }
 
 sub copy_new {
   my ($self) = @_;
-  my $results_dir   = $self->param_required('results_dir');
-  my $checksum_dir  = $self->param_required('checksum_dir');
-  my $release_date  = $self->param_required('release_date');
+  my $results_dir     = $self->param_required('results_dir');
+  my $checksum_dir    = $self->param_required('checksum_dir');
+  my $release_date    = $self->param_required('release_date');
+  my $skip_file_match = $self->param_required('skip_file_match');
   
   my $source_files = catdir($results_dir, '*.md5');
   my $target_dir = catdir($checksum_dir, $release_date);
   make_path($target_dir);
   
   foreach my $source_file (glob $source_files) {
-    copy ($source_file, $target_dir) or die $!;
+    my $copy_checksum = 1;
+    foreach my $match (@$skip_file_match) {
+      if ($source_file =~ /\Q$match\E/) {
+        $copy_checksum = 0;
+      }
+    }
+    
+    if ($copy_checksum) {
+      copy ($source_file, $target_dir) or die $!;
+    }
   }
 }
 
