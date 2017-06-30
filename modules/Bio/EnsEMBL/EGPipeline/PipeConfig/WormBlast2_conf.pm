@@ -135,7 +135,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/gadfly94.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/gadfly95.pep',
       },
       
       {                 
@@ -152,7 +152,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/gadfly94.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/gadfly95.pep',
       },
       {
         'logic_name'    => 'yeastp',
@@ -201,7 +201,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/slimswissprot20172.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/slimswissprot20175.pep',
       },
       
       {                 
@@ -218,7 +218,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/slimswissprot20172.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/slimswissprot20175.pep',
       },
       {
         'logic_name'    => 'ipi_humanp',
@@ -267,7 +267,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/wormpep259.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/wormpep260.pep',
       },
       {                 
         'logic_name'    => 'wormpepx',
@@ -283,7 +283,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/wormpep259.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/wormpep260.pep',
       },
       {
         'logic_name'    => 'remapepp',
@@ -395,7 +395,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brepep250.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brepep260.pep',
       },
       {                 
         'logic_name'    => 'brepepx',
@@ -411,7 +411,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brepep250.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brepep260.pep',
       },
       {
         'logic_name'    => 'brigpepp',
@@ -427,7 +427,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brigpep259.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brigpep260.pep',
       },
       {                 
         'logic_name'    => 'brigpepx',
@@ -443,7 +443,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brigpep259.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brigpep260.pep',
       },
       {
         'logic_name'    => 'brugpepp',
@@ -459,7 +459,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brugpep257.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brugpep260.pep',
       },
       {                 
         'logic_name'    => 'brugpepx',
@@ -475,7 +475,7 @@ sub default_options {
         'module'        => 'Bio::EnsEMBL::Analysis::Runnable::BlastEG',
         'linked_tables' => ['protein_align_feature'],
         'db_type'       => 'core',
-        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brugpep257.pep',
+        'db_file'       => '/nfs/nobackup/ensemblgenomes/wormbase/BUILD/pipeline/BlastDB/brugpep260.pep',
       },
       {
         'logic_name'    => 'ovolpepp',
