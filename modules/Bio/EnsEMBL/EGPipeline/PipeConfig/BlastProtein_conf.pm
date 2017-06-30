@@ -574,9 +574,8 @@ sub pipeline_analyses {
                           },
       -rc_name         => 'normal',
       -flow_into       => {
-#                            '2' => ['BlastPFactory'],
-                           '2->A' => ['BlastPFactory'],
-                           'A->1' => ['FilterBlastPHits'],
+                            '2->A' => ['BlastPFactory'],
+                            'A->1' => ['FilterBlastPHits'],
                           },
     },
 
