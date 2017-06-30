@@ -84,6 +84,7 @@ sub default_options {
       'anopheles_sinensis'        => '1NQL-9mmykZ0fWls6405mhCKSxIVfE2kvxaFRogb1tXY',
       'anopheles_stephensi'       => '1ZVMIQ_tr3zJBMuk-KdUcEXSIqVOjL8jANc_SKqQAlkU',
       'biomphalaria_glabrata'     => '1PPSMgx2-z6CPa4Cit5Kh1IUCa9i7Z6Rpnv4H5ks38UA',
+      'cimex_lectularius'         => '1h_Sx0lWt8m-epGXSzBDkP3qAT7Gkn1C-wAbgCW5KdoI',
       'culex_quinquefasciatus'    => '1_6KHioJdjHYroDooP48FavcclKs1D2vqxPZvJzcTq_U',
       'glossina_austeni'          => '1VWQ8g_JXkz8L4XLvJJ5AVGwjhr4NP5am25-DUtJcjc0',
       'glossina_brevipalpis'      => '1n8LzP0VOEUbgsFtkr2rX6FJNUEfr9CGCfKikrI0WdVo',
@@ -107,11 +108,20 @@ sub default_options {
     vb_external_db       => 'VB_Community_Annotation',
     citation_external_db => 'PUBMED',
 
-    # Exclude genes which come from sources with names and descriptions already
-    exclude_logic_name => [
+    # Exclude genes which come from sources with names already
+    exclude_name_source => [
       'mirbase_gene',
       'rfam_12.1_gene',
       'trnascan_gene',
+    ],
+    
+    # Exclude genes which come from sources with descriptions already
+    exclude_desc_source => [
+      'mirbase_gene',
+      'rfam_12.1_gene',
+      'trnascan_gene',
+      'refseq_mdom',
+      'refseq_scal',
     ],
     
     description_blacklist => ['Uncharacterized protein', 'AGAP\d.*', 'AAEL\d.*'],
@@ -268,11 +278,12 @@ sub pipeline_analyses {
                             logic_name           => $self->o('logic_name'),
                             vb_external_db       => $self->o('vb_external_db'),
                             citation_external_db => $self->o('citation_external_db'),
-                            exclude_logic_name   => $self->o('exclude_logic_name'),
+                            exclude_name_source  => $self->o('exclude_name_source'),
+                            exclude_desc_source  => $self->o('exclude_desc_source'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => $self->o('hive_capacity'),
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
@@ -314,7 +325,7 @@ sub pipeline_analyses {
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::DeleteUnattachedXref',
       -max_retry_count => 0,
       -parameters      => {},
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
@@ -335,7 +346,7 @@ sub pipeline_analyses {
       -parameters      => {
                             timing => 'before',
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => {
                             '2' => ['?table_name=gene_descriptions'],
                             '3' => ['?table_name=gene_names'],
@@ -349,7 +360,7 @@ sub pipeline_analyses {
       -parameters      => {
                             timing => 'after',
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => {
                             '2' => ['?table_name=gene_descriptions'],
                             '3' => ['?table_name=gene_names'],
@@ -368,7 +379,7 @@ sub pipeline_analyses {
                             citation_external_db => $self->o('citation_external_db'),
                           },
       -max_retry_count => 1,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
  ];
 }

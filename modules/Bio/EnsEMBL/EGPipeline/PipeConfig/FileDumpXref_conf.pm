@@ -39,7 +39,9 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::FileDumpXref_conf;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Hive::Version 2.3;
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+use Bio::EnsEMBL::Hive::Version 2.4;
+
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::FileDump_conf');
 
 sub default_options {
@@ -59,7 +61,6 @@ sub default_options {
     
     logic_name  => [],
     external_db => [],
-
   };
 }
 
@@ -103,21 +104,8 @@ sub pipeline_analyses {
                               logic_name         => $self->o('logic_name'),
                               external_db        => $self->o('external_db'),
                             },
-      -rc_name           => 'normal-rh7',
-      -flow_into         => ['CompressFile'],
+      -rc_name           => 'normal',
 	  },
-
-    {
-      -logic_name        => 'CompressFile',
-      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
-      -analysis_capacity => 10,
-      -batch_size        => 10,
-      -max_retry_count   => 0,
-      -parameters        => {
-                              cmd => 'gzip -n -f #out_file#',
-                            },
-      -rc_name           => 'normal-rh7',
-    },
 
   ];
 }

@@ -63,13 +63,15 @@ sub default_options {
     bin_count => '200',
     max_run   => '100',
     
-    no_pepstats => 0,
+    no_pepstats     => 0,
+    pepstats_binary => 'pepstats',
     
-    emboss_dir => '/nfs/software/ensembl/RHEL7/linuxbrew',
     canonical_transcripts_script => $self->o('ensembl_cvs_root_dir').
      '/ensembl/misc-scripts/canonical_transcripts/select_canonical_transcripts.pl',
     canonical_transcripts_out_dir => undef,
+    
     meta_coord_dir => undef,
+    
     optimize_tables => 0,
   };
 }
@@ -196,7 +198,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
 
     {
@@ -212,7 +214,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['GeneCount'],
     },
 
@@ -221,7 +223,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Production::Pipeline::Production::GeneCount',
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['GeneCount_Check'],
     },
 
@@ -242,7 +244,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
@@ -250,7 +252,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Production::Pipeline::Production::GeneGCBatch',
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['GeneGC_Check'],
     },
 
@@ -266,7 +268,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
@@ -274,7 +276,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Production::Pipeline::Production::GenomeStats',
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
 
     {
@@ -285,7 +287,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
 
     {
@@ -293,7 +295,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::EGPipeline::CoreStatistics::MetaLevels',
       -max_retry_count   => 3,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['MetaLevels_Check'],
     },
 
@@ -309,7 +311,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['CanonicalTranscripts'],
     },
 
@@ -322,7 +324,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['CanonicalTranscripts_Check'],
     },
 
@@ -339,20 +341,20 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
     {
       -logic_name        => 'PepStats',
       -module            => 'Bio::EnsEMBL::Production::Pipeline::Production::PepStatsBatch',
       -parameters        => {
-                              tmpdir  => '/tmp',
-                              binpath => $self->o('emboss_dir'),
-                              dbtype  => 'core',
+                              tmpdir          => '/tmp',
+                              pepstats_binary => $self->o('pepstats_binary'),
+                              dbtype          => 'core',
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => '12Gb_mem-rh7',
+      -rc_name           => '12Gb_mem',
       -flow_into         => ['PepStats_Check'],
     },
 
@@ -377,7 +379,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => ['CorrectNcoils'],
     },
 
@@ -387,7 +389,7 @@ sub pipeline_analyses {
       -parameters      => {},
       -max_retry_count => 1,
       -batch_size      => 50,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
     
     {
@@ -398,7 +400,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
     # Core Tasks - End #########################################################
 
@@ -424,7 +426,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -437,7 +439,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -450,7 +452,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -463,7 +465,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -476,7 +478,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -489,7 +491,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
     # Chromosome Tasks - End ###################################################
@@ -500,7 +502,7 @@ sub pipeline_analyses {
       -module     => 'Bio::EnsEMBL::Production::Pipeline::Production::SnpCount',
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
 
@@ -513,7 +515,7 @@ sub pipeline_analyses {
                             },
       -max_retry_count   => 1,
       -analysis_capacity => 10,
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -can_be_empty      => 1,
     },
     # Variation Tasks - End ####################################################
@@ -525,7 +527,7 @@ sub pipeline_analyses {
                        email   => $self->o('email'),
                        subject => $self->o('pipeline_name').' has finished',
                      },
-      -rc_name    => 'normal-rh7',
+      -rc_name    => 'normal',
     },
 
   ];

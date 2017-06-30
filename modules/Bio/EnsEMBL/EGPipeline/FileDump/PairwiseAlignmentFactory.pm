@@ -43,7 +43,7 @@ sub write_output {
   my ($self) = @_;
   my $compara          = $self->param_required('compara');
   my $dump_types       = $self->param_required('dump_types');
-  my $dump_names       = $self->param_required('dump_names');
+  my $compara_dumps    = $self->param_required('compara_dumps');
   my $skip_dumps       = $self->param_required('skip_dumps');
   my $results_dir      = $self->param_required('results_dir');
   my $files_per_subdir = $self->param_required('files_per_subdir');
@@ -80,7 +80,7 @@ sub write_output {
   foreach my $flow (keys %$dump_types) {
     foreach my $dump_type (@{$$dump_types{$flow}}) {
       if (!exists $skip_dumps{$dump_type}) {
-        my $prefix = $$dump_names{$dump_type}."_$release_date";
+        my $prefix = $$compara_dumps{$dump_type}."_$release_date";
   
         foreach my $mlss (@mlss) {
           my $mlss_id = $mlss->dbID;

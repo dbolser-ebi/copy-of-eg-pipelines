@@ -38,7 +38,7 @@ package Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchUniprot;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchExternal');
+use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FetchExternal');
 
 use Bio::SeqIO;
 use File::Path qw(make_path);

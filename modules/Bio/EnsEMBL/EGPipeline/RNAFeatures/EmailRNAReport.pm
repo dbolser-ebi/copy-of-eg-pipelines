@@ -149,13 +149,10 @@ sub run {
 sub summarise {
   my ($self, $file, $value_type, $thresholds) = @_;
   
-  local $/;
   open(my $fh, '<', $file) or $self->throw("Failed to open $file: $!");
-  my @rows = split(/\n/, <$fh>);
-  close($fh);
-
+  
   my %summary;
-  foreach my $row (@rows) {
+  while (my $row = <$fh>) {
     my ($value, $species, $biotype, $name) = split(/\t/, $row);
     if (defined $thresholds) {
       foreach my $threshold (@$thresholds) {
@@ -173,6 +170,8 @@ sub summarise {
       $summary{$species}{''}{$biotype}{$name}++;
     }
   }
+  
+  close($fh);
   
   my @columns = ('Species', $value_type, '# Biotypes', '# Models', '# Alignments');
   my @results;

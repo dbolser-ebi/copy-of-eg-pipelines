@@ -21,6 +21,8 @@ package Bio::EnsEMBL::EGPipeline::FileDump::GFF3Dumper;
 use strict;
 use warnings;
 no  warnings 'redefine';
+use feature 'say';
+
 use base ('Bio::EnsEMBL::EGPipeline::FileDump::BaseDumper');
 
 use Bio::EnsEMBL::Utils::IO::GFFSerializer;
@@ -30,7 +32,6 @@ use Bio::EnsEMBL::Transcript;
 use Bio::EnsEMBL::Exon;
 use Bio::EnsEMBL::RepeatFeature;
 
-use List::Util qw(min max);
 use Path::Tiny qw(path);
 
 sub param_defaults {
@@ -234,6 +235,7 @@ sub remove_separators {
 
 sub join_align_feature {
   my ($self, $out_file) = @_;
+  my $max_length = 100000;
   
   my $file = path($out_file);
   
@@ -244,6 +246,8 @@ sub join_align_feature {
   my @data = split(/\n/, $data);
   my %matches;
   
+  my $new_data;
+  
   foreach my $row (@data) {
     my ($region, $source, $start, $end, $strand, $id) = $row =~
       /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Parent=([^;]+)/;
@@ -252,27 +256,43 @@ sub join_align_feature {
       $matches{$id}{'region'} = $region;
       $matches{$id}{'source'} = $source;
       $matches{$id}{'strand'} = $strand;
-      push @{$matches{$id}{'start'}}, $start;
-      push @{$matches{$id}{'end'}}, $end;
+      if (!defined $matches{$id}{'start'} || $matches{$id}{'start'} > $start) {
+        $matches{$id}{'start'} = $start;
+      }
+      if (!defined $matches{$id}{'end'} || $matches{$id}{'end'} < $end) {
+        $matches{$id}{'end'} = $end;
+      }
+      push @{$matches{$id}{'parts'}}, $row;
+    } else {
+      $new_data .= "$row\n";
     }
   }
   
   foreach my $id (keys %matches) {
-    my $match = join("\t",
-      $matches{$id}{'region'},
-      $matches{$id}{'source'},
-      'match',
-      min(@{$matches{$id}{'start'}}),
-      max(@{$matches{$id}{'end'}}),
-      '.',
-      $matches{$id}{'strand'},
-      '.',
-      "ID=$id"
-    );
-    $data .= "$match\n";
+    my $start = $matches{$id}{'start'};
+    my $end   = $matches{$id}{'end'};
+    
+    if ($end - $start < $max_length) {
+      my $match = join("\t",
+        $matches{$id}{'region'},
+        $matches{$id}{'source'},
+        'match',
+        $start,
+        $end,
+        '.',
+        $matches{$id}{'strand'},
+        '.',
+        "ID=$id"
+      );
+      $new_data .= "$match\n";
+      
+      foreach my $part (@{$matches{$id}{'parts'}}) {
+        $new_data .= "$part\n";
+      }
+    }
   }
   
-  $file->spew($data);
+  $file->spew($new_data);
 }
 
 sub Bio::EnsEMBL::Gene::summary_as_hash {

@@ -96,7 +96,7 @@ sub default_options {
     # nonetheless inappropriate. (An alternative is to ratchet up the strictness
     # of the taxonomic filter, but you may then start excluding appropriate
     # models...)
-    rfam_version        => '12.1',
+    rfam_version        => '12.2',
     rfam_dir            => catdir('/nfs/panda/ensemblgenomes/external/Rfam', $self->o('rfam_version')),
     rfam_cm_file        => catdir($self->o('rfam_dir'), 'Rfam.cm'),
     rfam_logic_name     => 'cmscan_rfam_'.$self->o('rfam_version'),
@@ -113,9 +113,9 @@ sub default_options {
                             'Fungi' =>
                               ['RF00012', 'RF00017', 'RF01848', ],
                             'Metazoa' =>
-                              ['RF00882', 'RF00906', 'RF01582', 'RF01675', 'RF01846', 'RF01848', 'RF01849', 'RF01856', 'RF02032', ],
+                              ['RF00882', 'RF00906', 'RF01582', 'RF01675', 'RF01846', 'RF01848', 'RF01849', 'RF01856', 'RF02032', 'RF02625', 'RF02626', 'RF02628', 'RF02647', 'RF02682', ],
                             'Viridiplantae' =>
-                              ['RF00012', 'RF00017', 'RF01856', ],
+                              ['RF00012', 'RF00017', 'RF01856', 'RF02628', ],
                             'EnsemblProtists' =>
                               ['RF00012', 'RF00017', 'RF01855', ],
                             'Ensembl' =>
@@ -141,7 +141,7 @@ sub default_options {
     trnascan_logic_name => 'trnascan_align',
     trnascan_db_name    => 'TRNASCAN_SE',
     trnascan_pseudo     => 0,
-    trnascan_threshold  => 20,
+    trnascan_threshold  => 40,
     trnascan_parameters => '',
 
     # The annotation from mirBase isn't always available, but if it is,
@@ -314,12 +314,18 @@ sub pipeline_analyses {
       -analysis_capacity => 5,
       -max_retry_count   => 1,
       -parameters        => {
+                              table_list  => [
+                                'analysis',
+                                'analysis_description',
+                                'dna_align_feature',
+                                'dna_align_feature_attrib',
+                              ],
                               output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
       -flow_into         => {
                               '1->A' => ['RNAAnalysisFactory'],
-                              'A->1' => ['DumpGenome'],
+                              'A->1' => ['AnnotateRNAFeatures'],
                             },
     },
 
@@ -341,6 +347,7 @@ sub pipeline_analyses {
                             },
       -rc_name           => 'normal',
       -flow_into         => {
+                              '1' => WHEN('#run_cmscan#' => ['TaxonomicFilter']),
                               '2' => ['AnalysisSetup'],
                             },
     },
@@ -357,23 +364,22 @@ sub pipeline_analyses {
                               production_db      => $self->o('production_db'),
                             },
       -meadow_type       => 'LOCAL',
+      -flow_into         => ['DeleteAttributes'],
     },
 
     {
-      -logic_name        => 'DumpGenome',
-      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpGenome',
-      -analysis_capacity => 5,
-      -parameters        => {
-                              genome_dir => catdir($self->o('pipeline_dir'), '#species#'),
-                            },
-      -rc_name           => 'normal',
-      -flow_into         => {
-                              '1' => WHEN(
-                                      '#run_cmscan#'                     => ['TaxonomicFilter'],
-                                      '!#run_cmscan# and #run_trnascan#' => ['SplitDumpFile'],
-                                      '#load_mirbase#'                   => ['miRBase'],
-                                     ),
-                            },
+      -logic_name      => 'DeleteAttributes',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -max_retry_count => 0,
+      -parameters      => {
+                             sql => [
+                               'DELETE dafa.* FROM '.
+                                 'dna_align_feature_attrib dafa LEFT OUTER JOIN '.
+                                 'dna_align_feature daf USING (dna_align_feature_id) '.
+                                 'WHERE daf.dna_align_feature_id IS NULL',
+                             ]
+                           },
+      -meadow_type     => 'LOCAL',
     },
 
     {
@@ -410,6 +416,28 @@ sub pipeline_analyses {
                               cmscan_cm_file    => $self->o('cmscan_cm_file'),
                               cmscan_logic_name => $self->o('cmscan_logic_name'),
                               parameters_hash   => $self->o('cmscan_param_hash'),
+                            },
+      -rc_name           => 'normal',
+    },
+
+    {
+      -logic_name        => 'AnnotateRNAFeatures',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count   => 1,
+      -parameters        => {},
+      -flow_into         => WHEN(
+                              '#run_cmscan# or #run_trnascan#' => ['DumpGenome'],
+                              '#load_mirbase#'                 => ['miRBase'],
+                            ),
+      -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'DumpGenome',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpGenome',
+      -analysis_capacity => 5,
+      -parameters        => {
+                              genome_dir => catdir($self->o('pipeline_dir'), '#species#'),
                             },
       -rc_name           => 'normal',
       -flow_into         => ['SplitDumpFile'],
@@ -599,8 +627,8 @@ sub resource_classes {
   
   return {
     %{$self->SUPER::resource_classes},
-    'cmscan_4Gb_mem' => {'LSF' => '-q production-rh6 -n '.$self->o('cmscan_cpu').' -M 4000 -R "rusage[mem=4000] span[hosts=1]"'},
-    'cmscan_8Gb_mem' => {'LSF' => '-q production-rh6 -n '.$self->o('cmscan_cpu').' -M 8000 -R "rusage[mem=8000] span[hosts=1]"'},
+    'cmscan_4Gb_mem' => {'LSF' => '-q production-rh7 -n '.$self->o('cmscan_cpu').' -M 4000 -R "rusage[mem=4000]"'},
+    'cmscan_8Gb_mem' => {'LSF' => '-q production-rh7 -n '.$self->o('cmscan_cpu').' -M 8000 -R "rusage[mem=8000]"'},
   }
 }
 

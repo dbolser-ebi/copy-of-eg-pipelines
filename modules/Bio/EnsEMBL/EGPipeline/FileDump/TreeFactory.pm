@@ -126,9 +126,9 @@ sub id_range {
 
 sub sub_dir {
   my ($self, $dump_type) = @_;
-  my $dump_names   = $self->param_required('dump_names');
-  my $release_date = $self->param_required('release_date');
-  return $$dump_names{$dump_type}."_$release_date";
+  my $compara_dumps = $self->param_required('compara_dumps');
+  my $release_date  = $self->param_required('release_date');
+  return $$compara_dumps{$dump_type}."_$release_date";
 }
 
 1;

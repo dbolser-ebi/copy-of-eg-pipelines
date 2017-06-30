@@ -39,7 +39,9 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::FileDumpINSDC_conf;
 use strict;
 use warnings;
 
-use Bio::EnsEMBL::Hive::Version 2.3;
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
+use Bio::EnsEMBL::Hive::Version 2.4;
+
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::FileDump_conf');
 
 sub default_options {
@@ -62,7 +64,6 @@ sub default_options {
     per_chromosome => 0,
     source         => 'VectorBase',
     source_url     => 'https://www.vectorbase.org',
-
   };
 }
 
@@ -111,21 +112,8 @@ sub pipeline_analyses {
                               eg_filename_format => $self->o('eg_filename_format'),
                               taxonomy_db        => $self->o('taxonomy_db'),
                             },
-      -rc_name           => 'normal-rh7',
-      -flow_into         => ['CompressFile'],
+      -rc_name           => 'normal',
 	  },
-
-    {
-      -logic_name        => 'CompressFile',
-      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
-      -analysis_capacity => 10,
-      -batch_size        => 10,
-      -max_retry_count   => 0,
-      -parameters        => {
-                              cmd => 'gzip -n -f #out_file#',
-                            },
-      -rc_name           => 'normal-rh7',
-    },
 
   ];
 }

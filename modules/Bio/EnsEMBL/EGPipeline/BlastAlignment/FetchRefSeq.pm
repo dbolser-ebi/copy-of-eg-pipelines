@@ -38,7 +38,7 @@ package Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchRefSeq;
 
 use strict;
 use warnings;
-use base ('Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchExternal');
+use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FetchExternal');
 
 use File::Basename qw(fileparse);
 use File::Path qw(make_path);

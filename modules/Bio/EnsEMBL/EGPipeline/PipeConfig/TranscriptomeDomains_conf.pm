@@ -31,6 +31,7 @@ sub default_options {
 
     pipeline_name => 'transcriptome_domains',
     
+    transcriptome_dir  => undef,
     transcriptome_file => [],
     
     pipeline_dir => "/nfs/nobackup/ensemblgenomes/".$self->o('ENV', 'USER')."/transcriptome_domains",
@@ -43,13 +44,9 @@ sub default_options {
     max_dirs_per_directory  => $self->o('max_files_per_directory'),
     
     # InterPro settings
-    interproscan_dir     => '/nfs/panda/ensemblgenomes/development/InterProScan',
-    interproscan_version => '5.19-58.0',
-    interproscan_exe     => catdir(
-                               $self->o('interproscan_dir'),
-                               $self->o('interproscan_version'),
-                               'interproscan.sh'
-                            ),
+    interproscan_version => '5.22-61.0',
+    interproscan_exe     => 'interproscan.sh',
+    
     interpro_applications =>
     [
       'CDD',
@@ -62,6 +59,7 @@ sub default_options {
       'ProDom',
       'ProSitePatterns',
       'ProSiteProfiles',
+      'SFLD',
       'SMART',
       'SUPERFAMILY',
       'TIGRFAM',
@@ -107,6 +105,7 @@ sub pipeline_analyses {
       -max_retry_count   => 1,
       -input_ids         => [ {} ],
       -parameters        => {
+                              transcriptome_dir  => $self->o('transcriptome_dir'),
                               transcriptome_file => $self->o('transcriptome_file'),
                               pipeline_dir       => $self->o('pipeline_dir'),
                             },
@@ -148,11 +147,11 @@ sub pipeline_analyses {
                               interproscan_exe          => $self->o('interproscan_exe'),
                               interproscan_applications => $self->o('interpro_applications'),
                             },
-      -rc_name           => '4GB_4CPU-rh7',
+      -rc_name           => '4GB_4CPU',
       -flow_into         => {
                               1 => [
-                                    ':////accu?outfile_xml=[]',
-                                    ':////accu?outfile_tsv=[]',
+                                    '?accu_name=outfile_xml&accu_address=[]',
+                                    '?accu_name=outfile_tsv&accu_address=[]',
                                    ],
                             },
     },
@@ -164,7 +163,7 @@ sub pipeline_analyses {
       -parameters        => {
                               results_dir    => $self->o('results_dir'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['GenerateSolr'],
     },
     
@@ -176,7 +175,7 @@ sub pipeline_analyses {
                               interproscan_version => $self->o('interproscan_version'),
                               pathway_sources      => $self->o('pathway_sources'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
       -flow_into         => ['EmailReport'],
     },
     
@@ -188,7 +187,7 @@ sub pipeline_analyses {
                               email   => $self->o('email'),
                               subject => 'InterProScan transcriptome annotation',
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
     
   ];
@@ -199,7 +198,7 @@ sub resource_classes {
   
   return {
     %{$self->SUPER::resource_classes},
-    '4GB_4CPU-rh7' => {'LSF' => '-q production-rh7 -n 4 -M 4000 -R "rusage[mem=4000,tmp=4000] span[hosts=1]"'},
+    '4GB_4CPU' => {'LSF' => '-q production-rh7 -n 4 -M 4000 -R "rusage[mem=4000,tmp=4000] span[hosts=1]"'},
   }
 }
 
