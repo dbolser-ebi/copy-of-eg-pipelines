@@ -287,6 +287,7 @@ sub pipeline_analyses {
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             delete_existing    => 1,
                             linked_tables      => ['object_xref'],
+                            output_logic_name  => 1,
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {
@@ -323,6 +324,7 @@ sub pipeline_analyses {
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             delete_existing    => 1,
                             linked_tables      => ['object_xref'],
+                            output_logic_name  => 1,
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {
@@ -368,6 +370,7 @@ sub pipeline_analyses {
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             delete_existing    => 1,
                             linked_tables      => ['object_xref'],
+                            output_logic_name  => 1,
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {
@@ -405,6 +408,7 @@ sub pipeline_analyses {
                             db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
                             delete_existing    => 1,
                             linked_tables      => ['object_xref'],
+                            output_logic_name  => 1,
                           },
       -meadow_type     => 'LOCAL',
       -flow_into       => {

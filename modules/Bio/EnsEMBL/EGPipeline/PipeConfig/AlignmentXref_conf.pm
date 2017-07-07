@@ -133,7 +133,7 @@ sub default_options {
         'logic_name'    => $self->o('uniprot_reviewed_logic_name'),
         'display_label' => 'UniProt reviewed proteins',
         'description'   => 'Cross references to UniProt Swiss-Prot (reviewed) proteins, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'sprot',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -146,7 +146,7 @@ sub default_options {
         'logic_name'    => $self->o('uniprot_unreviewed_logic_name'),
         'display_label' => 'UniProt unreviewed proteins',
         'description'   => 'Cross references to UniProt TrEMBL (unreviewed) proteins, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'trembl',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -159,7 +159,7 @@ sub default_options {
         'logic_name'    => $self->o('refseq_peptide_logic_name'),
         'display_label' => 'RefSeq peptides',
         'description'   => 'Cross references to RefSeq peptide sequences, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'refseq_peptide',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -172,7 +172,7 @@ sub default_options {
         'logic_name'    => $self->o('refseq_dna_logic_name'),
         'display_label' => 'RefSeq transcripts',
         'description'   => 'Cross references to RefSeq nucleotide sequences, determined by alignment against the transcriptome with <em>blastx</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'refseq_dna',
         'program'       => 'blastn',
         'program_file'  => $self->o('blastn_exe'),
@@ -746,10 +746,19 @@ sub pipeline_analyses {
                               description_blacklist => $self->o('description_blacklist'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => WHEN('#email_xref_report#' => ['EmailAlignmentXrefReport']),
+      -flow_into         => ['MetaCoords'],
 
     },
-
+    
+    {
+      -logic_name        => 'MetaCoords',
+      -module            => 'Bio::EnsEMBL::EGPipeline::CoreStatistics::MetaCoords',
+      -parameters        => {},
+      -max_retry_count   => 1,
+      -rc_name           => 'normal',
+      -flow_into         => WHEN('#email_xref_report#' => ['EmailAlignmentXrefReport']),
+    },
+    
     {
       -logic_name        => 'EmailAlignmentXrefReport',
       -module            => 'Bio::EnsEMBL::EGPipeline::Xref::EmailAlignmentXrefReport',

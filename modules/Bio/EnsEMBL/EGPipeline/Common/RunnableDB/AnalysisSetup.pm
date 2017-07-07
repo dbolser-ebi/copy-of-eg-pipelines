@@ -84,6 +84,7 @@ sub param_defaults {
     'display_label'      => undef,
     'displayable'        => undef,
     'web_data'           => undef,
+    'output_logic_name'  => 0,
   };
 }
 
@@ -149,6 +150,22 @@ sub run {
   $aa->store($new_analysis);
  
   $dba->dbc->disconnect_if_idle(); 
+}
+
+sub write_output {
+  my ($self) = @_;
+  my $logic_name        = $self->param_required('logic_name');
+  my $output_logic_name = $self->param_required('output_logic_name');
+  
+  # Output parameter is "created_logic_name" rather than "logic_name"
+  # because you can make all sorts of problems for yourself if you
+  # output a parameter with the same name as one of the input parameters.
+  if ($output_logic_name) {
+    $self->dataflow_output_id(
+      { created_logic_name => $logic_name },
+      $output_logic_name
+    );
+  }
 }
 
 sub create_analysis {
