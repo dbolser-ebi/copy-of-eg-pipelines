@@ -73,7 +73,11 @@ sub default_options {
     # Can also create xrefs from RefSeq peptides and DNA.
     refseq_peptide => 0,
     refseq_dna     => 0,
-
+    
+    # RefSeq DNA can be aligned against just the coding sequence.
+    # This might be useful for worms, where the RefSeq transcripts don't have UTRs.
+    remove_utrs => 0,
+    
     # If there are existing xrefs based on checksums, don't introduce
     # duplicate xrefs/object_xrefs, by default.
     preferred_analysis => ['xrefuniparc', 'xrefuniprot'],
@@ -345,6 +349,7 @@ sub pipeline_analyses {
       -parameters        => {
                               transcriptome_dir => catdir($self->o('pipeline_dir'), '#species#', 'transcriptome'),
                               use_dbID          => 1,
+                              remove_utrs       => $self->o('remove_utrs'),
                             },
       -rc_name           => 'normal',
       -flow_into         => ['SplitTranscriptome'],

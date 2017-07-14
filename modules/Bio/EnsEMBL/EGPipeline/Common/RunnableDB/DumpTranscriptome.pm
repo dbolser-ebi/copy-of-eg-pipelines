@@ -31,12 +31,13 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    'overwrite'         => 0,
-    'header_style'      => 'default',
-    'chunk_factor'      => 1000,
-    'line_width'        => 80,
-    'is_canonical'      => undef,
-    'file_varname'      => 'transcriptome_file',
+    'overwrite'    => 0,
+    'header_style' => 'default',
+    'chunk_factor' => 1000,
+    'line_width'   => 80,
+    'is_canonical' => undef,
+    'remove_utrs'  => 0,
+    'file_varname' => 'transcriptome_file',
   };
   
 }
@@ -82,6 +83,7 @@ sub run {
   my $chunk_factor       = $self->param('chunk_factor');
   my $line_width         = $self->param('line_width');
   my $is_canonical       = $self->param('is_canonical');
+  my $remove_utrs        = $self->param('remove_utrs');
   
   open(my $fh, '>', $transcriptome_file) or $self->throw("Cannot open file $transcriptome_file: $!");
   my $serializer = Bio::EnsEMBL::Utils::IO::FASTASerializer->new(
@@ -100,6 +102,11 @@ sub run {
       next if $is_canonical != $transcript->is_canonical;
     }
     my $seq_obj = $transcript->seq();
+    if ($remove_utrs) {
+      if ($transcript->translateable_seq ne '') {
+        $seq_obj->seq($transcript->translateable_seq);
+      }
+    }
     
     if ($header_style ne 'default') {
       $seq_obj->display_id($self->header($header_style, $transcript));
