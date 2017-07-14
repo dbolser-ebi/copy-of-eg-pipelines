@@ -108,7 +108,6 @@ sub default_options {
     uniprot_xref_external_dbs => {
       'ChEMBL'          => 'ChEMBL',
       'EMBL'            => 'EMBL',
-      'ExpressionAtlas' => 'ArrayExpress',
       'GeneID'          => 'EntrezGene',
       'MEROPS'          => 'MEROPS',
       'PDB'             => 'PDB',
