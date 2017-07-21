@@ -144,7 +144,7 @@ sub run {
   
   # Recommended Hive trick for potentially long-running analyses.
   $self->dbc && $self->dbc->disconnect_if_idle();
-  $self->dbc->reconnect_when_lost(1);
+  $self->dbc && $self->dbc->reconnect_when_lost(1);
   if (! $parsing_only) {
     $runnable->run_analysis();
   }
