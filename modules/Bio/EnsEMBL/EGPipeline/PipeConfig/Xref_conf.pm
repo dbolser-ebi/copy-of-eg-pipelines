@@ -211,16 +211,17 @@ sub pipeline_analyses {
     {
       -logic_name      => 'ImportUniParc',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::ImportUniParc',
+      -max_retry_count => 1,
       -parameters      => {
                             uniparc_db => $self->o('local_uniparc_db'),
                           },
-      -max_retry_count => 1,
       -rc_name         => '4Gb_mem_4Gb_tmp',
     },
 
     {
       -logic_name      => 'SpeciesFactory',
       -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
+      -max_retry_count => 1,
       -parameters      => {
                             species         => $self->o('species'),
                             antispecies     => $self->o('antispecies'),
@@ -231,7 +232,6 @@ sub pipeline_analyses {
                             regulation_flow => 0,
                             variation_flow  => 0,
                           },
-      -max_retry_count => 1,
       -flow_into       => {
                             '2->A' => ['RunPipeline'],
                             'A->2' => WHEN('#email_xref_report#' => ['SetupXrefReport']),
@@ -274,67 +274,72 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'SetupUniParc',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count => 0,
-      -parameters      => {
-                            logic_name         => $self->o('checksum_logic_name'),
-                            module             => $self->o('checksum_module'),
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
-                            delete_existing    => 1,
-                            linked_tables      => ['object_xref'],
-                            output_logic_name  => 1,
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => {
-                            '1->A' => ['RemoveOrphans'],
-                            'A->1' => ['LoadUniParc'],
-                          },
+      -logic_name        => 'SetupUniParc',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              logic_name         => $self->o('checksum_logic_name'),
+                              module             => $self->o('checksum_module'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              delete_existing    => 1,
+                              linked_tables      => ['object_xref'],
+                              output_logic_name  => 1,
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => {
+                              '1->A' => ['RemoveOrphans'],
+                              'A->1' => ['LoadUniParc'],
+                            },
     },
 
     {
       -logic_name      => 'LoadUniParc',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc',
+      -hive_capacity   => $self->o('hive_capacity'),
       -max_retry_count => 0,
       -parameters      => {
                             uniparc_db  => $self->o('local_uniparc_db'),
                             logic_name  => $self->o('checksum_logic_name'),
                             external_db => $self->o('uniparc_external_db'),
                           },
-      -max_retry_count => 1,
-      -hive_capacity   => $self->o('hive_capacity'),
       -rc_name         => 'normal',
       -flow_into       => WHEN('#load_uniprot#' => ['SetupUniProt']),
     },
 
     {
-      -logic_name      => 'SetupUniProt',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count => 0,
-      -parameters      => {
-                            logic_name         => $self->o('uniparc_transitive_logic_name'),
-                            module             => $self->o('uniparc_transitive_module'),
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
-                            delete_existing    => 1,
-                            linked_tables      => ['object_xref'],
-                            output_logic_name  => 1,
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => {
-                            '1->A' => ['RemoveOrphans'],
-                            'A->1' => ['LoadUniProt'],
-                          },
+      -logic_name        => 'SetupUniProt',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              logic_name         => $self->o('uniparc_transitive_logic_name'),
+                              module             => $self->o('uniparc_transitive_module'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              delete_existing    => 1,
+                              linked_tables      => ['object_xref'],
+                              output_logic_name  => 1,
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => {
+                              '1->A' => ['RemoveOrphans'],
+                              'A->1' => ['LoadUniProt'],
+                            },
     },
 
     {
       -logic_name      => 'LoadUniProt',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt',
+      -hive_capacity   => $self->o('hive_capacity'),
+      -max_retry_count => 0,
       -parameters      => {
                             uniparc_db            => $self->o('remote_uniparc_db'),
                             uniprot_db            => $self->o('remote_uniprot_db'),
@@ -347,8 +352,6 @@ sub pipeline_analyses {
                             logic_name            => $self->o('uniparc_transitive_logic_name'),
                             external_dbs          => $self->o('uniprot_external_dbs'),
                           },
-      -max_retry_count => 1,
-      -hive_capacity   => $self->o('hive_capacity'),
       -rc_name         => 'normal',
       -flow_into       => [
                             WHEN('#load_uniprot_go#'    => ['SetupUniProtGO']),
@@ -357,30 +360,33 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'SetupUniProtGO',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count => 0,
-      -parameters      => {
-                            logic_name         => $self->o('uniprot_transitive_go_logic_name'),
-                            module             => $self->o('uniprot_transitive_go_module'),
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
-                            delete_existing    => 1,
-                            linked_tables      => ['object_xref'],
-                            output_logic_name  => 1,
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => {
-                            '1->A' => ['RemoveOrphans'],
-                            'A->1' => ['LoadUniProtGO'],
-                          },
+      -logic_name        => 'SetupUniProtGO',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              logic_name         => $self->o('uniprot_transitive_go_logic_name'),
+                              module             => $self->o('uniprot_transitive_go_module'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              delete_existing    => 1,
+                              linked_tables      => ['object_xref'],
+                              output_logic_name  => 1,
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => {
+                              '1->A' => ['RemoveOrphans'],
+                              'A->1' => ['LoadUniProtGO'],
+                            },
     },
 
     {
       -logic_name      => 'LoadUniProtGO',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO',
+      -hive_capacity   => $self->o('hive_capacity'),
       -max_retry_count => 0,
       -parameters      => {
                             uniprot_db           => $self->o('remote_uniprot_db'),
@@ -389,36 +395,37 @@ sub pipeline_analyses {
                             external_db          => $self->o('uniprot_go_external_db'),
                             uniprot_external_dbs => $self->o('uniprot_external_dbs'),
                           },
-      -max_retry_count => 1,
-      -hive_capacity   => $self->o('hive_capacity'),
       -rc_name         => 'normal',
     },
 
     {
-      -logic_name      => 'SetupUniProtXrefs',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count => 0,
-      -parameters      => {
-                            logic_name         => $self->o('uniprot_transitive_logic_name'),
-                            module             => $self->o('uniprot_transitive_xref_module'),
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                            db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
-                            delete_existing    => 1,
-                            linked_tables      => ['object_xref'],
-                            output_logic_name  => 1,
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => {
-                            '1->A' => ['RemoveOrphans'],
-                            'A->1' => ['LoadUniProtXrefs'],
-                          },
+      -logic_name        => 'SetupUniProtXrefs',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              logic_name         => $self->o('uniprot_transitive_logic_name'),
+                              module             => $self->o('uniprot_transitive_xref_module'),
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              delete_existing    => 1,
+                              linked_tables      => ['object_xref'],
+                              output_logic_name  => 1,
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => {
+                              '1->A' => ['RemoveOrphans'],
+                              'A->1' => ['LoadUniProtXrefs'],
+                            },
     },
 
     {
       -logic_name      => 'LoadUniProtXrefs',
       -module          => 'Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXrefs',
+      -hive_capacity   => $self->o('hive_capacity'),
       -max_retry_count => 0,
       -parameters      => {
                             uniprot_db             => $self->o('remote_uniprot_db'),
@@ -428,108 +435,118 @@ sub pipeline_analyses {
                             secondary_external_dbs => $self->o('uniprot_secondary_external_dbs'),
                             uniprot_external_dbs   => $self->o('uniprot_external_dbs'),
                           },
-      -max_retry_count => 1,
-      -hive_capacity   => $self->o('hive_capacity'),
       -rc_name         => 'normal',
     },
 
     {
-      -logic_name      => 'RemoveOrphans',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
-      -max_retry_count => 0,
-      -parameters      => {
-                             sql => [
-                               'DELETE dx.* FROM '.
-                                 'dependent_xref dx LEFT OUTER JOIN '.
-                                 'object_xref ox USING (object_xref_id) '.
-                                 'WHERE ox.object_xref_id IS NULL',
-                               'DELETE onx.* FROM '.
-                                 'ontology_xref onx LEFT OUTER JOIN '.
-                                 'object_xref ox USING (object_xref_id) '.
-                                 'WHERE ox.object_xref_id IS NULL',
-                               'UPDATE gene g LEFT OUTER JOIN '.
-                                 'xref x ON g.display_xref_id = x.xref_id '.
-                                 'SET g.display_xref_id = NULL '.
-                                 'WHERE x.xref_id IS NULL',
-                             ]
-                           },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => WHEN('#delete_unattached_xref#' => ['DeleteUnattachedXref']),
+      -logic_name        => 'RemoveOrphans',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                               sql => [
+                                 'DELETE dx.* FROM '.
+                                   'dependent_xref dx LEFT OUTER JOIN '.
+                                   'object_xref ox USING (object_xref_id) '.
+                                   'WHERE ox.object_xref_id IS NULL',
+                                 'DELETE onx.* FROM '.
+                                   'ontology_xref onx LEFT OUTER JOIN '.
+                                   'object_xref ox USING (object_xref_id) '.
+                                   'WHERE ox.object_xref_id IS NULL',
+                                 'UPDATE gene g LEFT OUTER JOIN '.
+                                   'xref x ON g.display_xref_id = x.xref_id '.
+                                   'SET g.display_xref_id = NULL '.
+                                   'WHERE x.xref_id IS NULL',
+                               ]
+                             },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => WHEN('#delete_unattached_xref#' => ['DeleteUnattachedXref']),
     },
 
     {
-      -logic_name      => 'DeleteUnattachedXref',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::DeleteUnattachedXref',
-      -max_retry_count => 0,
-      -parameters      => {},
-      -rc_name         => 'normal',
+      -logic_name        => 'DeleteUnattachedXref',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::DeleteUnattachedXref',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {},
+      -rc_name           => 'normal',
     },
 
     {
-      -logic_name      => 'SetupXrefReport',
-      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
-      -max_retry_count => 0,
-      -flow_into       => {
-                            '1->A' => ['NamesAndDescriptionsAfter'],
-                            'A->1' => ['EmailXrefReport'],
-                          },
-      -meadow_type     => 'LOCAL',
+      -logic_name        => 'SetupXrefReport',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -flow_into         => {
+                              '1->A' => ['NamesAndDescriptionsAfter'],
+                              'A->1' => ['EmailXrefReport'],
+                            },
+      -meadow_type       => 'LOCAL',
     },
 
     {
-      -logic_name      => 'NamesAndDescriptionsBefore',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::NamesAndDescriptions',
-      -max_retry_count => 0,
-      -parameters      => {
-                            timing => 'before',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => {
-                            '2' => ['?table_name=gene_descriptions'],
-                            '3' => ['?table_name=gene_names'],
-                          }
+      -logic_name        => 'NamesAndDescriptionsBefore',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::NamesAndDescriptions',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              timing => 'before',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => {
+                              '2' => ['?table_name=gene_descriptions'],
+                              '3' => ['?table_name=gene_names'],
+                            }
     },
 
     {
-      -logic_name      => 'NamesAndDescriptionsAfter',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::NamesAndDescriptions',
-      -max_retry_count => 0,
-      -parameters      => {
-                            timing => 'after',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => {
-                            '2' => ['?table_name=gene_descriptions'],
-                            '3' => ['?table_name=gene_names'],
-                          }
+      -logic_name        => 'NamesAndDescriptionsAfter',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::NamesAndDescriptions',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              timing => 'after',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => {
+                              '2' => ['?table_name=gene_descriptions'],
+                              '3' => ['?table_name=gene_names'],
+                            }
     },
 
     {
-      -logic_name      => 'EmailXrefReport',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::EmailXrefReport',
-      -parameters      => {
-                            email                            => $self->o('email'),
-                            subject                          => 'Xref pipeline report for #species#',
-                            db_type                          => $self->o('db_type'),
-                            load_uniprot                     => $self->o('load_uniprot'),
-                            load_uniprot_go                  => $self->o('load_uniprot_go'),
-                            load_uniprot_xrefs               => $self->o('load_uniprot_xrefs'),
-                            checksum_logic_name              => $self->o('checksum_logic_name'),
-                            uniparc_transitive_logic_name    => $self->o('uniparc_transitive_logic_name'),
-                            uniprot_transitive_logic_name    => $self->o('uniprot_transitive_logic_name'),
-                            uniprot_transitive_go_logic_name => $self->o('uniprot_transitive_go_logic_name'),
-                            uniparc_external_db              => $self->o('uniparc_external_db'),
-                            uniprot_external_dbs             => $self->o('uniprot_external_dbs'),
-                            uniprot_go_external_db           => $self->o('uniprot_go_external_db'),
-                            uniprot_xref_external_dbs        => $self->o('uniprot_xref_external_dbs'),
-                            replace_all                      => $self->o('replace_all'),
-                            gene_name_source                 => $self->o('gene_name_source'),
-                            overwrite_gene_name              => $self->o('overwrite_gene_name'),
-                            description_source               => $self->o('description_source'),
-                            overwrite_description            => $self->o('overwrite_description'),
-                          },
-      -max_retry_count => 1,
-      -rc_name         => 'normal',
+      -logic_name        => 'EmailXrefReport',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::EmailXrefReport',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              email                            => $self->o('email'),
+                              subject                          => 'Xref pipeline report for #species#',
+                              db_type                          => $self->o('db_type'),
+                              load_uniprot                     => $self->o('load_uniprot'),
+                              load_uniprot_go                  => $self->o('load_uniprot_go'),
+                              load_uniprot_xrefs               => $self->o('load_uniprot_xrefs'),
+                              checksum_logic_name              => $self->o('checksum_logic_name'),
+                              uniparc_transitive_logic_name    => $self->o('uniparc_transitive_logic_name'),
+                              uniprot_transitive_logic_name    => $self->o('uniprot_transitive_logic_name'),
+                              uniprot_transitive_go_logic_name => $self->o('uniprot_transitive_go_logic_name'),
+                              uniparc_external_db              => $self->o('uniparc_external_db'),
+                              uniprot_external_dbs             => $self->o('uniprot_external_dbs'),
+                              uniprot_go_external_db           => $self->o('uniprot_go_external_db'),
+                              uniprot_xref_external_dbs        => $self->o('uniprot_xref_external_dbs'),
+                              replace_all                      => $self->o('replace_all'),
+                              gene_name_source                 => $self->o('gene_name_source'),
+                              overwrite_gene_name              => $self->o('overwrite_gene_name'),
+                              description_source               => $self->o('description_source'),
+                              overwrite_description            => $self->o('overwrite_description'),
+                            },
+      -rc_name           => 'normal',
     },
  ];
 }

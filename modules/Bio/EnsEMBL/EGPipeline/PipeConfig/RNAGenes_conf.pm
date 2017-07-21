@@ -251,8 +251,9 @@ sub pipeline_analyses {
     {
       -logic_name        => 'AnalysisSetupCmscan',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count   => 0,
+      -analysis_capacity => 10,
       -batch_size        => 10,
+      -max_retry_count   => 0,
       -parameters        => {
                               db_backup_required => 1,
                               db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
@@ -269,8 +270,9 @@ sub pipeline_analyses {
     {
       -logic_name        => 'AnalysisSetupMirbase',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count   => 0,
+      -analysis_capacity => 10,
       -batch_size        => 10,
+      -max_retry_count   => 0,
       -parameters        => {
                               db_backup_required => 1,
                               db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
@@ -287,8 +289,9 @@ sub pipeline_analyses {
     {
       -logic_name        => 'AnalysisSetupTrnascan',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count   => 0,
+      -analysis_capacity => 10,
       -batch_size        => 10,
+      -max_retry_count   => 0,
       -parameters        => {
                               db_backup_required => 1,
                               db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
@@ -305,6 +308,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'CreateCmscanGenes',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateCmscanGenes',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               source_logic_name    => $self->o('cmscan_source_logic_name'),
@@ -327,6 +331,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'CreateMirbaseGenes',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateMirbaseGenes',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               source_logic_name => $self->o('mirbase_source_logic_name'),
@@ -342,6 +347,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'CreateTrnascanGenes',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::CreateTrnascanGenes',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               source_logic_name    => $self->o('trnascan_source_logic_name'),
@@ -360,6 +366,8 @@ sub pipeline_analyses {
     {
       -logic_name        => 'DeleteUnattachedXref',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::DeleteUnattachedXref',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -max_retry_count   => 1,
       -parameters        => {},
       -rc_name           => 'normal',
@@ -370,6 +378,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'ConfigureStableIDMapping',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::ConfigureStableIDMapping',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
                               all_new_species => $self->o('all_new_species'),
@@ -384,6 +393,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'StableIDMapping',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::StableIDMapping',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
                               report_style => $self->o('run_context'),
@@ -396,6 +406,8 @@ sub pipeline_analyses {
     {
       -logic_name        => 'MetaCoords',
       -module            => 'Bio::EnsEMBL::EGPipeline::CoreStatistics::MetaCoords',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -max_retry_count   => 1,
       -parameters        => {},
       -rc_name           => 'normal',
@@ -405,6 +417,8 @@ sub pipeline_analyses {
     {
       -logic_name        => 'EmailRNAGenesReport',
       -module            => 'Bio::EnsEMBL::EGPipeline::RNAFeatures::EmailRNAGenesReport',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               email               => $self->o('email'),
