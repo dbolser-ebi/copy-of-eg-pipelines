@@ -15,12 +15,12 @@
 use strict;
 use warnings;
 use feature 'say';
-use Data::Dumper;
 
 use File::Compare qw(compare);
 use File::Path qw(make_path remove_tree);
 use File::Spec::Functions qw(catdir);
 use FindBin;
+use Path::Tiny qw(path);
 use Test::Exception;
 use Test::More;
 
@@ -45,9 +45,9 @@ my $ini_2_file     = catdir($test_files_dir, 'agam_single_read.2.ini');
 my $ini_3_file     = catdir($test_files_dir, 'agam_single_read.3.ini');
 
 my $tmp_dir        = "/tmp/$ENV{'USER'}/writeinifile";
-my $tmp_ini_1_file = catdir($tmp_dir, 'test_1.ini');
-my $tmp_ini_2_file = catdir($tmp_dir, 'test_2.ini');
-my $tmp_ini_3_file = catdir($tmp_dir, 'test_3.ini');
+my $tmp_ini_1_file = catdir($tmp_dir, 'test_1_AgamP4.ini');
+my $tmp_ini_2_file = catdir($tmp_dir, 'test_2_AgamP4.ini');
+my $tmp_ini_3_file = catdir($tmp_dir, 'test_3_AgamP4.ini');
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::WriteIniFile';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
@@ -87,6 +87,12 @@ is($obj->param('ini_file'), $tmp_ini_1_file, "run method: ini filename");
 
 is(-e $tmp_ini_1_file, 1, "run method: ini file exists");
 
+# Remove absolute path from url
+my $tmp_ini_1_path = path($tmp_ini_1_file);
+my $tmp_ini_1_data = $tmp_ini_1_path->slurp;
+$tmp_ini_1_data =~ s/^(source_url\s*=\s*).*?([^\/]+)$/$1$2/gm;
+$tmp_ini_1_path->spew($tmp_ini_1_data);
+
 is(compare($ini_1_file, $tmp_ini_1_file), 0, "run method: file contents correct");
 
 remove_tree($tmp_dir);
@@ -109,6 +115,12 @@ is($obj->param('ini_file'), $tmp_ini_2_file, "run method: ini filename");
 
 is(-e $tmp_ini_2_file, 1, "run method: ini file exists");
 
+# Remove absolute path from url
+my $tmp_ini_2_path = path($tmp_ini_2_file);
+my $tmp_ini_2_data = $tmp_ini_2_path->slurp;
+$tmp_ini_2_data =~ s/^(source_url\s*=\s*).*?([^\/]+)$/$1$2/gm;
+$tmp_ini_2_path->spew($tmp_ini_2_data);
+
 is(compare($ini_2_file, $tmp_ini_2_file), 0, "run method: file contents correct");
 
 remove_tree($tmp_dir);
@@ -130,6 +142,12 @@ $obj->run();
 is($obj->param('ini_file'), $tmp_ini_3_file, "run method: ini filename");
 
 is(-e $tmp_ini_3_file, 1, "run method: ini file exists");
+
+# Remove absolute path from url
+my $tmp_ini_3_path = path($tmp_ini_3_file);
+my $tmp_ini_3_data = $tmp_ini_3_path->slurp;
+$tmp_ini_3_data =~ s/^(source_url\s*=\s*).*?([^\/]+)$/$1$2/gm;
+$tmp_ini_3_path->spew($tmp_ini_3_data);
 
 is(compare($ini_3_file, $tmp_ini_3_file), 0, "run method: file contents correct");
 
