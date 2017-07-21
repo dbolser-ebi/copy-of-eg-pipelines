@@ -53,8 +53,6 @@ my $obj  = Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::SRASeqFile->n
 my $job_obj = Bio::EnsEMBL::Hive::AnalysisJob->new;
 $obj->input_job($job_obj);
 
-
-
 {
 make_path($tmp_dir);
 
@@ -75,7 +73,7 @@ my $sam_file    = $$output{'sam_file'};
 is(-e $read_file_1, 1, "run method: single read file exists ($single_read_run)");
 ok(!defined($read_file_2), "run method: single read file does not exist ($single_read_run)");
 
-is(-s $read_file_1, 1975556812, "run method: single read file size ($single_read_run)");
+is(-s $read_file_1, 576365040, "run method: single read file size ($single_read_run)");
 
 is($sam_file, catdir($tmp_dir, "$single_read_run.sam"), "run method: sam file name ($single_read_run)");
 
@@ -102,8 +100,8 @@ my $sam_file    = $$output{'sam_file'};
 is(-e $read_file_1, 1, "run method: paired read file exists ($paired_read_run)");
 is(-e $read_file_2, 1, "run method: paired read file exists ($paired_read_run)");
 
-is(-s $read_file_1, 3305191542, "run method: paired read file size ($paired_read_run)");
-is(-s $read_file_2, 3274992152, "run method: paired read file size ($paired_read_run)");
+is(-s $read_file_1, 915656976, "run method: paired read file size ($paired_read_run)");
+is(-s $read_file_2, 963468102, "run method: paired read file size ($paired_read_run)");
 
 is($sam_file, catdir($tmp_dir, "$paired_read_run.sam"), "run method: sam file name ($paired_read_run)");
 
