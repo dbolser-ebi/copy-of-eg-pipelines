@@ -126,7 +126,7 @@ is($uniprot{type}, 'unreviewed', 'get_uniprot_for_upi method: correct accession'
 is($uniprot{description}, 'AGAP004700-PA', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 1, 'get_uniprot_for_upi method: correct version');
 ok(!defined($uniprot{gene_name}), 'get_uniprot_for_upi method: no gene name');
-is(scalar(@synonyms), 1, 'get_uniprot_for_upi method: one synonym');
+is(scalar(@synonyms), 2, 'get_uniprot_for_upi method: two synonyms');
 is($synonyms[0], 'AgaP_AGAP004700', 'get_uniprot_for_upi method: correct synonym');
 
 # Deleting the description is done in the add_xrefs method
@@ -179,7 +179,7 @@ is($uniprot{type}, 'unreviewed', 'get_uniprot_for_upi method: correct accession'
 is($uniprot{description}, 'Gustatory receptor', 'get_uniprot_for_upi method: correct description');
 is($uniprot{version}, 1, 'get_uniprot_for_upi method: correct version');
 is($uniprot{gene_name}, 'GPRGR57', 'get_uniprot_for_upi method: correct gene name');
-is(scalar(@synonyms), 1, 'get_uniprot_for_upi method: one synonym');
+is(scalar(@synonyms), 2, 'get_uniprot_for_upi method: two synonyms');
 is($synonyms[0], 'AgaP_AGAP004716', 'get_uniprot_for_upi method: correct synonym');
 ## add_xref method ignores unreviewed result if not in external_dbs
 my $filtered_external_dbs = {reviewed => 'Uniprot/SWISSPROT'};

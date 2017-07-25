@@ -71,7 +71,7 @@ $obj->input_job($job_obj);
 my $param_defaults = $obj->param_defaults();
 $obj->input_job->param_init($param_defaults);
 is($obj->param('db_type'), 'core',                            'param_defaults method: db_type');
-is($obj->param('logic_name'), 'xrefuniprot',                  'param_defaults method: logic_name');
+is($obj->param('logic_name'), 'gouniprot',                    'param_defaults method: logic_name');
 is($obj->param('external_db'), 'GO',                          'param_defaults method: external_db');
 is_deeply($obj->param('uniprot_external_dbs'), $uniprot_edbs, 'param_defaults method: uniprot_external_dbs');
 is($obj->param('replace_all'), 0,                             'param_defaults method: replace_all');
@@ -149,16 +149,18 @@ is($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, 2,  'run method: correct number of GO x
 is($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, 9,  'run method: correct number of GO xrefs');
 is($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, 137, 'run method: correct number of GO xrefs');
 
+delete_xrefs();
+
 $obj->run();
 
 $go_xrefs = object_xrefs();
-is($$go_xrefs{IEA}{'Interpro'}, 545,                    'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 114, 'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 401,  'run method: correct number of GO xrefs');
-is($$go_xrefs{IEA}{'null'}, 6,                          'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 4,   'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 20,  'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 267,  'run method: correct number of GO xrefs');
+ok(!defined($$go_xrefs{IEA}{'Interpro'}),              'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 50, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 200,  'run method: correct number of GO xrefs');
+ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,   'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 10,  'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 100,  'run method: correct number of GO xrefs');
 
 # Delete all object_xrefs and ontology_xrefs with matching external_db
 $obj->param('replace_all', 1);
@@ -166,12 +168,12 @@ $obj->run();
 
 $go_xrefs = object_xrefs();
 ok(!defined($$go_xrefs{IEA}{'Interpro'}),              'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 51, 'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 204, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SWISSPROT'}, '>=', 50, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IEA}{'Uniprot/SPTREMBL'}, '>=', 200, 'run method: correct number of GO xrefs');
 ok(!defined($$go_xrefs{IEA}{'null'}),                  'run method: correct number of GO xrefs');
 cmp_ok($$go_xrefs{ISS}{'Uniprot/SWISSPROT'}, '>=', 2,  'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 11, 'run method: correct number of GO xrefs');
-cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 132, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SWISSPROT'}, '>=', 10, 'run method: correct number of GO xrefs');
+cmp_ok($$go_xrefs{IBA}{'Uniprot/SPTREMBL'}, '>=', 100, 'run method: correct number of GO xrefs');
 
 done_testing();
 
@@ -191,4 +193,15 @@ sub object_xrefs {
   }
 
   return \%go_xrefs;
+}
+
+sub delete_xrefs {
+  my $translations = $ta->fetch_all();
+
+  foreach my $translation (@$translations) {
+    my $go_xrefs = $translation->transcript->get_all_DBEntries('GO');
+    foreach my $go_xref (@$go_xrefs) {
+      $dbea->remove_from_object($go_xref, $translation->transcript, 'Transcript');
+    }
+  }
 }

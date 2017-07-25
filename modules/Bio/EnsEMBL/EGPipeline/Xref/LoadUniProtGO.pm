@@ -47,7 +47,7 @@ sub param_defaults {
 
   return {
     %{$self->SUPER::param_defaults},
-    'logic_name'           => 'xrefuniprot',
+    'logic_name'           => 'gouniprot',
     'external_db'          => 'GO',
     'uniprot_external_dbs' => {reviewed => 'Uniprot/SWISSPROT', unreviewed => 'Uniprot/SPTREMBL'},
     'replace_all'          => 0,
@@ -93,11 +93,13 @@ sub add_xrefs {
       my $uniprot_xrefs = $dbea->fetch_all_by_Translation($translation, $$uniprot_external_dbs{$status});
 
       foreach my $uniprot_xref (@$uniprot_xrefs) {
-        my $gos = $self->get_go_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
+        if ($uniprot_xref->info_type eq 'DEPENDENT') {
+          my $gos = $self->get_go_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
 
-        foreach my $go (@$gos) {
-          my $xref = $self->add_xref($go, $uniprot_xref, $analysis, $external_db);
-          $dbea->store($xref, $translation->transcript->dbID(), 'Transcript');
+          foreach my $go (@$gos) {
+            my $xref = $self->add_xref($go, $uniprot_xref, $analysis, $external_db);
+            $dbea->store($xref, $translation->transcript->dbID(), 'Transcript');
+          }
         }
       }
     }

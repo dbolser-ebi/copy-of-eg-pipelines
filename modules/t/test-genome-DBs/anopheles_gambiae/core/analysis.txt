@@ -2,7 +2,8 @@
 508	2007-05-16 14:23:21	xrefexoneratedna	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 509	2015-09-29 10:23:23	community_models_anop	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
 510	2007-05-16 14:23:23	xrefexonerateprotein	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N
-511	2016-07-20 11:33:13	xrefuniprot	\N	\N	\N	\N	\N	\N	\N	Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt*	\N	\N	\N
+555	2016-07-20 11:33:13	gouniprot	\N	\N	\N	\N	\N	\N	\N	Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtGO	\N	\N	\N
+511	2016-07-20 11:33:13	xrefuniprot	\N	\N	\N	\N	\N	\N	\N	Bio::EnsEMBL::EGPipeline::Xref::LoadUniProtXref	\N	\N	\N
 512	2016-07-20 11:26:31	xrefuniparc	\N	\N	\N	\N	\N	\N	\N	Bio::EnsEMBL::EGPipeline::Xref::LoadUniProt	\N	\N	\N
 513	2016-07-20 11:01:21	xrefchecksum	\N	\N	\N	\N	\N	\N	\N	Bio::EnsEMBL::EGPipeline::Xref::LoadUniParc	\N	\N	\N
 514	2016-09-13 13:46:47	interpro2go	InterPro2GO	\N	\N	5.19-58.0	\N	\N	\N	\N	\N	\N	\N
