@@ -249,10 +249,12 @@ sub join_align_feature {
   my $new_data;
   
   foreach my $row (@data) {
-    my ($region, $source, $start, $end, $strand, $name, $id) = $row =~
-      /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Name=([^;]+).*Parent=([^;]+)/;
-    
-    if ($id) {
+    my ($region, $source, $start, $end, $strand, $name, $evalue) = $row =~
+        /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Name=([^;]+).*evalue=([^;]+)/;
+   
+    if ($name) {
+      my $id = join("_", $name, $region, $strand, $evalue);
+      
       $matches{$id}{'region'} = $region;
       $matches{$id}{'source'} = $source;
       $matches{$id}{'strand'} = $strand;
@@ -263,6 +265,7 @@ sub join_align_feature {
       if (!defined $matches{$id}{'end'} || $matches{$id}{'end'} < $end) {
         $matches{$id}{'end'} = $end;
       }
+      $row .= ";Parent=$id";
       push @{$matches{$id}{'parts'}}, $row;
     } else {
       $new_data .= "$row\n";
@@ -416,7 +419,7 @@ sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
   $summary{'end'}                 = $self->seq_region_end;
   $summary{'strand'}              = $self->strand;
   $summary{'id'}                  = undef;
-  $summary{'Parent'}              = $self->display_id.'_'.$self->seq_region_name.'_'.$self->strand;
+  #$summary{'Parent'}              = $self->display_id.'_'.$self->seq_region_name.'_'.$self->strand.'_'.$self->p_value;
   $summary{'Name'}                = $self->display_id;
   $summary{'description'}         = $self->analysis->description;
   $summary{'score'}               = $self->score;
