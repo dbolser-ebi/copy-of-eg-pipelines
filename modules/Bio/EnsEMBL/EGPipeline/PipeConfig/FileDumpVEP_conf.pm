@@ -39,6 +39,7 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::FileDumpVEP_conf;
 use strict;
 use warnings;
 
+use Bio::EnsEMBL::Hive::PipeConfig::HiveGeneric_conf;
 use Bio::EnsEMBL::Hive::Version 2.4;
 use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::FileDump_conf');
 
@@ -114,7 +115,7 @@ sub pipeline_analyses {
                             },
       -flow_into         => {
                               '2->A' => ['CreateDumpJobs'],
-                              'A->2' => ['CopySynonyms'],
+                              'A->2' => ['CheckDirectoryExists'],
                             },
       -meadow_type       => 'LOCAL',
     },
@@ -153,6 +154,18 @@ sub pipeline_analyses {
                               convert => 0,
                             },
       -rc_name           => 'normal',
+    },
+
+    {
+      -logic_name        => 'CheckDirectoryExists',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
+      -max_retry_count   => 0,
+      -parameters        => {
+                              cmd => 'ls #pipeline_dir#/#species#',
+                              return_codes_2_branches => {2 => 2},
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => ['CopySynonyms'],
     },
 
     {
