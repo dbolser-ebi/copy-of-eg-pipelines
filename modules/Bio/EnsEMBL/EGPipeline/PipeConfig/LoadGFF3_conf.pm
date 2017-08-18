@@ -138,6 +138,14 @@ sub default_options {
     # (rather than inferring from CDS), unless 'polypeptides' = 0. 
     polypeptides => 1,
     
+    # Some sources (I'm looking at you, RefSeq) have 1- or 2-base introns
+    # defined to deal with readthrough stop codons. But their sequence
+    # files contradict this, and include those intronic bases. The NCBI
+    # .gbff files then define a 1- or 2-base insertion of 'N's, which
+    # fixes everything up (and which this pipeline can handle).
+    # So, the pipeline can merge exons that are separated by a small intron.
+    min_intron_size => undef,
+    
     # Set the biotype for transcripts that produce invalid translations. We
     # can treat them as pseudogenes by setting 'nontranslating' => "pseudogene".
     # The default is "nontranslating_CDS", and in this case the translation
@@ -311,26 +319,27 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3',
       -max_retry_count   => 0,
       -parameters        => {
-                              gene_source    => $self->o('gene_source'),
-                              gff3_file      => $self->o('gff3_tidy_file'),
-                              fasta_file     => $self->o('fasta_file'),
-                              gene_types     => $self->o('gene_types'),
-                              mrna_types     => $self->o('mrna_types'),
-                              exon_types     => $self->o('exon_types'),
-                              cds_types      => $self->o('cds_types'),
-                              utr_types      => $self->o('utr_types'),
-                              ignore_types   => $self->o('ignore_types'),
-                              types_complete => $self->o('types_complete'),
-                              use_name_field => $self->o('use_name_field'),
-                              polypeptides   => $self->o('polypeptides'),
-                              nontranslating => $self->o('nontranslating'),
-                              prediction     => $self->o('prediction'),
+                              gene_source     => $self->o('gene_source'),
+                              gff3_file       => $self->o('gff3_tidy_file'),
+                              fasta_file      => $self->o('fasta_file'),
+                              gene_types      => $self->o('gene_types'),
+                              mrna_types      => $self->o('mrna_types'),
+                              exon_types      => $self->o('exon_types'),
+                              cds_types       => $self->o('cds_types'),
+                              utr_types       => $self->o('utr_types'),
+                              ignore_types    => $self->o('ignore_types'),
+                              types_complete  => $self->o('types_complete'),
+                              use_name_field  => $self->o('use_name_field'),
+                              polypeptides    => $self->o('polypeptides'),
+                              min_intron_size => $self->o('min_intron_size'),
+                              nontranslating  => $self->o('nontranslating'),
+                              prediction      => $self->o('prediction'),
                               xref_gene_external_db        => $self->o('xref_gene_external_db'),
                               xref_transcript_external_db  => $self->o('xref_transcript_external_db'),
                               xref_translation_external_db => $self->o('xref_translation_external_db'),
                               
                             },
-      -rc_name           => 'normal',
+      -rc_name           => '8Gb_mem',
       -flow_into         => {
                               '1' => WHEN('#fix_models#' =>
                                       ['FixModels'],

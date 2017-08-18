@@ -51,31 +51,32 @@ use Bio::EnsEMBL::Translation;
 sub param_defaults {
   my ($self) = @_;
   return {
-    db_type        => 'core',
-    gene_types     => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
-                       'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
-    mrna_types     => ['mRNA', 'transcript', 'pseudogenic_transcript',
-                       'pseudogenic_rRNA', 'pseudogenic_tRNA',
-                       'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA',
-                       'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA',
-                       'SRP_RNA', 'tRNA'],
-    exon_types     => ['exon', 'pseudogenic_exon'],
-    cds_types      => ['CDS'],
-    utr_types      => ['five_prime_UTR', 'three_prime_UTR'],
-    ignore_types   => ['misc_RNA', 'RNA',
-                       'match', 'match_part',
-                       'cDNA_match', 'nucleotide_match', 'protein_match',
-                       'polypeptide', 'protein',
-                       'chromosome', 'supercontig', 'contig',
-                       'region', 'biological_region',
-                       'regulatory_region', 'repeat_region'],
-    types_complete => 1,
-    use_name_field => undef,
-    polypeptides   => 1,
-    nontranslating => 'nontranslating_CDS',
-    prediction     => 0,
-    gene_source    => 'Ensembl',
-    stable_ids     => {},
+    db_type         => 'core',
+    gene_types      => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
+                        'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
+    mrna_types      => ['mRNA', 'transcript', 'pseudogenic_transcript',
+                        'pseudogenic_rRNA', 'pseudogenic_tRNA',
+                        'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA',
+                        'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA',
+                        'SRP_RNA', 'tRNA'],
+    exon_types      => ['exon', 'pseudogenic_exon'],
+    cds_types       => ['CDS'],
+    utr_types       => ['five_prime_UTR', 'three_prime_UTR'],
+    ignore_types    => ['misc_RNA', 'RNA',
+                        'match', 'match_part',
+                        'cDNA_match', 'nucleotide_match', 'protein_match',
+                        'polypeptide', 'protein',
+                        'chromosome', 'supercontig', 'contig',
+                        'region', 'biological_region',
+                        'regulatory_region', 'repeat_region'],
+    types_complete  => 1,
+    use_name_field  => undef,
+    polypeptides    => 1,
+    min_intron_size => undef,
+    nontranslating  => 'nontranslating_CDS',
+    prediction      => 0,
+    gene_source     => 'Ensembl',
+    stable_ids      => {},
   };
 }
 
@@ -233,7 +234,8 @@ sub add_transcripts {
 
 sub add_transcript {
   my ($self, $db, $gff_transcript, $gene) = @_;
-  my @exon_types = @{ $self->param_required('exon_types') };
+  my @exon_types      = @{ $self->param_required('exon_types') };
+  my $min_intron_size = $self->param('min_intron_size');
   
   my $transcript = $self->new_transcript($gff_transcript, $gene);
   $transcript->stable_id($gene->stable_id) unless $transcript->stable_id;
@@ -243,7 +245,7 @@ sub add_transcript {
   if (scalar(@gff_exons) == 0) {
     $gff_exons = $self->infer_exons($db, $gff_transcript);
   } else {
-    $gff_exons = $self->correct_exon_overlaps(\@gff_exons);
+    $gff_exons = $self->merge_exons(\@gff_exons, $min_intron_size);
   }
   
   $self->add_exons($gff_exons, $transcript, 0);
@@ -253,7 +255,8 @@ sub add_transcript {
 
 sub add_predicted_transcript {
   my ($self, $db, $gff_transcript, $gene) = @_;
-  my @exon_types = @{ $self->param_required('exon_types') };
+  my @exon_types      = @{ $self->param_required('exon_types') };
+  my $min_intron_size = $self->param('min_intron_size');
   
   my $transcript = $self->new_predicted_transcript($gff_transcript, $gene);
   
@@ -262,7 +265,7 @@ sub add_predicted_transcript {
   if (scalar(@gff_exons) == 0) {
     $gff_exons = $self->infer_exons($db, $gff_transcript);
   } else {
-    $gff_exons = $self->correct_exon_overlaps(\@gff_exons);
+    $gff_exons = $self->merge_exons(\@gff_exons, $min_intron_size);
   }
   $self->add_exons($gff_exons, $transcript, 1);
   
@@ -271,7 +274,8 @@ sub add_predicted_transcript {
 
 sub add_pseudogenic_transcript {
   my ($self, $db, $gff_gene, $gene) = @_;
-  my @exon_types = @{ $self->param_required('exon_types') };
+  my @exon_types      = @{ $self->param_required('exon_types') };
+  my $min_intron_size = $self->param('min_intron_size');
   
   $gene->biotype('pseudogene');
   
@@ -285,7 +289,7 @@ sub add_pseudogenic_transcript {
   if (scalar(@gff_exons) == 0) {
     $gff_exons = $self->infer_exons($db, $gff_transcript);
   } else {
-    $gff_exons = $self->correct_exon_overlaps(\@gff_exons);
+    $gff_exons = $self->merge_exons(\@gff_exons, $min_intron_size);
   }
   $self->add_exons($gff_exons, $transcript, 0);
   
@@ -529,41 +533,63 @@ sub infer_translation {
   return ($translation_id, $gff_object, $genomic_start, $genomic_end);
 }
 
-sub correct_exon_overlaps {
-  my ($self, $gff_exons) = @_;
+sub merge_exons {
+  my ($self, $gff_exons, $min_intron_size) = @_;
   
   # If one exon is wholly within another ignore it; if there is
-  # overlap at the 3' end, truncate the overlapping exon; because
-  # we sort from 5' to 3', there is no need to consider 5' overlaps.
+  # overlap at the 3' end, merge the exon; because we sort from 5' to 3',
+  # there is no need to consider 5' overlaps.
+  # If min_intron_size is defined, then close any gaps between
+  # exons that are less than that by merging exons.
   my @corrected;
   my $previous;
+  
+  $min_intron_size = 0 unless defined $min_intron_size;
   
   foreach my $gff_exon (sort sort_coding @$gff_exons) {
     if ($gff_exon->strand == -1) {
       if (defined $previous) {
-        if ($gff_exon->end >= $previous) {
-          $gff_exon->end($previous - 1);
-        }
-        if ($gff_exon->start < $previous) {
+        if ( $gff_exon->end >= ($previous - $min_intron_size) ) {
+          # The current exon either overlaps, or shares a sufficiently
+          # small intron, with the previous exon, so adjust the previous
+          # exon accordingly, as long as the current exon isn't wholly
+          # within the previous exon.
+          if ($gff_exon->start < $previous) {
+            $corrected[-1]->start($gff_exon->start);
+            $previous = $gff_exon->start;
+          }
+        } else {
+          # Current exon does not need to be merged.
           push @corrected, $gff_exon;
+          $previous = $gff_exon->start;
         }
       } else {
+        # First exon, nothing to do.
         push @corrected, $gff_exon;
+        $previous = $gff_exon->start;
       }
-      $previous = $gff_exon->start;
       
     } else {
       if (defined $previous) {
-        if ($gff_exon->start <= $previous) {
-          $gff_exon->start($previous + 1);
-        }
-        if ($gff_exon->end > $previous) {
+        if ( $gff_exon->start <= ($previous + $min_intron_size) ) {
+          # The current exon either overlaps, or shares a sufficiently
+          # small intron, with the previous exon, so adjust the previous
+          # exon accordingly, as long as the current exon isn't wholly
+          # within the previous exon.
+          if ($gff_exon->end > $previous) {
+            $corrected[-1]->end($gff_exon->end);
+            $previous = $gff_exon->end;
+          }
+        } else {
+          # Current exon does not need to be merged.
           push @corrected, $gff_exon;
+          $previous = $gff_exon->end;
         }
       } else {
+        # First exon, nothing to do.
         push @corrected, $gff_exon;
+        $previous = $gff_exon->end;
       }
-      $previous = $gff_exon->end;
     }
   }
   
