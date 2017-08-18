@@ -48,7 +48,7 @@ sub default_options {
     max_dirs_per_directory  => $self->o('max_files_per_directory'),
     
     # InterPro settings
-    interproscan_version => '5.24-63.0',
+    interproscan_version => '5.25-64.0',
     interproscan_exe     => 'interproscan.sh',
    	run_interproscan     => 1,
     
@@ -591,7 +591,7 @@ sub pipeline_analyses {
         interproscan_applications => '#interproscan_lookup_applications#',
         run_interproscan          => $self->o('run_interproscan'),
       },
-      -rc_name           => '4Gb_mem_4Gb_tmp',
+      -rc_name           => '8Gb_mem_4Gb_tmp',
       -flow_into         => ['StoreProteinFeatures'],
     },
     
@@ -610,7 +610,7 @@ sub pipeline_analyses {
         interproscan_applications => '#interproscan_nolookup_applications#',
         run_interproscan          => $self->o('run_interproscan'),
       },
-      -rc_name           => '4GB_4CPU',
+      -rc_name           => '8GB_4CPU',
       -flow_into         => ['StoreProteinFeatures'],
     },
     
@@ -629,7 +629,7 @@ sub pipeline_analyses {
         interproscan_applications => '#interproscan_local_applications#',
         run_interproscan          => $self->o('run_interproscan'),
       },
-      -rc_name           => '4GB_4CPU',
+      -rc_name           => '8GB_4CPU',
       -flow_into         => ['StoreProteinFeatures'],
     },
     
@@ -779,7 +779,7 @@ sub resource_classes {
   
   return {
     %{$self->SUPER::resource_classes},
-    '4GB_4CPU' => {'LSF' => '-q production-rh7 -n 4 -M 4000 -R "rusage[mem=4000,tmp=4000]"'},
+    '8GB_4CPU' => {'LSF' => '-q production-rh7 -n 4 -M 8000 -R "rusage[mem=8000,tmp=4000]"'},
   }
 }
 
