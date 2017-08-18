@@ -268,6 +268,7 @@ sub pipeline_analyses {
       -logic_name        => 'DNAAnalysisFactory',
       -module            => 'Bio::EnsEMBL::EGPipeline::DNAFeatures::DNAAnalysisFactory',
       -max_retry_count   => 0,
+      -analysis_capacity => 10,
       -batch_size        => 10,
       -parameters        => {
                               dust               => $self->o('dust'),
@@ -293,6 +294,7 @@ sub pipeline_analyses {
       -logic_name        => 'AnalysisSetup',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
       -max_retry_count   => 0,
+      -analysis_capacity => 10,
       -batch_size        => 10,
       -parameters        => {
                               db_backup_required => 1,
@@ -307,6 +309,7 @@ sub pipeline_analyses {
       -logic_name        => 'DeleteRepeatConsensus',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
       -max_retry_count   => 1,
+      -analysis_capacity => 10,
       -batch_size        => 10,
       -parameters        => {
                               sql => [
@@ -336,6 +339,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'SplitDumpFiles_1',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FastaSplit',
+      -analysis_capacity => 25,
       -parameters        => {
                               fasta_file              => '#genome_file#',
                               max_seq_length_per_file => $self->o('dust_trf_max_seq_length'),
@@ -357,6 +361,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'SplitDumpFiles_2',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FastaSplit',
+      -analysis_capacity => 25,
       -parameters        => {
                               fasta_file              => '#genome_file#',
                               max_seq_length_per_file => $self->o('max_seq_length_per_file'),
@@ -402,6 +407,8 @@ sub pipeline_analyses {
       -logic_name        => 'RepeatMaskerFactory',
       -module            => 'Bio::EnsEMBL::EGPipeline::DNAFeatures::RepeatMaskerFactory',
       -max_retry_count   => 1,
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -parameters        => {
                               always_use_repbase => $self->o('always_use_repbase'),
                               rm_library         => $self->o('repeatmasker_library'),
@@ -426,6 +433,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'UpdateMetadata',
       -module            => 'Bio::EnsEMBL::EGPipeline::DNAFeatures::UpdateMetadata',
+      -analysis_capacity => 10,
       -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => WHEN('#email_report#' => ['EmailRepeatReport']),
@@ -434,6 +442,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'EmailRepeatReport',
       -module            => 'Bio::EnsEMBL::EGPipeline::DNAFeatures::EmailRepeatReport',
+      -analysis_capacity => 10,
       -parameters        => {
                               email   => $self->o('email'),
                               subject => 'DNA features pipeline: Repeat report for #species#',
