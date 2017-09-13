@@ -72,8 +72,7 @@ sub default_options {
     run_trnascan => 1,
     load_mirbase => 1,
 
-    program_dir => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    cmscan_exe  => catdir($self->o('program_dir'), 'cmscan'),
+    cmscan_exe => 'cmscan',
 
     cmscan_cm_file    => {},
     cmscan_logic_name => {},
@@ -137,7 +136,7 @@ sub default_options {
     # positives). If you use tRNAscan-SE, however, you do have the option of
     # including pseudogenes, and you get info about the anticodon in the
     # gene description.
-    trnascan_exe        => catdir($self->o('program_dir'), 'tRNAscan-SE'),
+    trnascan_exe        => 'tRNAscan-SE',
     trnascan_logic_name => 'trnascan_align',
     trnascan_db_name    => 'TRNASCAN_SE',
     trnascan_pseudo     => 0,
