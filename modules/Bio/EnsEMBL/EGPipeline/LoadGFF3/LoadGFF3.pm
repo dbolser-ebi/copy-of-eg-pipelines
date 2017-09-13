@@ -603,6 +603,11 @@ sub translation_coordinates {
   
   my @exons = @{ $transcript->get_all_Exons };
   
+  $start_exon = $exons[0];
+  $end_exon   = $exons[-1];
+  $seq_start  = 1;
+  $seq_end    = $exons[-1]->length;
+  
   foreach my $exon (@exons) {
     if ($genomic_start >= $exon->start && $genomic_start <= $exon->end) {
       if ($exon->strand == -1) {
