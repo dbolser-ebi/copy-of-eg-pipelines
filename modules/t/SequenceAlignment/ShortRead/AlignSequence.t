@@ -77,8 +77,8 @@ my %aligners =
 (
   bowtie2 => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::Bowtie2Aligner',
-               dir           => '/nfs/panda/ensemblgenomes/external/bowtie2',
-               version       => '2.2.6',
+               dir           => undef,
+               version       => '2.3.2',
                single_total  => 25000,
                single_mapped => 1625,
                paired_total  => 50000,
@@ -86,30 +86,30 @@ my %aligners =
              },
   bwa     => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::BwaAligner',
-               dir           => '/nfs/panda/ensemblgenomes/external/bwa',
-               version       => '0.6.1-r104',
+               dir           => undef,
+               version       => '0.7.16a-r1181',
                single_total  => 25000,
                single_mapped => 2137,
                paired_total  => 50000,
-               paired_mapped => 3711,
+               paired_mapped => 3705,
              },
   gsnap   => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::GsnapAligner',
-               dir           => '/nfs/panda/ensemblgenomes/external/gmap-gsnap/bin',
-               version       => '2012-11-09',
-               single_total  => 25675,
-               single_mapped => 1598,
-               paired_total  => 50285,
-               paired_mapped => 4471,
+               dir           => undef,
+               version       => '2017-01-14',
+               single_total  => 25967,
+               single_mapped => 2382,
+               paired_total  => 50030,
+               paired_mapped => 3921,
              },
   hisat2  => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::HISAT2Aligner',
-               dir           => '/nfs/panda/ensemblgenomes/external/hisat2',
-               version       => '2.0.4',
-               single_total  => 25932,
-               single_mapped => 2299,
-               paired_total  => 50030,
-               paired_mapped => 3735,
+               dir           => undef,
+               version       => '2.0.5',
+               single_total  => 25906,
+               single_mapped => 2250,
+               paired_total  => 50029,
+               paired_mapped => 3734,
              },
   star    => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::StarAligner',
@@ -122,7 +122,7 @@ my %aligners =
              },
   tophat2 => {
                class         => 'Bio::EnsEMBL::EGPipeline::Common::Aligner::TopHat2Aligner',
-               dir           => '/nfs/panda/ensemblgenomes/external/tophat2',
+               dir           => undef,
                version       => '2.1.1',
                single_total  => 3158,
                single_mapped => 3158,
@@ -131,7 +131,7 @@ my %aligners =
              },
 );
 
-$obj->param('samtools_dir', '/nfs/panda/ensemblgenomes/external/samtools');
+$obj->param('samtools_dir', undef);
 
 foreach my $aligner (sort keys %aligners) {
   my $class         = $aligners{$aligner}{class};

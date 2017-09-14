@@ -46,8 +46,8 @@ my $bam_index_file  = catdir($test_files_dir, 'agam_merged.sorted.bai');
 my $bam_cindex_file = catdir($test_files_dir, 'agam_merged.sorted.csi');
 my $vcf_file        = catdir($test_files_dir, 'agam_merged.sorted.vcf');
 
-my $samtools_dir = '/nfs/panda/ensemblgenomes/external/samtools';
-my $bcftools_dir = '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin';
+my $samtools_dir = undef;
+my $bcftools_dir = undef;
 
 my $tmp_dir = "/tmp/$ENV{'USER'}/mergebam";
 

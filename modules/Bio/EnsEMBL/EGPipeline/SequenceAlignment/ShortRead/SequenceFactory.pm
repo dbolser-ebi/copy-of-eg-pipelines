@@ -32,7 +32,7 @@ sub param_defaults {
   return {
     'reformat_header' => 1,
     'trim_est'        => 1,
-    'trimest_exe'     => '/nfs/panda/ensemblgenomes/external/EMBOSS/bin/trimest',
+    'trimest_exe'     => 'trimest',
     'tax_id_restrict' => 1,
   };
 }

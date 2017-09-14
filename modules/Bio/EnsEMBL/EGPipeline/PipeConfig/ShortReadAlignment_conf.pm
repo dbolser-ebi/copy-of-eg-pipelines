@@ -79,7 +79,7 @@ sub default_options {
     min_slice_length   => 0,
 
     # Aligner options.
-    aligner    => 'bwa',
+    aligner    => 'hisat2',
     threads    => 4,
     data_type  => 'rnaseq',
     index_mode => 'default',
@@ -87,14 +87,15 @@ sub default_options {
     max_intron => 1,
     use_gtf    => 0,
 
-    # Some of the aligners have newer versions, but it's not a given that
-    # these will be better than the version we've used up till now.
-    bowtie2_dir  => '/nfs/panda/ensemblgenomes/external/bowtie2',
-    bwa_dir      => '/nfs/panda/ensemblgenomes/external/bwa',
-    gsnap_dir    => '/nfs/panda/ensemblgenomes/external/gmap-gsnap/bin',
-    hisat2_dir   => '/nfs/panda/ensemblgenomes/external/hisat2',
+    # If a directory is not specified then the version in the
+    # Ensembl software environment will be used. STAR is no longer
+    # actively supported, but is available as legacy software.
+    bowtie2_dir  => undef,
+    bwa_dir      => undef,
+    gsnap_dir    => undef,
+    hisat2_dir   => undef,
     star_dir     => '/nfs/panda/ensemblgenomes/external/STAR',
-    tophat2_dir  => '/nfs/panda/ensemblgenomes/external/tophat2',
+    tophat2_dir  => undef,
 
     # Different aligners have different memory requirements; unless explicitly
     # over-ridden, use defaults, which should work on a genome that isn't too
@@ -138,10 +139,12 @@ sub default_options {
     },
     samtobam_memory => 16000,
 
-    samtools_dir  => '/nfs/panda/ensemblgenomes/external/samtools',
-    bedtools_dir  => '/nfs/panda/ensemblgenomes/external/bedtools/bin',
-    bcftools_dir  => '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin',
-    ucscutils_dir => '/nfs/panda/ensemblgenomes/external/ucsc_utils',
+    # If a directory is not specified then the version in the
+    # Ensembl software environment will be used.
+    samtools_dir  => undef,
+    bedtools_dir  => undef,
+    bcftools_dir  => undef,
+    ucscutils_dir => undef,
   };
 }
 

@@ -29,7 +29,7 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    'samtools_dir' => '/nfs/panda/ensemblgenomes/external/samtools',
+    'samtools_dir' => undef,
   };
 }
 
@@ -37,7 +37,7 @@ sub fetch_input {
 	my ($self) = @_;
   
   my $species      = $self->param_required('species');
-  my $samtools_dir = $self->param_required('samtools_dir');
+  my $samtools_dir = $self->param('samtools_dir');
   my $bam_file     = $self->param_required('merged_bam_file');
   my $bw_file      = $self->param('bw_file');
   my $ini_file     = $self->param_required('ini_file');
