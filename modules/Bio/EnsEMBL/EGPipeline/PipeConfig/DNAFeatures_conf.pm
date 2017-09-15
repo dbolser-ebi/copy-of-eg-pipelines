@@ -74,10 +74,9 @@ sub default_options {
     # the mysql server with connections.
     max_hive_capacity => 100,
 
-    program_dir      => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    dust_exe         => catdir($self->o('program_dir'), 'dustmasker'),
-    trf_exe          => catdir($self->o('program_dir'), 'trf'),
-    repeatmasker_exe => catdir($self->o('program_dir'), 'RepeatMasker'),
+    dust_exe         => 'dustmasker',
+    trf_exe          => 'trf',
+    repeatmasker_exe => 'RepeatMasker',
 
     dust         => 1,
     trf          => 1,

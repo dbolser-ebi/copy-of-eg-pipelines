@@ -92,10 +92,9 @@ sub default_options {
     uniprot_source    => 'sprot',
     uniprot_dir       => catdir($self->o('pipeline_dir'), 'uniprot'),
     
-    blast_dir        => '/nfs/software/ensembl/RHEL7/linuxbrew',
-    makeblastdb_exe  => catdir($self->o('blast_dir'), 'bin/makeblastdb'),
-    blastp_exe       => catdir($self->o('blast_dir'), 'bin/blastp'),
-    blastx_exe       => catdir($self->o('blast_dir'), 'bin/blastx'),
+    makeblastdb_exe  => 'makeblastdb',
+    blastp_exe       => 'blastp',
+    blastx_exe       => 'blastx',
     blast_threads    => 3,
     blast_parameters => '-word_size 3 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -seg yes -num_threads '.$self->o('blast_threads'),
     

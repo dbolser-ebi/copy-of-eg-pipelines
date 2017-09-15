@@ -46,12 +46,11 @@ sub default_options {
     max_files_per_directory => 50,
     max_dirs_per_directory  => $self->o('max_files_per_directory'),
     min_slice_length        => 5000,
-    
+
     # Program paths
-    repeatmodeler_dir => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    builddatabase_exe => catdir($self->o('repeatmodeler_dir'), 'BuildDatabase'),
-    repeatmodeler_exe => catdir($self->o('repeatmodeler_dir'), 'RepeatModeler'),
-    
+    builddatabase_exe => 'BuildDatabase',
+    repeatmodeler_exe => 'RepeatModeler',
+
     # Blast engine can be wublast or ncbi
     blast_engine => 'ncbi',
   };

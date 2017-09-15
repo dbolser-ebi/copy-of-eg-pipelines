@@ -38,8 +38,8 @@ sub default_options {
     run_all => 0,
     meta_filters => {},
 
-    bedtools_dir  => '/nfs/panda/ensemblgenomes/external/bedtools/bin',
-    ucscutils_dir => '/nfs/panda/ensemblgenomes/external/ucsc_utils',
+    bedtools_dir  => undef,
+    ucscutils_dir => undef,
   };
 }
 

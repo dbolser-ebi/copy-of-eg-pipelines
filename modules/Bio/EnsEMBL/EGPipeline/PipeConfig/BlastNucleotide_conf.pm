@@ -68,9 +68,8 @@ sub default_options {
     
     max_hive_capacity => 100,
     
-    blast_dir        => '/nfs/software/ensembl/RHEL7/linuxbrew',
-    makeblastdb_exe  => catdir($self->o('blast_dir'), 'bin/makeblastdb'),
-    blast_exe        => catdir($self->o('blast_dir'), 'bin/blastn'),
+    makeblastdb_exe  => 'makeblastdb',
+    blast_exe        => 'blastn',
     blast_threads    => 3,
     blast_parameters => '-word_size 11 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -num_threads '.$self->o('blast_threads'),
     

@@ -113,10 +113,9 @@ sub default_options {
     refseq_tax_level => undef,
 
     # Blast parameters
-    blast_dir         => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    makeblastdb_exe   => catdir($self->o('blast_dir'), 'makeblastdb'),
-    blastn_exe        => catdir($self->o('blast_dir'), 'blastn'),
-    blastp_exe        => catdir($self->o('blast_dir'), 'blastp'),
+    makeblastdb_exe   => 'makeblastdb',
+    blastn_exe        => 'blastn',
+    blastp_exe        => 'blastp',
     blast_threads     => 3,
     blastn_parameters => '-word_size 11 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -num_threads '.$self->o('blast_threads'),
     blastp_parameters => '-word_size  3 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -seg yes -num_threads '.$self->o('blast_threads'),
