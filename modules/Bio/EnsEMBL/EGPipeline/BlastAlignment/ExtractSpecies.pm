@@ -130,7 +130,7 @@ sub parse_uniprot {
   
   if ($full_desc =~ /OS=$species/) {
     my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
-    $inseq->desc(join('|', map { $_ || '' } ($primary_id, $desc, $version)));
+    $inseq->desc(join('|', map { $_ || '' } ($inseq->display_id(), $desc, $version)));
 
     $seq_out->write_seq($inseq);
   }
