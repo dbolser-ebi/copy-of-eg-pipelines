@@ -55,9 +55,9 @@ my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
 my @module_methods = qw(
   add_exons add_predicted_transcript add_pseudogenic_transcript add_transcript 
-  add_transcripts add_translation check_db check_seq_ids correct_exon_overlaps 
-  get_cds get_cds_id get_polypeptide get_utr infer_exons infer_transcript 
-  infer_translation load_db load_genes new_exon new_gene new_predicted_exon 
+  add_transcripts add_translation check_db check_seq_ids get_cds get_cds_id 
+  get_polypeptide get_utr infer_exons infer_transcript infer_translation 
+  load_db load_genes merge_exons new_exon new_gene new_predicted_exon 
   new_predicted_transcript new_transcript new_translation set_exon_phase 
   set_nontranslating_gene set_nontranslating_transcript translation_coordinates 
 );
@@ -796,7 +796,7 @@ foreach my $test_gene (@{$test_genes}) {
     
     my $transcript = $$transcripts[0];
     is($transcript->biotype, 'protein_coding', 'run method: transcript biotype correct for '.$transcript->stable_id);
-    is(scalar(@{$transcript->get_all_Exons()}), 3, 'run method: three exons stored');
+    is(scalar(@{$transcript->get_all_Exons()}), 2, 'run method: two exons stored');
     is($transcript->seq->seq(), $cdna, 'run method: correct cDNA sequence stored');
     is($transcript->translateable_seq(), $coding, 'run method: correct coding sequence stored');
     is($transcript->translate->seq(), $aa, 'run method: correct amino acid sequence stored');
@@ -815,7 +815,7 @@ foreach my $test_gene (@{$test_genes}) {
     my $transcript = $$transcripts[0];
     
     is($transcript->biotype, 'protein_coding', 'run method: transcript biotype correct for '.$transcript->stable_id);
-    is(scalar(@{$transcript->get_all_Exons()}), 5, 'run method: five exons stored');
+    is(scalar(@{$transcript->get_all_Exons()}), 3, 'run method: three exons stored');
     is($transcript->seq->seq(), $cdna, 'run method: correct cDNA sequence stored');
     is($transcript->translateable_seq(), $coding, 'run method: correct coding sequence stored');
     is($transcript->translate->seq(), $aa, 'run method: correct amino acid sequence stored');
