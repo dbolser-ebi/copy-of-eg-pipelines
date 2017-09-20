@@ -65,6 +65,9 @@ sub default_options {
     genbank_filename       => undef,
     protein_fasta_filename => undef,
     
+    # Since this mode was designed to be used with patch builds,
+    # default to not deleting any existing genes.
+    delete_existing => 0,
   };
 }
 
