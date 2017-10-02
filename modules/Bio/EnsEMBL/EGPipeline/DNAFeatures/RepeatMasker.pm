@@ -51,6 +51,8 @@ sub fetch_runnable {
     %parameters,
   );
   
+  $runnable->timer('24h');
+  
   $self->param('save_object_type', 'RepeatFeature');
   
   return $runnable;
