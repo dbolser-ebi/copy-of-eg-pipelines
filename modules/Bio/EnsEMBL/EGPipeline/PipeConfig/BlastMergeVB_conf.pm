@@ -396,7 +396,7 @@ sub pipeline_analyses {
                               cmd => 'mkdir -p #proteome_dir#/#species#;
                                       cp #pipeline_dir#/#species#/*.gff3 #proteome_dir#/#species#/.;
                                       cp #pipeline_dir#/#species#/*.json #proteome_dir#/#species#/.;
-                                      chmod -R g+rw #proteome_dir#/#species#;',
+                                      chmod -R g+rw #proteome_dir#/#species# || true;',
                             },
       -rc_name           => 'normal',
     },
