@@ -108,12 +108,4 @@ sub set_protein_coding {
   }
 }
 
-sub update_translation_start {
-  my ($self, $dba, $dbid, $start) = @_;
-  
-  my $sql = 'UPDATE translation SET seq_start = ? WHERE translation_id = ?;';
-  my $sth = $dba->dbc->db_handle->prepare($sql);
-  $sth->execute($start, $dbid) or $self->throw("Failed to execute: $sql");
-}
-
 1;

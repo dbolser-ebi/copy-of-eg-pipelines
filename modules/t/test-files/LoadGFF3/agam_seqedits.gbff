@@ -1,141 +1,8 @@
-LOCUS       test_gbff_1-RA           1526 bp    mRNA    linear   INV 28-SEP-2011
-DEFINITION  Anopheles gambiae str. PEST AGAP004704-PA (AgaP_AGAP004704) mRNA,
-            complete cds.
-ACCESSION   test_gbff_1-RA 
-VERSION     test_gbff_1-RA
-KEYWORDS    RefSeq.
-SOURCE      Anopheles gambiae str. PEST
-  ORGANISM  Anopheles gambiae str. PEST
-            Eukaryota; Metazoa; Ecdysozoa; Arthropoda; Hexapoda; Insecta;
-            Pterygota; Neoptera; Endopterygota; Diptera; Nematocera;
-            Culicoidea; Culicidae; Anophelinae; Anopheles.
-REFERENCE   1  (bases 1 to 1532)
-  AUTHORS   Mongin,E., Louis,C., Holt,R.A., Birney,E. and Collins,F.H.
-  TITLE     The Anopheles gambiae genome: an update
-  JOURNAL   Trends Parasitol. 20 (2), 49-52 (2004)
-   PUBMED   14747013
-REFERENCE   2  (bases 1 to 1532)
-  AUTHORS   Holt,R.A., Subramanian,G.M., Halpern,A., Sutton,G.G., Charlab,R.,
-            Nusskern,D.R., Wincker,P., Clark,A.G., Ribeiro,J.M., Wides,R.,
-            Salzberg,S.L., Loftus,B., Yandell,M., Majoros,W.H., Rusch,D.B.,
-            Lai,Z., Kraft,C.L., Abril,J.F., Anthouard,V., Arensburger,P.,
-            Atkinson,P.W., Baden,H., de Berardinis,V., Baldwin,D., Benes,V.,
-            Biedler,J., Blass,C., Bolanos,R., Boscus,D., Barnstead,M., Cai,S.,
-            Center,A., Chaturverdi,K., Christophides,G.K., Chrystal,M.A.,
-            Clamp,M., Cravchik,A., Curwen,V., Dana,A., Delcher,A., Dew,I.,
-            Evans,C.A., Flanigan,M., Grundschober-Freimoser,A., Friedli,L.,
-            Gu,Z., Guan,P., Guigo,R., Hillenmeyer,M.E., Hladun,S.L.,
-            Hogan,J.R., Hong,Y.S., Hoover,J., Jaillon,O., Ke,Z., Kodira,C.,
-            Kokoza,E., Koutsos,A., Letunic,I., Levitsky,A., Liang,Y., Lin,J.J.,
-            Lobo,N.F., Lopez,J.R., Malek,J.A., McIntosh,T.C., Meister,S.,
-            Miller,J., Mobarry,C., Mongin,E., Murphy,S.D., O'Brochta,D.A.,
-            Pfannkoch,C., Qi,R., Regier,M.A., Remington,K., Shao,H.,
-            Sharakhova,M.V., Sitter,C.D., Shetty,J., Smith,T.J., Strong,R.,
-            Sun,J., Thomasova,D., Ton,L.Q., Topalis,P., Tu,Z., Unger,M.F.,
-            Walenz,B., Wang,A., Wang,J., Wang,M., Wang,X., Woodford,K.J.,
-            Wortman,J.R., Wu,M., Yao,A., Zdobnov,E.M., Zhang,H., Zhao,Q.,
-            Zhao,S., Zhu,S.C., Zhimulev,I., Coluzzi,M., della Torre,A.,
-            Roth,C.W., Louis,C., Kalush,F., Mural,R.J., Myers,E.W., Adams,M.D.,
-            Smith,H.O., Broder,S., Gardner,M.J., Fraser,C.M., Birney,E.,
-            Bork,P., Brey,P.T., Venter,J.C., Weissenbach,J., Kafatos,F.C.,
-            Collins,F.H. and Hoffman,S.L.
-  TITLE     The genome sequence of the malaria mosquito Anopheles gambiae
-  JOURNAL   Science 298 (5591), 129-149 (2002)
-   PUBMED   12364791
-REFERENCE   3  (bases 1 to 1532)
-  CONSRTM   VectorBase
-  TITLE     Anopheles gambiae revised assembly AgamP3 and re-annotation
-  JOURNAL   Unpublished
-REFERENCE   4  (bases 1 to 1532)
-  CONSRTM   VectorBase
-  TITLE     Direct Submission
-  JOURNAL   Submitted (31-JUL-2006) VectorBase / Ensembl, European
-            Bioinformatics Institute, Wellcome Trust Genome Campus, Hinxton,
-            Cambridge CB10 1SD, UK
-COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
-            NCBI review. This record is derived from a genomic sequence
-            (CM000356.1) and transcript sequences (test_transcriptome_1 and
-            test_transcriptome_2) annotated
-            using gene prediction method: Gnomon.
-            On Oct 15, 2007 this sequence version replaced gi:118790251.
-            COMPLETENESS: incomplete on the 3' end.
-            ##RefSeq-Attributes-START##
-            assembly gap :: added 128 transcript bases to patch genome assembly
-                            gap
-            ##RefSeq-Attributes-END##
-PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
-            1-96                test_transcriptome_1 1-96
-            97-119              CM000356.1           2255473-2255405
-            120-241             test_transcriptome_2 3-124
-            242-1310            CM000356.1           2254037-2255104
-            1311-1534           CM000356.1           2253748-2253970
-FEATURES             Location/Qualifiers
-     source          1..1532
-                     /organism="Anopheles gambiae str. PEST"
-                     /mol_type="mRNA"
-                     /strain="PEST"
-                     /db_xref="taxon:180454"
-                     /chromosome="2L"
-     gene            1..>1532
-                     /locus_tag="AgaP_AGAP004704"
-                     /old_locus_tag="AgaP_ENSANGG00000002901"
-                     /old_locus_tag="ENSANGG00000002901"
-                     /db_xref="GeneID:1278526"
-                     /db_xref="VectorBase:AGAP004704"
-     CDS             87..1532
-                     /locus_tag="AgaP_AGAP004704"
-                     /old_locus_tag="AgaP_ENSANGG00000002901"
-                     /old_locus_tag="ENSANGG00000002901"
-                     /note="AGAP004704-PA encoded by AGAP004704-RA"
-                     /codon_start=1
-                     /product="AGAP004704-PA"
-                     /protein_id="XP_318129.4"
-                     /db_xref="GI:158298042"
-                     /db_xref="VectorBase:AGAP004704-PA"
-                     /db_xref="GeneID:1278526"
-                     /db_xref="VectorBase:AGAP004704"
-                     /translation="MSEQKKRKKKSKEEIAKEFDLPERKSKIATIYKQDGQAYCLCRS
-                     SDSSRFMICCDACEEWYHGDCINVSEKEAKHIKHYYCQRCKEEDPSLQTVFRLVPAPG
-                     PIPLPEEKKPKKKKKETPIGGSSEKRCGSCDGCLAENCGNCEGCLGLTKNGRKQRCDM
-                     RFCSNSSTRKKDRAAIKAGGRNKKRKRSVTPEVFCNPALEGERQCYGPGCIMTARPQS
-                     KYCSDECGMKLATSRIYQVLPQRIQEWSLSPAVGEEQNKKALESIRMKQAIVRATLAE
-                     LDKRHAELDLLVERAKRCTLDPNALENADLEDEMSMYCITCGHEIHSKTAIRHMEKCF
-                     NKYESQASFGSIFKTRIDGNSMFCDFYNPASKTYCKRLRVLCPEHCKDPKINDTDVCG
-                     CPLVRNVFELTGEFCRAPKKSCFKHYVWEKIRRAEIDLERVRQWLKMDELVEQERLIR
-                     QAMASRAGVLGLMLHSTYNHEIMEKLCAGKF"
-ORIGIN      
-        1 ctgaaccaag tgaatctaca ttgatagtcc attcgtgtat tgcgctcagc gtaactaaac
-       61 cacattaaaa atctaataag cacactatga gtgaacaaaa gaaaagaaag aaaaaatcca
-      121 aagaggaaat agctaaggaa ttcgacttgc ctgaaaggaa aagcaagatt gccactattt
-      181 acaaacaaga tggacaagct tactgcttgt gtagatcttc cgattcttcg cgattcatga
-      241 tttgttgcgatgcatgcgaagaatggtaccatggagattgtattaatgtgtcagaaaaggaagcca
-      301 agcatatcaa acattactac tgtcagcgat gcaaagaaga agacccttcg ttacagaccg
-      361 ttttccgctt ggtcccagcg cctggtccaa tcccgcttcc ggaggaaaaa aaacctaaaa
-      421 agaaaaagaa ggaaactccc attggtggtt catctgagaa gcgttgcggt agctgcgacg
-      481 gttgccttgc cgaaaattgt ggtaactgtg aaggttgttt gggtctcact aagaacggcc
-      541 gaaagcagcg ttgcgatatg cgtttttgca gcaactcaag tacccggaag aaggaccgag
-      601 cagctataaa agcgggagga agaaacaaaa agcgaaaacg gtccgttact ccagaggttt
-      661 tttgtaaccc tgcattggaa ggcgaacgac aatgctacgg tcccgggtgt attatgaccg
-      721 cccgacctca atcaaaatac tgttcggatg aatgtggcat gaagttagca acgagccgaa
-      781 tctatcaggt tttaccgcaa cgtattcaag agtggtctct tagcccagct gttggcgaag
-      841 aacaaaacaa gaaggcactt gaatcaattc gcatgaagca agcgatagtt agagctactc
-      901 tagcagaact ggataaacga catgctgagt tggacctgct ggttgaacgt gcaaagaggt
-      961 gcacgttgga tccaaatgca ttggaaaatg ctgatttgga ggatgaaatg tcaatgtact
-     1021 gcataacgtg tggtcatgag attcattcca aaactgcaat tcggcatatg gaaaaatgtt
-     1081 tcaacaaata cgagagtcag gcaagctttg gcagcatttt caagacacga attgacggca
-     1141 attcaatgtt ctgtgatttc tacaatccgg ctagcaagac atactgcaaa cgtttacgag
-     1201 tgttatgccc agaacactgc aaggacccaa aaattaatga tacggacgtc tgtggttgcc
-     1261 ctttagtacg caatgtattt gaattaacag gagaattttg ccgagcacca aagaaatctt
-     1321 gcttcaaaca ttatgtatgg gaaaaaatac gacgtgcaga aattgatctt gaacgagtac
-     1381 gacagtggtt aaaaatggac gaactcgtcg aacaggaacg tctaattcgt caggcaatgg
-     1441 catcacgagc cggagtgctg ggactaatgc tgcactcaac gtacaatcat gaaatcatgg
-     1501 aaaagttatg tgctggtaaa ttttag
-//
-LOCUS       test_gbff_2-RA           1872 bp    mRNA    linear   INV 28-SEP-2011
+LOCUS       test_gbff_pos_ins-RA           1872 bp    mRNA    linear   INV 28-SEP-2011
 DEFINITION  Anopheles gambiae str. PEST AGAP004724-PA (AgaP_AGAP004724) mRNA,
             complete cds.
-ACCESSION   test_gbff_2-RA
-VERSION     test_gbff_2-RA  GI:158297997
+ACCESSION   test_gbff_pos_ins-RA
+VERSION     test_gbff_pos_ins-RA  GI:158297997
 KEYWORDS    RefSeq.
 SOURCE      Anopheles gambiae str. PEST
   ORGANISM  Anopheles gambiae str. PEST
@@ -272,11 +139,11 @@ ORIGIN
      1801 aaggacaata aagtgcttca agaaacagtg aaaaacatac agcaggtata taatgcatac
      1861 cagtttaaat gaaataat
 //
-LOCUS       test_gbff_3-RA           1872 bp    mRNA    linear   INV 28-SEP-2011
+LOCUS       test_gbff_pos_del-RA           1872 bp    mRNA    linear   INV 28-SEP-2011
 DEFINITION  Anopheles gambiae str. PEST AGAP004724-PA (AgaP_AGAP004724) mRNA,
             complete cds.
-ACCESSION   test_gbff_3-RA
-VERSION     test_gbff_3-RA  GI:158297997
+ACCESSION   test_gbff_pos_del-RA
+VERSION     test_gbff_pos_del-RA  GI:158297997
 KEYWORDS    RefSeq.
 SOURCE      Anopheles gambiae str. PEST
   ORGANISM  Anopheles gambiae str. PEST
@@ -339,8 +206,7 @@ COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
 
 PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
             1-161               CM000356.1     2775211-2775371
-            162-176             CM000356.1     2794636-2794749
-            177-1878            CM000356.1     2794886-2796487
+            162-177             CM000356.1     2775373-2775388
 FEATURES             Location/Qualifiers
      source          1..1878
                      /organism="Anopheles gambiae str. PEST"
@@ -348,13 +214,13 @@ FEATURES             Location/Qualifiers
                      /strain="PEST"
                      /db_xref="taxon:180454"
                      /chromosome="2L"
-     gene            <1..>1878
+     gene            <1..>177
                      /locus_tag="AgaP_AGAP004724"
                      /old_locus_tag="AgaP_ENSANGG00000015152"
                      /old_locus_tag="ENSANGG00000015152"
                      /db_xref="GeneID:1278504"
                      /db_xref="VectorBase:AGAP004724"
-     CDS             1..1878
+     CDS             1..177
                      /locus_tag="AgaP_AGAP004724"
                      /old_locus_tag="AgaP_ENSANGG00000015152"
                      /old_locus_tag="ENSANGG00000015152"
@@ -367,48 +233,294 @@ FEATURES             Location/Qualifiers
                      /db_xref="GeneID:1278504"
                      /db_xref="VectorBase:AGAP004724"
                      /translation="MEDVNNNSSARSYSDRPASRRGLGPTNNLFASNNTTTSATPSPV
-                     AIIRPGTALXPPSALRSGTASRLLANNGISMISSTSQRIGTALGNAGNRMADRPITQH
-                     GISGLSTSYGRLGTAVSSNRQIKDKRYWQALLQSKIQEINQETTKILKEKKFLDRERS
-                     ARKLYEKRVKEAAKELTNLQSTLTSMNLALDNCTSGMTRQHLLNETVALRERNEHIQE
-                     QLEVIFKQRQQKDIENKALERNTEQEKNKVIEMINSLPEEDQHKYREYKALSENLRKQ
-                     NAIYHSQISEMEKQKDRLNTMIMNSQSRSEAHRLKSKLKELLNKRNALREEENNRLSP
-                     AQEREKLINDVRSNNQALASIGKQLKIVEDQLIEKKETLQQIDQDLEEGNSERHVKYK
-                     ELKKRDDVMSAFMDSFKSNMNQEQQCKCIKLIYSKCLIITQSLLCKHVTGIDTLKNQI
-                     TYAIEQITMQGINMNGMYDAKLEGNGFTSKNDLNSHSGLMKEYKKLGIQLKQLQILEK
-                     RTVQQMNSLRQEETEALQSIQKYANLEIPRSEAIAKMNELTTILQEMEDKKRVTENVV
-                     DEARNRNHEIKINLKSNDTYRQISHLEDKLIDLMKDNKVLQETVKNIQQVYNAYQFKU
-                     NN"
+                     AIIRPGTALNECXEL"
 ORIGIN      
         1 atggaagatg ttaacaataa ctcatcggca cgatcctatt cagaccgtcc tgcatcccga
        61 agaggtttag gtccaactaa caatctattt gcttcaaata acacaaccac ctcagcaacg
-      121 cctagccctg ttgccatcat aagacccgga actgctttga anccaccttc tgcattgcgc
-      181 tctggaactg caagtaggct cttggcaaat aatggaattt ctatgatttc gtcgacatcc
-      241 caacgcattg gaacagcttt aggaaatgct ggaaatcgaa tggcagaccg tccaattaca
-      301 cagcatggca tcagtggcct ttcgacgtct tacggacgtc ttggaactgc tgttagtagt
-      361 aatcgtcaaa ttaaagacaa acgctactgg caagcattat tacaaagcaa aattcaagaa
-      421 atcaatcaag aaacaacaaa gattttgaag gaaaaaaagt ttctcgatcg tgaacgatca
-      481 gctagaaagc tgtacgagaa acgtgtaaaa gaagctgcaa aagaattgac aaacctacaa
-      541 tccaccctaa cgtcgatgaa tttagctttg gacaactgta catcgggtat gacacggcaa
-      601 catctattaa acgaaacggt agcattacga gaacgcaacg agcacattca agaacagttg
-      661 gaggtcattt tcaagcagcg acaacaaaaa gacatcgaaa acaaggcact ggaacgaaat
-      721 acagaacagg agaaaaataa ggtgattgaa atgatcaatt cgctaccaga agaggatcag
-      781 cacaaatatc gggaatacaa agctttgtcg gaaaatcttc gcaaacagaa tgccatttac
-      841 catagccaga taagcgagat ggaaaaacaa aaggacagac ttaacacaat gattatgaac
-      901 tcacaatctc gttctgaagc acatcgtcta aaatcaaagt tgaaagaatt gctaaacaaa
-      961 cgaaatgctt tacgagaaga ggaaaacaat cgcctctcgc cagctcagga gcgcgaaaaa
-     1021 ctaatcaacg atgtacgatc caacaaccag gcgctagcta gtattggcaa gcaactaaag
-     1081 atcgttgaag atcaattgat agaaaaaaaa gaaacattac agcagatcga ccaagatctt
-     1141 gaagaaggaa actccgagcg ccatgtaaag tacaaggaac ttaaaaaacg agatgatgta
-     1201 atgtcagcat ttatggacag ttttaaaagc aacatgaatc aggaacagca atgtaagtgc
-     1261 attaaattaa tttactcaaa gtgtcttata ataacgcaat ctcttctttg caaacatgtt
-     1321 acaggtatag atacgctgaa aaatcaaatc acgtatgcta ttgagcaaat tacaatgcaa
-     1381 ggaatcaaca tgaacgggat gtatgatgcg aaactagaag gaaacggatt tacatctaag
-     1441 aatgatctta attctcactc gggactgatg aaggaataca aaaaacttgg catacaactc
-     1501 aagcaactcc aaatattgga aaaacgtaca gtgcagcaaa tgaattctct acgccaggaa
-     1561 gaaacagaag ctctgcaaag tattcaaaag tatgctaact tggaaatacc tcgatccgag
-     1621 gcaattgcaa aaatgaatga gcttaccacc attctgcaag agatggaaga taaaaaacgt
-     1681 gttacagaaa atgtggtcga tgaagctcgc aatagaaatc atgagataaa gattaatctg
-     1741 aaaagtaacg atacatatcg acaaatttct catcttgaag ataagctgat agatttaatg
-     1801 aaggacaata aagtgcttca agaaacagtg aaaaacatac agcaggtata taatgcatac
-     1861 cagtttaaat gaaataat
+      121 cctagccctg ttgccatcat aagacccgga actgctttga atgagtgcta agaactt
+//
+LOCUS       test_gbff_neg_ins-RA           1526 bp    mRNA    linear   INV 28-SEP-2011
+DEFINITION  Anopheles gambiae str. PEST AGAP004704-PA (AgaP_AGAP004704) mRNA,
+            complete cds.
+ACCESSION   test_gbff_neg_ins-RA 
+VERSION     test_gbff_neg_ins-RA
+KEYWORDS    RefSeq.
+SOURCE      Anopheles gambiae str. PEST
+  ORGANISM  Anopheles gambiae str. PEST
+            Eukaryota; Metazoa; Ecdysozoa; Arthropoda; Hexapoda; Insecta;
+            Pterygota; Neoptera; Endopterygota; Diptera; Nematocera;
+            Culicoidea; Culicidae; Anophelinae; Anopheles.
+REFERENCE   1  (bases 1 to 1532)
+  AUTHORS   Mongin,E., Louis,C., Holt,R.A., Birney,E. and Collins,F.H.
+  TITLE     The Anopheles gambiae genome: an update
+  JOURNAL   Trends Parasitol. 20 (2), 49-52 (2004)
+   PUBMED   14747013
+REFERENCE   2  (bases 1 to 1532)
+  AUTHORS   Holt,R.A., Subramanian,G.M., Halpern,A., Sutton,G.G., Charlab,R.,
+            Nusskern,D.R., Wincker,P., Clark,A.G., Ribeiro,J.M., Wides,R.,
+            Salzberg,S.L., Loftus,B., Yandell,M., Majoros,W.H., Rusch,D.B.,
+            Lai,Z., Kraft,C.L., Abril,J.F., Anthouard,V., Arensburger,P.,
+            Atkinson,P.W., Baden,H., de Berardinis,V., Baldwin,D., Benes,V.,
+            Biedler,J., Blass,C., Bolanos,R., Boscus,D., Barnstead,M., Cai,S.,
+            Center,A., Chaturverdi,K., Christophides,G.K., Chrystal,M.A.,
+            Clamp,M., Cravchik,A., Curwen,V., Dana,A., Delcher,A., Dew,I.,
+            Evans,C.A., Flanigan,M., Grundschober-Freimoser,A., Friedli,L.,
+            Gu,Z., Guan,P., Guigo,R., Hillenmeyer,M.E., Hladun,S.L.,
+            Hogan,J.R., Hong,Y.S., Hoover,J., Jaillon,O., Ke,Z., Kodira,C.,
+            Kokoza,E., Koutsos,A., Letunic,I., Levitsky,A., Liang,Y., Lin,J.J.,
+            Lobo,N.F., Lopez,J.R., Malek,J.A., McIntosh,T.C., Meister,S.,
+            Miller,J., Mobarry,C., Mongin,E., Murphy,S.D., O'Brochta,D.A.,
+            Pfannkoch,C., Qi,R., Regier,M.A., Remington,K., Shao,H.,
+            Sharakhova,M.V., Sitter,C.D., Shetty,J., Smith,T.J., Strong,R.,
+            Sun,J., Thomasova,D., Ton,L.Q., Topalis,P., Tu,Z., Unger,M.F.,
+            Walenz,B., Wang,A., Wang,J., Wang,M., Wang,X., Woodford,K.J.,
+            Wortman,J.R., Wu,M., Yao,A., Zdobnov,E.M., Zhang,H., Zhao,Q.,
+            Zhao,S., Zhu,S.C., Zhimulev,I., Coluzzi,M., della Torre,A.,
+            Roth,C.W., Louis,C., Kalush,F., Mural,R.J., Myers,E.W., Adams,M.D.,
+            Smith,H.O., Broder,S., Gardner,M.J., Fraser,C.M., Birney,E.,
+            Bork,P., Brey,P.T., Venter,J.C., Weissenbach,J., Kafatos,F.C.,
+            Collins,F.H. and Hoffman,S.L.
+  TITLE     The genome sequence of the malaria mosquito Anopheles gambiae
+  JOURNAL   Science 298 (5591), 129-149 (2002)
+   PUBMED   12364791
+REFERENCE   3  (bases 1 to 1532)
+  CONSRTM   VectorBase
+  TITLE     Anopheles gambiae revised assembly AgamP3 and re-annotation
+  JOURNAL   Unpublished
+REFERENCE   4  (bases 1 to 1532)
+  CONSRTM   VectorBase
+  TITLE     Direct Submission
+  JOURNAL   Submitted (31-JUL-2006) VectorBase / Ensembl, European
+            Bioinformatics Institute, Wellcome Trust Genome Campus, Hinxton,
+            Cambridge CB10 1SD, UK
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. This record is derived from a genomic sequence
+            (CM000356.1) and transcript sequences (test_transcriptome_1 and
+            test_transcriptome_2) annotated
+            using gene prediction method: Gnomon.
+            On Oct 15, 2007 this sequence version replaced gi:118790251.
+            COMPLETENESS: incomplete on the 3' end.
+            ##RefSeq-Attributes-START##
+            assembly gap :: added 128 transcript bases to patch genome assembly
+                            gap
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
+            1-96                test_transcriptome_1 1-96
+            97-119              CM000356.1           2255383-2255405
+            120-241             test_transcriptome_2 3-124
+            242-1310            CM000356.1           2254037-2255104
+            1311-1534           CM000356.1           2253748-2253970
+FEATURES             Location/Qualifiers
+     source          1..1532
+                     /organism="Anopheles gambiae str. PEST"
+                     /mol_type="mRNA"
+                     /strain="PEST"
+                     /db_xref="taxon:180454"
+                     /chromosome="2L"
+     gene            1..>1532
+                     /locus_tag="AgaP_AGAP004704"
+                     /old_locus_tag="AgaP_ENSANGG00000002901"
+                     /old_locus_tag="ENSANGG00000002901"
+                     /db_xref="GeneID:1278526"
+                     /db_xref="VectorBase:AGAP004704"
+     CDS             87..1532
+                     /locus_tag="AgaP_AGAP004704"
+                     /old_locus_tag="AgaP_ENSANGG00000002901"
+                     /old_locus_tag="ENSANGG00000002901"
+                     /note="AGAP004704-PA encoded by AGAP004704-RA"
+                     /codon_start=1
+                     /product="AGAP004704-PA"
+                     /protein_id="XP_318129.4"
+                     /db_xref="GI:158298042"
+                     /db_xref="VectorBase:AGAP004704-PA"
+                     /db_xref="GeneID:1278526"
+                     /db_xref="VectorBase:AGAP004704"
+                     /translation="MSEQKKRKKKSKEEIAKEFDLPERKSKIATIYKQDGQAYCLCRS
+                     SDSSRFMICCDACEEWYHGDCINVSEKEAKHIKHYYCQRCKEEDPSLQTVFRLVPAPG
+                     PIPLPEEKKPKKKKKETPIGGSSEKRCGSCDGCLAENCGNCEGCLGLTKNGRKQRCDM
+                     RFCSNSSTRKKDRAAIKAGGRNKKRKRSVTPEVFCNPALEGERQCYGPGCIMTARPQS
+                     KYCSDECGMKLATSRIYQVLPQRIQEWSLSPAVGEEQNKKALESIRMKQAIVRATLAE
+                     LDKRHAELDLLVERAKRCTLDPNALENADLEDEMSMYCITCGHEIHSKTAIRHMEKCF
+                     NKYESQASFGSIFKTRIDGNSMFCDFYNPASKTYCKRLRVLCPEHCKDPKINDTDVCG
+                     CPLVRNVFELTGEFCRAPKKSCFKHYVWEKIRRAEIDLERVRQWLKMDELVEQERLIR
+                     QAMASRAGVLGLMLHSTYNHEIMEKLCAGKF"
+ORIGIN      
+        1 ctgaaccaag tgaatctaca ttgatagtcc attcgtgtat tgcgctcagc gtaactaaac
+       61 cacattaaaa atctaataag cacactatga gtgaacaaaa gaaaagaaag aaaaaatcca
+      121 aagaggaaat agctaaggaa ttcgacttgc ctgaaaggaa aagcaagatt gccactattt
+      181 acaaacaaga tggacaagct tactgcttgt gtagatcttc cgattcttcg cgattcatga
+      241 tttgttgcgatgcatgcgaagaatggtaccatggagattgtattaatgtgtcagaaaaggaagcca
+      301 agcatatcaa acattactac tgtcagcgat gcaaagaaga agacccttcg ttacagaccg
+      361 ttttccgctt ggtcccagcg cctggtccaa tcccgcttcc ggaggaaaaa aaacctaaaa
+      421 agaaaaagaa ggaaactccc attggtggtt catctgagaa gcgttgcggt agctgcgacg
+      481 gttgccttgc cgaaaattgt ggtaactgtg aaggttgttt gggtctcact aagaacggcc
+      541 gaaagcagcg ttgcgatatg cgtttttgca gcaactcaag tacccggaag aaggaccgag
+      601 cagctataaa agcgggagga agaaacaaaa agcgaaaacg gtccgttact ccagaggttt
+      661 tttgtaaccc tgcattggaa ggcgaacgac aatgctacgg tcccgggtgt attatgaccg
+      721 cccgacctca atcaaaatac tgttcggatg aatgtggcat gaagttagca acgagccgaa
+      781 tctatcaggt tttaccgcaa cgtattcaag agtggtctct tagcccagct gttggcgaag
+      841 aacaaaacaa gaaggcactt gaatcaattc gcatgaagca agcgatagtt agagctactc
+      901 tagcagaact ggataaacga catgctgagt tggacctgct ggttgaacgt gcaaagaggt
+      961 gcacgttgga tccaaatgca ttggaaaatg ctgatttgga ggatgaaatg tcaatgtact
+     1021 gcataacgtg tggtcatgag attcattcca aaactgcaat tcggcatatg gaaaaatgtt
+     1081 tcaacaaata cgagagtcag gcaagctttg gcagcatttt caagacacga attgacggca
+     1141 attcaatgtt ctgtgatttc tacaatccgg ctagcaagac atactgcaaa cgtttacgag
+     1201 tgttatgccc agaacactgc aaggacccaa aaattaatga tacggacgtc tgtggttgcc
+     1261 ctttagtacg caatgtattt gaattaacag gagaattttg ccgagcacca aagaaatctt
+     1321 gcttcaaaca ttatgtatgg gaaaaaatac gacgtgcaga aattgatctt gaacgagtac
+     1381 gacagtggtt aaaaatggac gaactcgtcg aacaggaacg tctaattcgt caggcaatgg
+     1441 catcacgagc cggagtgctg ggactaatgc tgcactcaac gtacaatcat gaaatcatgg
+     1501 aaaagttatg tgctggtaaa ttttag
+//
+LOCUS       test_gbff_pos_ins_ins-RA
+VERSION     test_gbff_pos_ins_ins-RA  GI:158297997
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-3                 CM000356.1     2775211-2775213
+            4-5                 "NN"           1-2
+            6-7                 CM000356.1     2775214-2775215
+            8-8                 "N"            1-1
+            9-14                CM000356.1     2775216-2775221
+FEATURES             Location/Qualifiers
+     source          1..14
+                     /mol_type="mRNA"
+     gene            1..14
+     CDS             1..12
+ORIGIN      
+        1 atgnnganag atgt
+//
+LOCUS       test_gbff_pos_del_del-RA
+VERSION     test_gbff_pos_del_del-RA  GI:158297997
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-3                 CM000356.1     2775211-2775213
+            4-5                 CM000356.1     2775215-2775216
+            6-9                 CM000356.1     2775218-2775221
+FEATURES             Location/Qualifiers
+     source          1..9
+                     /mol_type="mRNA"
+     gene            1..9
+     CDS             1..9
+ORIGIN      
+        1 atgaaatgt
+//
+LOCUS       test_gbff_pos_ins_del-RA
+VERSION     test_gbff_pos_ins_del-RA  GI:158297997
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+             1-3                 CM000356.1     2775211-2775213
+             4-4                 "N"            1-1
+             5-7                 CM000356.1     2775214-2775216
+             8-11                CM000356.1     2775218-2775221
+FEATURES             Location/Qualifiers
+      source          1..11
+                      /mol_type="mRNA"
+      gene            1..11
+      CDS             1..9
+ORIGIN      
+        1 atgngaaatg t
+//
+LOCUS       test_gbff_pos_del_ins-RA
+VERSION     test_gbff_pos_del_ins-RA  GI:158297997
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER PRIMARY_SPAN        COMP
+            1-3                 CM000356.1     2775211-2775213
+            4-5                 CM000356.1     2775216-2775217
+            6-6                 "N"            1-1
+            7-10                CM000356.1     2775218-2775221
+FEATURES             Location/Qualifiers
+     source          1..10
+                     /mol_type="mRNA"
+     gene            1..10
+     CDS             1..9
+ORIGIN      
+        1 atgagnatgt
+//
+LOCUS       test_gbff_neg_ins_ins-RA
+VERSION     test_gbff_neg_ins_ins-RA
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
+            1-4                 CM000356.1           2255402-2255405
+            5-5                 "N"                  1-1
+            6-8                 CM000356.1           2255399-2255401
+            9-10                "NN"                 1-2
+            11-15               CM000356.1           2255394-2255398
+FEATURES             Location/Qualifiers
+     source          1..15
+                     /mol_type="mRNA"
+     gene            1..15
+     CDS             1..15
+ORIGIN      
+        1 aaaangaann aagaa
+//
+LOCUS       test_gbff_neg_del_del-RA
+VERSION     test_gbff_neg_del_del-RA
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
+            1-4                 CM000356.1           2255402-2255405
+            5-6                 CM000356.1           2255399-2255400
+            7-9                 CM000356.1           2255394-2255396
+FEATURES             Location/Qualifiers
+     source          1..9
+                     /mol_type="mRNA"
+     gene            1..9
+     CDS             1..9
+ORIGIN      
+        1 aaaaaagaa
+//
+LOCUS       test_gbff_neg_ins_del-RA
+VERSION     test_gbff_neg_ins_del-RA
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
+            1-4                 CM000356.1           2255402-2255405
+            5-5                 "N"                  1-1
+            6-8                 CM000356.1           2255399-2255401
+            9-12                CM000356.1           2255394-2255397
+FEATURES             Location/Qualifiers
+     source          1..12
+                     /mol_type="mRNA"
+     gene            1..12
+     CDS             1..12
+ORIGIN      
+        1 aaaangaaagaa
+//
+LOCUS       test_gbff_neg_del_ins-RA
+VERSION     test_gbff_neg_del_ins-RA
+COMMENT     
+            ##RefSeq-Attributes-START##
+            frameshifts :: corrected 2 indel
+            ##RefSeq-Attributes-END##
+PRIMARY     REFSEQ_SPAN         PRIMARY_IDENTIFIER   PRIMARY_SPAN        COMP
+            1-2                 CM000356.1           2255404-2255405
+            3-5                 CM000356.1           2255399-2255401
+            6-6                 "N"                  1-1
+            7-11                CM000356.1           2255394-2255398
+FEATURES             Location/Qualifiers
+     source          1..11
+                     /mol_type="mRNA"
+     gene            1..11
+     CDS             3..11
+ORIGIN      
+        1 aagaanaagaa
 //

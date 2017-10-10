@@ -683,6 +683,7 @@ note('##########################################################################
 $lg_obj->param('gff3_file', $transl_gff3_file);
 $lg_obj->param('ignore_types', ['region', 'chromosome', 'polypeptide', 'protein']);
 $lg_obj->param('polypeptides', 1);
+$lg_obj->param('min_intron_size', 3);
 
 $testdb->hide($dbtype, 
   qw(exon exon_transcript gene meta_coord transcript translation));
@@ -690,7 +691,7 @@ $testdb->hide($dbtype,
 $lg_obj->run();
 
 my $test_genes = $ga->fetch_all_by_logic_name($logic_name);
-is(scalar(@{$test_genes}), 11, 'run method: eleven genes stored');
+is(scalar(@{$test_genes}), 12, 'run method: twelve genes stored');
 
 foreach my $test_gene (@{$test_genes}) {
   note('gene:'.$test_gene->stable_id);
