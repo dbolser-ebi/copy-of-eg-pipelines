@@ -108,13 +108,13 @@ sub default_options_generic {
     fasta_tidy  => "perl -i -pe '".$self->o('fasta_subst')."'",
     
     # Lists of the types that we expect to see in the GFF3 file.
-    gene_types   => ['gene', 'pseudogene', 'miRNA_gene',
+    gene_types   => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
                      'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
     mrna_types   => ['mRNA', 'transcript', 'pseudogenic_transcript',
                      'pseudogenic_rRNA', 'pseudogenic_tRNA',
                      'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA',
-                     'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA',
-                     'SRP_RNA', 'tRNA'],
+                     'RNase_MRP_RNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA',
+                     'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'],
     exon_types   => ['exon', 'pseudogenic_exon'],
     cds_types    => ['CDS'],
     utr_types    => ['five_prime_UTR', 'three_prime_UTR'],
