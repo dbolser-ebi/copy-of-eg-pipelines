@@ -164,6 +164,10 @@ sub default_options_generic {
     # By default, genes are loaded as full-on genes; load instead as a
     # predicted transcript by setting 'prediction' = 1.
     prediction => 0,
+    
+    # Big genomes need more memory, because we need to load all the
+    # sequence into an in-memory database.
+    big_genome_threshold => 1e9,
   };
 }
 
@@ -215,11 +219,12 @@ sub pipeline_wide_parameters_generic {
   
   return {
     %{$self->SUPER::pipeline_wide_parameters},
-    'db_type'            => $self->o('db_type'),
-    'logic_name'         => $self->o('logic_name'),
-    'delete_existing'    => $self->o('delete_existing'),
-    'fix_models'         => $self->o('fix_models'),
-    'apply_seq_edits'    => $self->o('apply_seq_edits'),
+    'db_type'              => $self->o('db_type'),
+    'logic_name'           => $self->o('logic_name'),
+    'delete_existing'      => $self->o('delete_existing'),
+    'fix_models'           => $self->o('fix_models'),
+    'apply_seq_edits'      => $self->o('apply_seq_edits'),
+    'big_genome_threshold' => $self->o('big_genome_threshold'),
   };
 }
 
@@ -336,7 +341,10 @@ sub pipeline_analyses_generic {
                               production_db      => $self->o('production_db'),
                             },
       -meadow_type       => 'LOCAL',
-      -flow_into         => ['AddSynonyms'],
+      -flow_into         => WHEN('-s #fasta_file# < #big_genome_threshold#' =>
+                              ['AddSynonyms'],
+                            ELSE
+                              ['AddSynonyms_HighMem']),
     },
 
     {
@@ -345,14 +353,66 @@ sub pipeline_analyses_generic {
       -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
+                              escape_branch       => -1,
                               synonym_external_db => $self->o('synonym_external_db'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => ['LoadGFF3'],
+      -flow_into         => {
+                               '1' => ['LoadGFF3'],
+                              '-1' => ['AddSynonyms_HighMem'],
+                            },
+    },
+
+    {
+      -logic_name        => 'AddSynonyms_HighMem',
+      -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms',
+      -analysis_capacity => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              synonym_external_db => $self->o('synonym_external_db'),
+                            },
+      -rc_name           => '8Gb_mem',
+      -flow_into         => ['LoadGFF3_HighMem'],
     },
 
     {
       -logic_name        => 'LoadGFF3',
+      -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3',
+      -analysis_capacity => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              escape_branch   => -1,
+                              gene_source     => $self->o('gene_source'),
+                              gff3_file       => '#gff3_tidy_file#',
+                              gene_types      => $self->o('gene_types'),
+                              mrna_types      => $self->o('mrna_types'),
+                              exon_types      => $self->o('exon_types'),
+                              cds_types       => $self->o('cds_types'),
+                              utr_types       => $self->o('utr_types'),
+                              ignore_types    => $self->o('ignore_types'),
+                              types_complete  => $self->o('types_complete'),
+                              use_name_field  => $self->o('use_name_field'),
+                              polypeptides    => $self->o('polypeptides'),
+                              min_intron_size => $self->o('min_intron_size'),
+                              nontranslating  => $self->o('nontranslating'),
+                              prediction      => $self->o('prediction'),
+                              xref_gene_external_db        => $self->o('xref_gene_external_db'),
+                              xref_transcript_external_db  => $self->o('xref_transcript_external_db'),
+                              xref_translation_external_db => $self->o('xref_translation_external_db'),
+                              
+                            },
+      -rc_name           => '8Gb_mem',
+      -flow_into         => {
+                               '1' => WHEN('#fix_models#' =>
+                                        ['FixModels'],
+                                      ELSE
+                                        ['EmailReport']),
+                              '-1' => ['LoadGFF3_HighMem'],
+                            },
+    },
+
+    {
+      -logic_name        => 'LoadGFF3_HighMem',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3',
       -analysis_capacity => 10,
       -max_retry_count   => 0,
@@ -376,7 +436,7 @@ sub pipeline_analyses_generic {
                               xref_translation_external_db => $self->o('xref_translation_external_db'),
                               
                             },
-      -rc_name           => '8Gb_mem',
+      -rc_name           => '16Gb_mem',
       -flow_into         => {
                               '1' => WHEN('#fix_models#' =>
                                       ['FixModels'],

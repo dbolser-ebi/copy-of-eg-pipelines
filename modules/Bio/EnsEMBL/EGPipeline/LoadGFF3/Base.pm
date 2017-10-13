@@ -37,6 +37,18 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
+sub fetch_input {
+  my $self = shift @_;
+  
+  if (defined $self->param('escape_branch') and 
+      $self->input_job->retry_count >= $self->input_job->analysis->max_retry_count) 
+  {
+    $self->dataflow_output_id($self->input_id, $self->param('escape_branch'));
+    $self->input_job->autoflow(0);
+    $self->complete_early("Failure probably due to memory limit, retrying with a higher limit.");
+  }
+}
+
 sub fetch_slices {
   my ($self, $dba) = @_;
   
@@ -60,15 +72,19 @@ sub load_fasta {
   my ($self, $fasta_file) = @_;
   my %fasta;
   
-  local $/;
   open(FASTA, $fasta_file);
-  %fasta = <FASTA> =~ />(\S+).*\n([^\>]+)/gm;
-  close(FASTA);
   
-  foreach my $id (keys %fasta) {
-    $fasta{$id} =~ s/\s//gm;
-    $fasta{$id} = uc($fasta{$id});
+  my $id;
+  while (my $row = <FASTA>) {
+    if ($row =~ /^>(\S+)/) {
+      $id = $1;
+    } else {
+      $row =~ s/\s//gm;
+      $fasta{$id} .= uc($row);
+    }
   }
+  
+  close(FASTA);
   
   return %fasta;
 }
