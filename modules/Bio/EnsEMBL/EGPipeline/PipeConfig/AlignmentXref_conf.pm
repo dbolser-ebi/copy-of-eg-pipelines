@@ -325,7 +325,7 @@ sub pipeline_analyses {
                               proteome_dir => catdir($self->o('pipeline_dir'), '#species#', 'proteome'),
                               use_dbID     => 1,
                             },
-      -rc_name           => 'normal',
+      -rc_name           => '8Gb_mem',
       -flow_into         => ['SplitProteome'],
     },
 
