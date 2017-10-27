@@ -43,7 +43,7 @@ my $fasta_file       = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
 
 
 my $gene_types   = ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene', 'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ];
-my $mrna_types   = ['mRNA', 'transcript', 'pseudogenic_transcript', 'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'];
+my $mrna_types   = ['mRNA', 'transcript', 'pseudogenic_transcript', 'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA', 'RNase_MRP_RNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'];
 my $exon_types   = ['exon', 'pseudogenic_exon'];
 my $cds_types    = ['CDS'];
 my $utr_types    = ['five_prime_UTR', 'three_prime_UTR'];

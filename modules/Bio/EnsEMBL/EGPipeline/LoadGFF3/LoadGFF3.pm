@@ -239,6 +239,7 @@ sub add_transcript {
   
   my $transcript = $self->new_transcript($gff_transcript, $gene);
   $transcript->stable_id($gene->stable_id) unless $transcript->stable_id;
+  $self->warning($transcript->stable_id);
   
   my @gff_exons = $gff_transcript->get_SeqFeatures(@exon_types);
   my $gff_exons;
@@ -327,7 +328,7 @@ sub add_translation {
     ($translation_id, $gff_object, $genomic_start, $genomic_end) = $self->infer_translation($gff_transcript, $transcript);
   }
   
-  if (defined $genomic_start && defined $genomic_end) {
+  if (defined $genomic_start && defined $genomic_end && ($genomic_end - $genomic_start) > 1 ) {
     my ($start_exon, $end_exon, $seq_start, $seq_end) = $self->translation_coordinates($transcript, $genomic_start, $genomic_end);
     
     my $translation = $self->new_translation($translation_id, $start_exon, $end_exon, $seq_start, $seq_end);
