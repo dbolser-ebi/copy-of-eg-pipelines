@@ -239,7 +239,6 @@ sub add_transcript {
   
   my $transcript = $self->new_transcript($gff_transcript, $gene);
   $transcript->stable_id($gene->stable_id) unless $transcript->stable_id;
-  $self->warning($transcript->stable_id);
   
   my @gff_exons = $gff_transcript->get_SeqFeatures(@exon_types);
   my $gff_exons;
