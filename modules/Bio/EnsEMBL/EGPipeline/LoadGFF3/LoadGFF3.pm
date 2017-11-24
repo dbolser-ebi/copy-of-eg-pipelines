@@ -327,7 +327,7 @@ sub add_translation {
     ($translation_id, $gff_object, $genomic_start, $genomic_end) = $self->infer_translation($gff_transcript, $transcript);
   }
   
-  if (defined $genomic_start && defined $genomic_end) {
+  if (defined $genomic_start && defined $genomic_end && ($genomic_end - $genomic_start) > 1 ) {
     my ($start_exon, $end_exon, $seq_start, $seq_end) = $self->translation_coordinates($transcript, $genomic_start, $genomic_end);
     
     my $translation = $self->new_translation($translation_id, $start_exon, $end_exon, $seq_start, $seq_end);
