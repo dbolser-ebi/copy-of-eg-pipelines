@@ -37,6 +37,13 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
+sub param_defaults {
+  my ($self) = @_;
+  return {
+    db_type => 'core',
+  };
+}
+
 sub fetch_input {
   my $self = shift @_;
   
@@ -47,6 +54,13 @@ sub fetch_input {
     $self->input_job->autoflow(0);
     $self->complete_early("Failure probably due to memory limit, retrying with a higher limit.");
   }
+  
+  # Need explicit disconnects, so that connections are freed up
+  # while the analysis is running.
+  my $db_type = $self->param('db_type');
+  my $dba = $self->get_DBAdaptor($db_type);
+  $dba->dbc && $dba->dbc->disconnect_if_idle();
+  $self->dbc && $self->dbc->disconnect_if_idle();
 }
 
 sub fetch_slices {

@@ -39,8 +39,9 @@ use base ('Bio::EnsEMBL::EGPipeline::LoadGFF3::Base');
 
 sub param_defaults {
   my ($self) = @_;
+  
   return {
-    db_type             => 'core',
+    %{$self->SUPER::param_defaults},
     synonym_external_db => 'ensembl_internal_synonym',
   };
 }

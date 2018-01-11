@@ -41,13 +41,6 @@ use base ('Bio::EnsEMBL::EGPipeline::LoadGFF3::Base');
 use List::Util qw(min);
 use Path::Tiny qw(path);
 
-sub param_defaults {
-  my ($self) = @_;
-  return {
-    db_type => 'core',
-  };
-}
-
 sub run {
   my ($self) = @_;
   my $db_type            = $self->param_required('db_type');

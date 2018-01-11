@@ -50,8 +50,9 @@ use Bio::EnsEMBL::Translation;
 
 sub param_defaults {
   my ($self) = @_;
+  
   return {
-    db_type         => 'core',
+    %{$self->SUPER::param_defaults},
     gene_types      => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
                         'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
     mrna_types      => ['mRNA', 'transcript', 'pseudogenic_transcript',
