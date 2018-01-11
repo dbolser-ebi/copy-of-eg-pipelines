@@ -48,12 +48,12 @@ sub qc {
   my $assembly  = $self->required_param('assembly');
   
   my $method_name = ($type eq 'core' ? '' : $type.'_').'species_suffix';
-  my $source_dir  = $self->data_dir.'/'.$self->$method_name;
+  my $source_dir  = $self->dump_dir.'/'.$self->$method_name;
   
   die("ERROR: Expected to find $source_dir\n") unless -d $source_dir;
   die("ERROR: Expected to find $source_dir/info.txt") unless -e "$source_dir/info.txt";
   
-  my $qc_dir = $self->data_dir."/qc/$species/$assembly";
+  my $qc_dir = $self->dump_dir."/qc/$species/$assembly";
   unless(-d $qc_dir) {
     make_path($qc_dir) or die "Could not make directory $qc_dir";
   }
@@ -74,7 +74,7 @@ sub qc {
 
   $self->check_dirs($cache_dir_obj, $converted);
 
-  $self->run_test_set($self->data_dir) if $has_var && $type ne 'refseq';
+  $self->run_test_set($self->dump_dir) if $has_var && $type ne 'refseq';
 
   rmtree($qc_dir);
 }
