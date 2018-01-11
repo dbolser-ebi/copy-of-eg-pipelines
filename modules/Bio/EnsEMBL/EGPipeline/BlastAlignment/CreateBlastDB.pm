@@ -116,12 +116,12 @@ sub write_output {
   if (defined $proteome_source && defined $logic_name_prefix) {
     if ($logic_name_prefix eq 'file') {
       my ($name, undef, undef) = fileparse($db_fasta_file, qr/\.[^.]*/);
-      ($logic_name_prefix) = $name =~ /(\w+)$/;
+      ($logic_name_prefix = $name) =~ s/\W/_/g;
     }
     
     if ($proteome_source eq 'database') {
       if ($source_species) {
-        $source_species =~ /^(\w).*_(\w+)/;
+        $source_species =~ /^(\w)[^_]*_(\w+)/;
         $logic_name_prefix = "$1$2";
       }
     }
