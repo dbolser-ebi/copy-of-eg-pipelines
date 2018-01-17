@@ -743,6 +743,7 @@ sub new_gene {
     -modified_date => time,
     -analysis      => $analysis,
   );
+  $gene->version(undef);
   
   $self->add_xrefs($gff_gene, $analysis, $gene, 'gene');
   
@@ -777,6 +778,7 @@ sub new_transcript {
     -modified_date => time,
     -analysis      => $gene->analysis,
   );
+  $transcript->version(undef);
   
   $self->add_xrefs($gff_transcript, $transcript->analysis, $transcript, 'transcript');
   
@@ -814,6 +816,7 @@ sub new_exon {
     -created_date  => time,
     -modified_date => time,
   );
+  $exon->version(undef);
   
   return $exon;
 }
@@ -850,6 +853,7 @@ sub new_translation {
     -created_date  => time,
     -modified_date => time,
   );
+  $translation->version(undef);
   
   return $translation;
 }
