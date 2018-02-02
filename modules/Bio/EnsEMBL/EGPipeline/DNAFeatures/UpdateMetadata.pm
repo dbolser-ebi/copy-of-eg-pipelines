@@ -31,7 +31,7 @@ sub run {
   # Add meta data
   my $meta_sql =
     "INSERT IGNORE INTO meta (species_id, meta_key, meta_value) ".
-    "SELECT 1, 'repeat.analysis', logic_name FROM ".
+    "SELECT NULL, 'repeat.analysis', logic_name FROM ".
     "repeat_feature INNER JOIN analysis USING (analysis_id) ".
     "GROUP BY logic_name;";
   $dbh->do($meta_sql);
