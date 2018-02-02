@@ -46,16 +46,15 @@ sub default_options {
   return {
     %{$self->SUPER::default_options},
     
-    pipeline_name => 'bulk_sql_'.$self->o('ensembl_release'),
+    pipeline_name => 'bulk_sql',
     
-    species         => [],
-    division        => [],
-    run_all         => 0,
-    antispecies     => [],
-    core_flow       => 2,
-    meta_filters    => {},
+    species      => [],
+    division     => [],
+    antispecies  => [],
+    run_all      => 0,
+    meta_filters => {},
     
-    sql => [],
+    sql_file => undef,
   };
 }
 
@@ -70,7 +69,7 @@ sub pipeline_analyses {
   
   return [
     {
-      -logic_name  => 'ScheduleSpecies',
+      -logic_name  => 'SpeciesFactory',
       -module      => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
       -input_ids   => [ {} ],
       -parameters  => {
@@ -78,27 +77,26 @@ sub pipeline_analyses {
                        antispecies     => $self->o('antispecies'),
                        division        => $self->o('division'),
                        run_all         => $self->o('run_all'),
-                       core_flow       => $self->o('core_flow'),
+                       meta_filters    => $self->o('meta_filters'),
                        chromosome_flow => 0,
                        regulation_flow => 0,
                        variation_flow  => 0,
-                       meta_filters    => $self->o('meta_filters'),
                       },
       -flow_into   => {
-                       '2' => 'RunSQL',
+                       '2' => 'SqlExecute',
                       },
-      -rc_name     => 'normal-rh7',
+      -rc_name     => 'normal',
     },
 
     {
-      -logic_name      => 'RunSQL',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -logic_name      => 'SqlExecute',
+      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlExecute',
       -parameters      => {
-                            sql => $self->o('sql'),
+                            sql_file => $self->o('sql_file'),
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
     },
 
   ];

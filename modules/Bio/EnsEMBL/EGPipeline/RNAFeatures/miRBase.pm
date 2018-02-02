@@ -71,38 +71,42 @@ sub parse_mirbase {
   
     $seqname =~ s/^chr//i;
     my $slice = $sa->fetch_by_region('toplevel', $seqname);
+    
+    if (defined $slice) {
+      my $strand = $orientation eq '-' ? -1 : 1;
+      
+      my ($accession, $rna_name) = $attributes =~ /ID=([^;]+).*Name=([^;]+)/;
+      
+      my $length = $end - $start + 1; 
+      my $cigar = $length.'M';
 
-    my $strand = $orientation eq '-' ? -1 : 1;
-    
-    my ($accession, $rna_name) = $attributes =~ /ID=([^;]+).*Name=([^;]+)/;
-    
-    my $length = $end - $start + 1; 
-    my $cigar = $length.'M';
-
-    my $biotype = "pre_miRNA";
-    
-    my @attribs;
-    push @attribs, $self->create_attrib('rna_gene_biotype', $biotype);
-    push @attribs, $self->create_attrib('rfam_accession',   $accession);
-    # I know that says 'rfam_accession', but it works for any accession;
-    # the attrib_type will be changed in due course.
-    
-    my $feature = Bio::EnsEMBL::DnaDnaAlignFeature->new(
-      -slice          => $slice,
-      -start          => $start,
-      -end            => $end,
-      -strand         => $strand,
-      -hstart         => 1,
-      -hend           => $length,
-      -hstrand        => 1,
-      -hseqname       => $rna_name,
-      -cigar_string   => $cigar,
-      -external_db_id => $external_db_id,
-    );
-    $feature->add_Attributes(@attribs);
-    $feature->analysis($analysis);
-    
-    $dafa->store($feature);
+      my $biotype = "pre_miRNA";
+      
+      my @attribs;
+      push @attribs, $self->create_attrib('rna_gene_biotype', $biotype);
+      push @attribs, $self->create_attrib('rfam_accession',   $accession);
+      # I know that says 'rfam_accession', but it works for any accession;
+      # the attrib_type will be changed in due course.
+      
+      my $feature = Bio::EnsEMBL::DnaDnaAlignFeature->new(
+        -slice          => $slice,
+        -start          => $start,
+        -end            => $end,
+        -strand         => $strand,
+        -hstart         => 1,
+        -hend           => $length,
+        -hstrand        => 1,
+        -hseqname       => $rna_name,
+        -cigar_string   => $cigar,
+        -external_db_id => $external_db_id,
+      );
+      $feature->add_Attributes(@attribs);
+      $feature->analysis($analysis);
+      
+      $dafa->store($feature);
+    } else {
+      $self->throw("miRBase data in $file annotated on unrecognised sequence name");
+    }
   }
 }
 

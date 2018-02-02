@@ -97,7 +97,7 @@ sub add_xrefs {
 
         foreach my $go (@$gos) {
           my $xref = $self->add_xref($go, $uniprot_xref, $analysis, $external_db);
-       	  $dbea->store($xref, $translation->dbID(), 'Translation');
+          $dbea->store($xref, $translation->transcript->dbID(), 'Transcript');
         }
       }
     }

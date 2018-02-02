@@ -186,6 +186,9 @@ sub default_options {
       },
     ],
     
+    # WebApollo files are stored in a local EBI archive.
+    proteome_dir => '/nfs/panda/ensemblgenomes/vectorbase/vb_proteome',
+    
     # Remove existing *_align_features; if => 0 then existing analyses
     # and their features will remain, with the logic_name suffixed by '_bkp'.
     delete_existing => 1,
@@ -226,6 +229,16 @@ sub pipeline_create_commands {
   ];
 }
 
+sub pipeline_wide_parameters {
+  my ($self) = @_;
+
+  return {
+    %{$self->SUPER::pipeline_wide_parameters},
+    pipeline_dir => $self->o('pipeline_dir'),
+    proteome_dir => $self->o('proteome_dir'),
+  };
+}
+
 sub pipeline_analyses {
   my $self = shift @_;
   
@@ -260,7 +273,7 @@ sub pipeline_analyses {
                             db_type     => $self->o('db_type'),
                             output_file => catdir($self->o('backup_dir'), '#species#', 'of_bkp.sql.gz'),
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => {
                             '1->A' => ['AnalysisUnmergeFactory'],
                             'A->1' => ['AnalysisSetupFactory'],
@@ -280,7 +293,7 @@ sub pipeline_analyses {
                             linked_tables    => $self->o('linked_tables'),
                             db_type          => $self->o('db_type'),
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => {
                             '2' => ['AnalysisUnmerge'],
                           },
@@ -296,7 +309,7 @@ sub pipeline_analyses {
       -parameters        => {
                               db_type => $self->o('db_type'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
 
     {
@@ -344,7 +357,7 @@ sub pipeline_analyses {
                             external_db_name  => $self->o('external_db_name'),
                             analysis_groups   => $self->o('analysis_groups'),
                           },
-      -rc_name         => 'normal-rh7',
+      -rc_name         => 'normal',
       -flow_into       => {
                             '2' => ['AnalysisMerge'],
                           },
@@ -360,7 +373,7 @@ sub pipeline_analyses {
       -parameters        => {
                               db_type => $self->o('db_type'),
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
     },
 
     {
@@ -371,9 +384,23 @@ sub pipeline_analyses {
       -parameters        => {
                               optimize_tables => 1,
                             },
-      -rc_name           => 'normal-rh7',
+      -rc_name           => 'normal',
+      -flow_into         => ['CopyToArchive'],
     },
     
+    {
+      -logic_name        => 'CopyToArchive',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
+      -max_retry_count   => 0,
+      -parameters        => {
+                              cmd => 'mkdir -p #proteome_dir#/#species#;
+                                      cp #pipeline_dir#/#species#/*.gff3 #proteome_dir#/#species#/.;
+                                      cp #pipeline_dir#/#species#/*.json #proteome_dir#/#species#/.;
+                                      chmod -R g+rw #proteome_dir#/#species#;',
+                            },
+      -rc_name           => 'normal',
+    },
+
   ];
 }
 

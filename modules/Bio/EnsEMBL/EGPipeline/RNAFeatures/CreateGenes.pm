@@ -458,6 +458,7 @@ sub new_gene {
     -created_date  => time,
     -modified_date => time,
   );
+  $gene->version(undef);
   
   return $gene;
 }
@@ -490,6 +491,7 @@ sub new_transcript {
     -created_date  => time,
     -modified_date => time,
   );
+  $transcript->version(undef);
   $transcript->add_supporting_features($feature);
   
   if (defined $structure) {
@@ -519,6 +521,7 @@ sub new_exon {
     -created_date    => time,
     -modified_date   => time,
   );
+  $exon->version(undef);
   
   return $exon;
 }

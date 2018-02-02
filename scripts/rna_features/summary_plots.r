@@ -6,8 +6,8 @@ for(i in 1:length(args))
   }
 }
 library(optparse, lib.loc=lib)
-library(plyr, lib.loc=lib)
-library(reshape, lib.loc=lib)
+library(plyr)
+library(reshape)
 
 option_list = list(
   make_option(c("-i", "--inputfile"), type="character", help="Input file summarising the alignments"),
