@@ -1,7 +1,6 @@
 =head1 LICENSE
 
-Copyright [1999-2014] EMBL-European Bioinformatics Institute
-and Wellcome Trust Sanger Institute
+Copyright [2009-2018] EMBL-European Bioinformatics Institute
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +16,6 @@ limitations under the License.
 
 =cut
 
-
 =pod
 
 =head1 NAME
@@ -26,11 +24,7 @@ Bio::EnsEMBL::EGPipeline::PipeConfig::BulkSQL_conf
 
 =head1 DESCRIPTION
 
-Pipeline to run the same SQL across a set of databases.
-
-=head1 Author
-
-James Allen
+Pipeline to run SQL commands across a set of databases.
 
 =cut
 
@@ -39,7 +33,7 @@ package Bio::EnsEMBL::EGPipeline::PipeConfig::BulkSQL_conf;
 use strict;
 use warnings;
 
-use base ('Bio::EnsEMBL::EGPipeline::PipeConfig::EGGeneric_conf');
+use base ('Bio::EnsEMBL::Production::Pipeline::PipeConfig::Base_conf');
 
 sub default_options {
   my ($self) = @_;
@@ -58,34 +52,26 @@ sub default_options {
   };
 }
 
-# Force an automatic loading of the registry in all workers.
-sub beekeeper_extra_cmdline_options {
-  my $self = shift;
-  return "-reg_conf ".$self->o("registry");
-}
-
 sub pipeline_analyses {
   my ($self) = @_;
   
   return [
     {
-      -logic_name  => 'SpeciesFactory',
-      -module      => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
-      -input_ids   => [ {} ],
-      -parameters  => {
-                       species         => $self->o('species'),
-                       antispecies     => $self->o('antispecies'),
-                       division        => $self->o('division'),
-                       run_all         => $self->o('run_all'),
-                       meta_filters    => $self->o('meta_filters'),
-                       chromosome_flow => 0,
-                       regulation_flow => 0,
-                       variation_flow  => 0,
-                      },
-      -flow_into   => {
-                       '2' => 'SqlExecute',
-                      },
-      -rc_name     => 'normal',
+      -logic_name      => 'SpeciesFactory',
+      -module          => 'Bio::EnsEMBL::Production::Pipeline::Common::SpeciesFactory',
+      -max_retry_count => 0,
+      -input_ids       => [ {} ],
+      -parameters      => {
+                           species      => $self->o('species'),
+                           antispecies  => $self->o('antispecies'),
+                           division     => $self->o('division'),
+                           run_all      => $self->o('run_all'),
+                           meta_filters => $self->o('meta_filters'),
+                          },
+      -flow_into       => {
+                           '2' => 'SqlExecute',
+                          },
+      -rc_name         => 'default',
     },
 
     {
@@ -96,7 +82,7 @@ sub pipeline_analyses {
                           },
       -max_retry_count => 1,
       -hive_capacity   => 10,
-      -rc_name         => 'normal',
+      -rc_name         => 'default',
     },
 
   ];

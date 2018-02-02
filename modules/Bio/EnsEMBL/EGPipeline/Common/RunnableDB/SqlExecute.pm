@@ -36,7 +36,7 @@ package Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlExecute;
 use strict;
 use warnings;
 
-use base 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base';
+use base 'Bio::EnsEMBL::Production::Pipeline::Common::Base';
 
 sub param_defaults {
   my ($self) = @_;
