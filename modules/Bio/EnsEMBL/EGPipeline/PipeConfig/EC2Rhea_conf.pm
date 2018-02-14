@@ -107,7 +107,7 @@ sub pipeline_analyses {
 
     {
       -logic_name        => 'StoreRheaXrefs',
-      -module            => 'Bio::EnsEMBL::EGPipeline::ProteinFeatures::StoreRheaXrefs',
+      -module            => 'Bio::EnsEMBL::EGPipeline::EC2Rhea::StoreRheaXrefs',
       -hive_capacity     => 10,
       -max_retry_count   => 1,
       -parameters        => {
