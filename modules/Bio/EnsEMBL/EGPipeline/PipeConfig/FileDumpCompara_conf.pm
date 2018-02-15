@@ -90,11 +90,10 @@ sub default_options {
     # Use external programs to validate output files. Note that we use
     # a slightly customised orthoxml schema, that allows the file to
     # only contain paralogs.
-    sofware_dir     => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    newick_stats    => catdir($self->o('sofware_dir'), 'nw_stats'),
-    mafValidator    => catdir($self->o('sofware_dir'), 'mafValidator.py'),
+    newick_stats    => 'nw_stats',
+    mafValidator    => 'mafValidator.py',
     #mafValidator    => '/nfs/panda/ensemblgenomes/external/mafTools/bin/mafValidator.py',
-    
+
     xmllint         => 'xmllint',
     schema_dir      => '/nfs/panda/ensemblgenomes/external/xml_schema',
     orthoxml_schema => catdir($self->o('schema_dir'), 'orthoxml.paralogs.xsd'),

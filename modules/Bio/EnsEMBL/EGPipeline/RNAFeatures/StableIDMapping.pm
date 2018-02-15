@@ -52,11 +52,12 @@ sub fetch_input {
   my $report_dir   = $self->param_required('report_dir');
   
   my $old_db = {
-    -host   => $self->param_required('old_host'),
-    -port   => $self->param_required('old_port'),
-    -user   => $self->param_required('old_user'),
-    -pass   => $self->param('old_pass') || '',
-    -dbname => $self->param_required('old_dbname'),
+    -host    => $self->param_required('old_host'),
+    -port    => $self->param_required('old_port'),
+    -user    => $self->param_required('old_user'),
+    -pass    => $self->param('old_pass') || '',
+    -dbname  => $self->param_required('old_dbname'),
+    -species => $species,
   };
   my $old_dba = Bio::EnsEMBL::DBSQL::DBAdaptor->new(%$old_db);
   $self->param('old_dba', $old_dba);

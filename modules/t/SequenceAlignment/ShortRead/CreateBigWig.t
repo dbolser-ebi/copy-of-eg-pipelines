@@ -42,8 +42,8 @@ my $bam_file        = catdir($test_files_dir, 'agam_single_read.sorted.bam');
 my $bigwig_file     = catdir($test_files_dir, 'agam_single_read.sorted.bigwig');
 my $tmp_bigwig_file = catdir($test_files_dir, 'agam_single_read.sorted.bw');
 
-my $bedtools_dir  = '/nfs/panda/ensemblgenomes/external/bedtools/bin';
-my $ucscutils_dir = '/nfs/panda/ensemblgenomes/external/ucsc_utils';
+my $bedtools_dir  = undef;
+my $ucscutils_dir = undef;
 
 my $module_name    = 'Bio::EnsEMBL::EGPipeline::SequenceAlignment::ShortRead::CreateBigWig';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
@@ -74,14 +74,23 @@ is(-e $tmp_bigwig_file, 1, "run method: bigwig file exists");
 
 is(compare($bigwig_file, $tmp_bigwig_file), 0, "run method: file contents correct");
 
+my $bedtools = 'bedtools';
+if (defined $bedtools_dir) {
+  $bedtools = "$bedtools_dir/$bedtools"
+}
+my $ucscutils = 'wigToBigWig';
+if (defined $ucscutils_dir) {
+  $ucscutils = "$ucscutils_dir/$ucscutils"
+}
+
 my $cmds =
-  "$bedtools_dir/bedtools genomecov ".
+  "$bedtools genomecov ".
   " -g $length_file ".
   " -ibam $bam_file ".
   " -bg ".
   " -split ".
   " > $bam_file.wig ; ".
-  "$ucscutils_dir/wigToBigWig ".
+  "$ucscutils ".
   " $bam_file.wig ".
   " $length_file ".
   " $tmp_bigwig_file ";

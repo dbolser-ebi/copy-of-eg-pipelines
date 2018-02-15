@@ -56,6 +56,7 @@ sub param_defaults {
     'output_regex'     => '^\s*(\w+)',
     'query_type'       => 'dna',
     'database_type'    => 'pep',
+    'query_subtype'    => '',
     'pvalue_threshold' => 0.01,
     'filter_prune'     => 1,
     'filter_min_score' => 200,
@@ -94,7 +95,9 @@ sub fetch_runnable {
       $self->param('save_object_type', 'ProteinAlignFeature');
     }
   } else {
-    $self->param('results_index', 'transcript');
+    if ($self->param_required('query_subtype') eq 'transcript') {
+      $self->param('results_index', 'transcript');
+    }
     $self->param('save_object_type', 'DnaAlignFeature');
   }
   

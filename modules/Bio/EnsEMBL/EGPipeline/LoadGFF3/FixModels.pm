@@ -38,14 +38,8 @@ use feature 'say';
 
 use base ('Bio::EnsEMBL::EGPipeline::LoadGFF3::Base');
 
+use List::Util qw(min);
 use Path::Tiny qw(path);
-
-sub param_defaults {
-  my ($self) = @_;
-  return {
-    db_type => 'core',
-  };
-}
 
 sub run {
   my ($self) = @_;
@@ -135,6 +129,14 @@ sub shift_translation {
   return $success;
 }
 
+sub update_translation_start {
+  my ($self, $dba, $dbid, $start) = @_;
+  
+  my $sql = 'UPDATE translation SET seq_start = ? WHERE translation_id = ?;';
+  my $sth = $dba->dbc->db_handle->prepare($sql);
+  $sth->execute($start, $dbid) or $self->throw("Failed to execute: $sql");
+}
+
 sub shift_gene {
   my ($self, $dba, $transcript, $target_seq) = @_;
   
@@ -148,7 +150,7 @@ sub shift_gene {
   # models will be shifted forwards, so we don't try that.
   
   my $shift     = 0;
-  my $max_shift = 25;
+  my $max_shift = min($transcript->seq_region_start, 25);
   my $success   = 0;
   
   while ($shift-- > -$max_shift) {

@@ -37,13 +37,6 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
-sub param_defaults {
-  my ($self) = @_;
-  return {
-    db_type => 'core',
-  };
-}
-
 sub run {
   my ($self) = @_;
   my $db_type    = $self->param_required('db_type');

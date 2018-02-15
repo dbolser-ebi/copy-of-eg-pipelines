@@ -64,7 +64,7 @@ sub default_options {
     max_files_per_directory => 100,
     max_dirs_per_directory  => $self->o('max_files_per_directory'),
 
-    max_hive_capacity => 100,
+    max_hive_capacity => 50,
 
     # By default, create xrefs from both reviewed and unreviewed UniProt sets.
     uniprot_reviewed   => 1,
@@ -73,7 +73,11 @@ sub default_options {
     # Can also create xrefs from RefSeq peptides and DNA.
     refseq_peptide => 0,
     refseq_dna     => 0,
-
+    
+    # RefSeq DNA can be aligned against just the coding sequence.
+    # This might be useful for worms, where the RefSeq transcripts don't have UTRs.
+    remove_utrs => 0,
+    
     # If there are existing xrefs based on checksums, don't introduce
     # duplicate xrefs/object_xrefs, by default.
     preferred_analysis => ['xrefuniparc', 'xrefuniprot'],
@@ -109,10 +113,9 @@ sub default_options {
     refseq_tax_level => undef,
 
     # Blast parameters
-    blast_dir         => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
-    makeblastdb_exe   => catdir($self->o('blast_dir'), 'makeblastdb'),
-    blastn_exe        => catdir($self->o('blast_dir'), 'blastn'),
-    blastp_exe        => catdir($self->o('blast_dir'), 'blastp'),
+    makeblastdb_exe   => 'makeblastdb',
+    blastn_exe        => 'blastn',
+    blastp_exe        => 'blastp',
     blast_threads     => 3,
     blastn_parameters => '-word_size 11 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -num_threads '.$self->o('blast_threads'),
     blastp_parameters => '-word_size  3 -num_alignments 100000 -num_descriptions 100000 -lcase_masking -seg yes -num_threads '.$self->o('blast_threads'),
@@ -133,7 +136,7 @@ sub default_options {
         'logic_name'    => $self->o('uniprot_reviewed_logic_name'),
         'display_label' => 'UniProt reviewed proteins',
         'description'   => 'Cross references to UniProt Swiss-Prot (reviewed) proteins, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'sprot',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -146,7 +149,7 @@ sub default_options {
         'logic_name'    => $self->o('uniprot_unreviewed_logic_name'),
         'display_label' => 'UniProt unreviewed proteins',
         'description'   => 'Cross references to UniProt TrEMBL (unreviewed) proteins, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'trembl',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -159,7 +162,7 @@ sub default_options {
         'logic_name'    => $self->o('refseq_peptide_logic_name'),
         'display_label' => 'RefSeq peptides',
         'description'   => 'Cross references to RefSeq peptide sequences, determined by alignment against the proteome with <em>blastp</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'refseq_peptide',
         'program'       => 'blastp',
         'program_file'  => $self->o('blastp_exe'),
@@ -172,7 +175,7 @@ sub default_options {
         'logic_name'    => $self->o('refseq_dna_logic_name'),
         'display_label' => 'RefSeq transcripts',
         'description'   => 'Cross references to RefSeq nucleotide sequences, determined by alignment against the transcriptome with <em>blastx</em>.',
-        'displayable'   => 1,
+        'displayable'   => 0,
         'db'            => 'refseq_dna',
         'program'       => 'blastn',
         'program_file'  => $self->o('blastn_exe'),
@@ -282,37 +285,42 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'BackupCoreDatabase',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DatabaseDumper',
-      -max_retry_count => 1,
-      -parameters      => {
-                            output_file => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
-                            table_list  => ['analysis', 'analysis_description', 'identity_xref', 'object_xref', 'xref'],
-                          },
-      -rc_name         => 'normal',
+      -logic_name        => 'BackupCoreDatabase',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DatabaseDumper',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              output_file => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
+                              table_list  => ['analysis', 'analysis_description', 'identity_xref', 'object_xref', 'xref'],
+                            },
+      -rc_name           => 'normal',
     },
 
     {
-      -logic_name      => 'DumpSequence',
-      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
-      -max_retry_count => 0,
-      -flow_into       => [
-                            WHEN('#uniprot_reviewed# || '.
-                                 '#uniprot_unreviewed# || '.
-                                 '#refseq_peptide#' =>
-                              ['DumpProteome']
-                            ),
-                            WHEN('#refseq_dna#' =>
-                              ['DumpTranscriptome']
-                            ),
-                          ],
-      -meadow_type     => 'LOCAL',
+      -logic_name        => 'DumpSequence',
+      -module            => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -flow_into         => [
+                              WHEN('#uniprot_reviewed# || '.
+                                   '#uniprot_unreviewed# || '.
+                                   '#refseq_peptide#' =>
+                                ['DumpProteome']
+                              ),
+                              WHEN('#refseq_dna#' =>
+                                ['DumpTranscriptome']
+                              ),
+                            ],
+      -meadow_type       => 'LOCAL',
     },
 
     {
       -logic_name        => 'DumpProteome',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpProteome',
       -analysis_capacity => 5,
+      -max_retry_count   => 1,
       -parameters        => {
                               proteome_dir => catdir($self->o('pipeline_dir'), '#species#', 'proteome'),
                               use_dbID     => 1,
@@ -325,6 +333,7 @@ sub pipeline_analyses {
       -logic_name        => 'SplitProteome',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FastaSplit',
       -analysis_capacity => 5,
+      -max_retry_count   => 0,
       -parameters        => {
                               fasta_file              => '#proteome_file#',
                               max_seq_length_per_file => $self->o('max_seq_length_per_file'),
@@ -342,9 +351,11 @@ sub pipeline_analyses {
       -logic_name        => 'DumpTranscriptome',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpTranscriptome',
       -analysis_capacity => 5,
+      -max_retry_count   => 1,
       -parameters        => {
                               transcriptome_dir => catdir($self->o('pipeline_dir'), '#species#', 'transcriptome'),
                               use_dbID          => 1,
+                              remove_utrs       => $self->o('remove_utrs'),
                             },
       -rc_name           => 'normal',
       -flow_into         => ['SplitTranscriptome'],
@@ -354,6 +365,7 @@ sub pipeline_analyses {
       -logic_name        => 'SplitTranscriptome',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::FastaSplit',
       -analysis_capacity => 5,
+      -max_retry_count   => 0,
       -parameters        => {
                               fasta_file              => '#transcriptome_file#',
                               max_seq_length_per_file => $self->o('max_seq_length_per_file'),
@@ -498,104 +510,116 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'AnalysisSetupFactory',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::AnalysisSetupFactory',
-      -max_retry_count => 1,
-      -parameters      => {
-                            analyses => $self->o('analyses'),
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => {
-                            '2' => ['AnalysisSetup'],
-                          },
+      -logic_name        => 'AnalysisSetupFactory',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::AnalysisSetupFactory',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              analyses => $self->o('analyses'),
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => {
+                              '2' => ['AnalysisSetup'],
+                            },
     },
 
     {
-      -logic_name      => 'AnalysisSetup',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
-      -max_retry_count => 0,
-      -batch_size      => 10,
-      -parameters      => {
-                            db_backup_required => 1,
-                            db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
-                            delete_existing    => 1,
-                            production_lookup  => $self->o('production_lookup'),
-                            production_db      => $self->o('production_db'),
-                          },
-      -meadow_type     => 'LOCAL',
-      -flow_into       => ['DeleteIdentityXrefs'],
+      -logic_name        => 'AnalysisSetup',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              db_backup_required => 1,
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'core_bkp.sql.gz'),
+                              delete_existing    => 1,
+                              production_lookup  => $self->o('production_lookup'),
+                              production_db      => $self->o('production_db'),
+                            },
+      -meadow_type       => 'LOCAL',
+      -flow_into         => ['DeleteIdentityXrefs'],
     },
 
     {
-      -logic_name      => 'DeleteIdentityXrefs',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
-      -max_retry_count => 0,
-      -parameters      => {
-                            sql => [
-                              'DELETE ox.*, ix.* FROM '.
-                                'object_xref ox INNER JOIN '.
-                                'identity_xref ix USING (object_xref_id) INNER JOIN '.
-                                'xref x USING (xref_id) INNER JOIN '.
-                                'external_db edb USING (external_db_id) '.
-                              'WHERE edb.db_name = "#external_db#"',]
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => WHEN('#delete_unattached_xref#' => ['DeleteUnattachedXref']),
+      -logic_name        => 'DeleteIdentityXrefs',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::SqlCmd',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              sql => [
+                                'DELETE ox.*, ix.* FROM '.
+                                  'object_xref ox INNER JOIN '.
+                                  'identity_xref ix USING (object_xref_id) INNER JOIN '.
+                                  'xref x USING (xref_id) INNER JOIN '.
+                                  'external_db edb USING (external_db_id) '.
+                                'WHERE edb.db_name = "#external_db#"',]
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => WHEN('#delete_unattached_xref#' => ['DeleteUnattachedXref']),
     },
 
     {
-      -logic_name      => 'DeleteUnattachedXref',
-      -module          => 'Bio::EnsEMBL::EGPipeline::Xref::DeleteUnattachedXref',
-      -max_retry_count => 0,
-      -parameters      => {},
-      -rc_name         => 'normal',
+      -logic_name        => 'DeleteUnattachedXref',
+      -module            => 'Bio::EnsEMBL::EGPipeline::Xref::DeleteUnattachedXref',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 0,
+      -parameters        => {},
+      -rc_name           => 'normal',
     },
 
     {
-      -logic_name      => 'ExtractSpecies',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::ExtractSpecies',
-      -max_retry_count => 1,
-      -parameters      => {
-                            source_species => $self->o('source_species'),
-                            file_varname   => 'db_fasta_file',
-                            data_type      => '#database_type#',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => ['CreateBlastDB'],
+      -logic_name        => 'ExtractSpecies',
+      -module            => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::ExtractSpecies',
+      -hive_capacity     => $self->o('max_hive_capacity'),
+      -max_retry_count   => 1,
+      -parameters        => {
+                              source_species => $self->o('source_species'),
+                              file_varname   => 'db_fasta_file',
+                              data_type      => '#database_type#',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => ['CreateBlastDB'],
     },
 
     {
-      -logic_name      => 'CreateBlastDB',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::CreateBlastDB',
-      -max_retry_count => 2,
-      -parameters      => {
-                            makeblastdb_exe   => $self->o('makeblastdb_exe'),
-                            blast_db          => $self->o('blast_db'),
-                            proteome_source   => 'various',
-                            logic_name_prefix => 'various',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => [
-                            WHEN('#query_type# eq "pep"' =>
-                              ['FetchProteomeFiles'],
-                            ELSE
-                              ['FetchTranscriptomeFiles']
-                            ),
-                          ],
+      -logic_name        => 'CreateBlastDB',
+      -module            => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::CreateBlastDB',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 2,
+      -parameters        => {
+                              makeblastdb_exe   => $self->o('makeblastdb_exe'),
+                              blast_db          => $self->o('blast_db'),
+                              proteome_source   => 'various',
+                              logic_name_prefix => 'various',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => [
+                              WHEN('#query_type# eq "pep"' =>
+                                ['FetchProteomeFiles'],
+                              ELSE
+                                ['FetchTranscriptomeFiles']
+                              ),
+                            ],
     },
 
     {
-      -logic_name      => 'FetchProteomeFiles',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchSplitFiles',
-      -max_retry_count => 1,
-      -parameters      => {
-                            seq_type => 'proteome',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => {
-                            '2->A' => ['BlastP'],
-                            'A->1' => ['FilterBlastHits'],
-                          },
+      -logic_name        => 'FetchProteomeFiles',
+      -module            => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchSplitFiles',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              seq_type => 'proteome',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => {
+                              '2->A' => ['BlastP'],
+                              'A->1' => ['FilterBlastHits'],
+                            },
     },
 
     {
@@ -655,17 +679,19 @@ sub pipeline_analyses {
     },
     
     {
-      -logic_name      => 'FetchTranscriptomeFiles',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchSplitFiles',
-      -max_retry_count => 1,
-      -parameters      => {
-                            seq_type => 'transcriptome',
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => {
-                            '2->A' => ['BlastN'],
-                            'A->1' => ['FilterBlastHits'],
-                          },
+      -logic_name        => 'FetchTranscriptomeFiles',
+      -module            => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FetchSplitFiles',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              seq_type => 'transcriptome',
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => {
+                              '2->A' => ['BlastN'],
+                              'A->1' => ['FilterBlastHits'],
+                            },
     },
 
     {
@@ -725,20 +751,24 @@ sub pipeline_analyses {
     },
 
     {
-      -logic_name      => 'FilterBlastHits',
-      -module          => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FilterHits',
-      -max_retry_count => 1,
-      -parameters      => {
-                            db_type      => 'core',
-                            filter_top_x => 1,
-                          },
-      -rc_name         => 'normal',
-      -flow_into       => ['LoadAlignmentXref'],
+      -logic_name        => 'FilterBlastHits',
+      -module            => 'Bio::EnsEMBL::EGPipeline::BlastAlignment::FilterHits',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {
+                              db_type      => 'core',
+                              filter_top_x => 1,
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => ['LoadAlignmentXref'],
     },
 
     {
       -logic_name        => 'LoadAlignmentXref',
       -module            => 'Bio::EnsEMBL::EGPipeline::Xref::LoadAlignmentXref',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               db_fasta_file         => '#db_fasta_file#',
@@ -746,13 +776,26 @@ sub pipeline_analyses {
                               description_blacklist => $self->o('description_blacklist'),
                             },
       -rc_name           => 'normal',
-      -flow_into         => WHEN('#email_xref_report#' => ['EmailAlignmentXrefReport']),
+      -flow_into         => ['MetaCoords'],
 
     },
-
+    
+    {
+      -logic_name        => 'MetaCoords',
+      -module            => 'Bio::EnsEMBL::EGPipeline::CoreStatistics::MetaCoords',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
+      -max_retry_count   => 1,
+      -parameters        => {},
+      -rc_name           => 'normal',
+      -flow_into         => WHEN('#email_xref_report#' => ['EmailAlignmentXrefReport']),
+    },
+    
     {
       -logic_name        => 'EmailAlignmentXrefReport',
       -module            => 'Bio::EnsEMBL::EGPipeline::Xref::EmailAlignmentXrefReport',
+      -analysis_capacity => 10,
+      -batch_size        => 10,
       -max_retry_count   => 1,
       -parameters        => {
                               email   => $self->o('email'),

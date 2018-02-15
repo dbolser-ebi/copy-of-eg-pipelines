@@ -40,13 +40,6 @@ use base ('Bio::EnsEMBL::EGPipeline::LoadGFF3::Base');
 
 use Path::Tiny qw(path);
 
-sub param_defaults {
-  my ($self) = @_;
-  return {
-    db_type => 'core',
-  };
-}
-
 sub run {
   my ($self) = @_;
   my $db_type            = $self->param_required('db_type');
@@ -70,8 +63,8 @@ sub run {
 sub seq_edits_from_genbank {
   my ($self, $dba, $genbank_file) = @_;
   
-  my $ta = $dba->get_adaptor('Transcript');
-  my $aa = $dba->get_adaptor("Attribute");
+  my $ta  = $dba->get_adaptor('Transcript');
+  my $aa  = $dba->get_adaptor("Attribute");
   
   my $genbank_path = path($genbank_file);
   my $genbank = $genbank_path->slurp;
@@ -79,6 +72,8 @@ sub seq_edits_from_genbank {
   $genbank =~ s!//\s*\Z!!m;
   my @genbank = split(m!//\s+!, $genbank);
   
+  my ($edit_count, $total_count) = (0, 0);
+
   foreach my $record (@genbank) {
     if ($record =~ /##RefSeq-Attributes-START##.*(assembly gap|frameshifts)/ms) {
       
@@ -88,70 +83,56 @@ sub seq_edits_from_genbank {
       
       my ($accession) = $record =~ /^VERSION\s+(\S+)/m;
       my $transcript  = $ta->fetch_by_stable_id($accession);
+      $self->throw("$accession in file, not in database") unless $transcript;
+      #$self->warning($accession);
       
       my $cdna_seq = $self->extract_seq($record);
       
       # Check that the sequences don't already match before trying anything...
       if ($transcript->seq->seq ne $cdna_seq) {
-        my $edits = $self->extract_edits($record);
+        $self->warning('Attempting seq_edits for '.$transcript->stable_id);
+        $total_count++;
         
-        my ($five_prime_adjust, $seq_start) = $self->adjust_five_prime_edit($record, $edits);
-        if ($five_prime_adjust) {
-          $cdna_seq =~ s/^.{$five_prime_adjust}//;
-          
-          if (defined $seq_start) {
-            $self->update_translation_start($dba, $transcript->translation->dbID, $seq_start);
-            $transcript = $ta->fetch_by_stable_id($accession);
-          }
+        # Start and end will only be defined if they fall within a seq_edit.
+        my ($edits, $start, $end) = $self->extract_edits($record, $cdna_seq);
+        
+        my @attribs;
+        
+        if (defined $start) {
+          my $start_attrib = $self->add_translation_start($transcript, $start);
+          push @attribs, $start_attrib;
         }
         
-        if (scalar(@$edits)) {
-          my $three_prime_adjust = $self->adjust_three_prime_edit($record, $edits);
-          if ($three_prime_adjust) {
-            $cdna_seq =~ s/.{$three_prime_adjust}$//;
-          }
+        if (defined $end) {
+          my $end_attrib = $self->add_translation_end($transcript, $end);
+          push @attribs, $end_attrib;
         }
-        
-        # Need to track the length of the inserts we're making and subtract
-        # that from subsequent edit starts, because the seq_edits all need
-        # to be relative to the original transcript...
-        my $edit_length = 0;
-        my @atts;
         
         foreach my $edit (@$edits) {
-          my ($seq_name, $t_start, $t_end) = @$edit;
-          
-          # This looks weird, but having $to one less than $from
-          # is how you indicate a sequence insertion...
-          my $from = $t_start - $edit_length;
-          my $to   = $from - 1;
-          
-          my $subseq;
-          if ($seq_name =~ /"(N+)"/) {
-            $subseq = "$1";
-          } else {
-            $subseq = substr($cdna_seq, $t_start-1, $t_end-$t_start+1);
-          }
-          
-          my $att = $self->add_transcript_seq_edit($transcript, $from, $to, $subseq);
-          push @atts, $att;
-          
-          $edit_length += length($subseq);
+          my $seq_edit = $self->add_transcript_seq_edit($transcript, @$edit);
+          $self->warning("Adding seq_edit: ".join(' ', @$edit)."\n");
+          push @attribs, $seq_edit;
         }
         
         if ($transcript->seq->seq eq $cdna_seq) {
-          $aa->store_on_Transcript($transcript, \@atts);
-        } else {          
-          my $att = $self->add_transcript_seq_edit($transcript, 1, $transcript->length, $cdna_seq);
-          $aa->store_on_Transcript($transcript, [$att]);
+          $self->warning('Storing seq_edits');
+          $aa->store_on_Transcript($transcript, \@attribs);
+          $edit_count++;
+        } else {       
+          $self->warning("Not storing seq_edits\nEdited seq:\n".$transcript->seq->seq."\nTarget seq:\n$cdna_seq\n");
+          
+          #my $seq_edit = $self->add_transcript_seq_edit($transcript, 1, $transcript->length, $cdna_seq);
+          #$aa->store_on_Transcript($transcript, [$seq_edit]);
         }
       }
     }
   }
+  
+  $self->warning("$edit_count / $total_count seq_edits successful");
 }
 
 sub extract_edits {
-  my ($self, $record) = @_;
+  my ($self, $record, $cdna_seq) = @_;
   
   my %transcriptomes = ();
   my ($transcriptomes) = $record =~ /\s+transcript\s+sequences*\s+\((.*?)\)/ms;
@@ -162,21 +143,67 @@ sub extract_edits {
   
   my ($coords) = $record =~ /^PRIMARY[^\n]+\n(^\s+.+)/ms;
   $coords =~ s/\n^\S.+//ms;
-  my @coords   = split(/\n/, $coords);
-  my @edits    = ();
+  my @coords = split(/\n/, $coords);
+  my @edits = ();
   
-  # Note that it's important to get these in sequential order,
-  # in order for the subsequent calculations to work.
+  # Need to detect if a coding region starts or ends in a seq_edit.
+  my ($cds_start, $cds_end) = $record =~ /^\s+CDS\D+(\d+)\D+(\d+)\s*$/m;
+  my ($transl_start, $transl_end);
+  
+  # Deletions are rather cryptic. Need to compare pairs of coords to look
+  # for gaps of 1 or 2 bases, so need to keep track of last position.
+  my ($last_seq_name, $last_seq_region_start, $last_seq_region_end);
+  
+  # The positions given in the file are all relative to the original
+  # sequence. But in the Ensembl API, seq_edits are applied to the
+  # result of any previous edits. So need to track what we've already
+  # done, and modify positions accordingly.
+  my $offset = 0;
+  
   foreach my $coord (@coords) {
-    my ($t_start, $t_end, $seq_name) =
-      $coord =~ /^\s+(\d+)\-(\d+)\s+(\S+)\s+\d+\-\d+/;
+    my ($start, $end, $seq_name, $seq_region_start, $seq_region_end) =
+      $coord =~ /^\s+(\d+)\-(\d+)\s+(\S+)\s+(\d+)\-(\d+)/;
     
-    if (exists $transcriptomes{$seq_name} || $seq_name =~ /"N+"/) {
-      push @edits, [$seq_name, $t_start, $t_end];
+    # Inserted sequence
+    my $subseq;
+    if (exists $transcriptomes{$seq_name}) {
+      $subseq = substr($cdna_seq, $start - 1, $end-$start + 1);
+      
+      if ($cds_start >= $start && $cds_start <= $end) {
+        $transl_start = $cds_start;
+      }
+      if ($cds_end >= $start && $cds_end <= $end) {
+        $transl_end = $cds_end;
+      }
+      
+    } elsif ($seq_name =~ /"(NN?)"/) {
+      $subseq = $1;
     }
+    if (defined $subseq) {
+      push @edits, [$start - $offset, $start - $offset - 1, $subseq];
+      $offset += length($subseq);
+    }
+    
+    # Deleted sequence
+    if (defined $last_seq_name && $last_seq_name eq $seq_name) {
+      my $gap;
+      if ($last_seq_region_end < $seq_region_start) {
+        $gap = $seq_region_start - $last_seq_region_end - 1;
+      } else {
+        $gap = $last_seq_region_start - $seq_region_end - 1;
+      }
+      if ($gap <= 2) {
+        push @edits, [$start - $offset, $start - $offset + $gap - 1, ''];
+        $offset -= $gap
+      }
+    }
+    
+    $last_seq_name         = $seq_name;
+    $last_seq_region_start = $seq_region_start;
+    $last_seq_region_end   = $seq_region_end;
   }
   
-  return \@edits;
+  return (\@edits, $transl_start, $transl_end);
 }
 
 sub extract_seq {
@@ -188,84 +215,6 @@ sub extract_seq {
   $seq =~ s/\s+//gm;
   
   return uc($seq);
-}
-
-sub adjust_five_prime_edit {
-  my ($self, $record, $edits) = @_;
-  my $adjustment = 0;
-  my $seq_start;
-  
-  # The e! core code cannot deal with sequence added to the 5' end
-  # that includes UTR; so remove the UTR, so that we at least get
-  # the protein-coding bit right.
-  # Also, if the inserted sequence starts mid-codon, lop off the partial codon.
-  my ($cds_start, $cds_end) = $record =~ /^\s+CDS\D+(\d+)\D+(\d+)\s*$/m;
-  my ($codon_start) = $record =~ /^\s+\/codon_start=(\d)\s*$/m;
-  my $codon_adjustment = $codon_start - 1;
-  
-  # We assume that we will never have a two chunks of sequence
-  # added via transcriptomic data added at the 5' end where the first
-  # is UTR only.
-  if ($cds_start > 1 && $$edits[0][1] == 1) {
-    if ($cds_start <= $$edits[0][2]) {
-      $adjustment = $codon_adjustment + $cds_start - 1;
-      $seq_start = 1;
-      
-      foreach my $edit (@$edits) {
-        $$edit[1] -= $adjustment;
-        $$edit[2] -= $adjustment;
-      }
-      $$edits[0][1] = 1;
-    } else {
-      $adjustment = $$edits[0][2];
-      
-      foreach my $edit (@$edits) {
-        $$edit[1] -= $adjustment;
-        $$edit[2] -= $adjustment;
-      }
-      shift @$edits;
-      
-      my ($accession) = $record =~ /^VERSION\s+(\S+)/m;
-      $self->warning("Transcriptomic sequence at 5' end of $accession is UTR only, edit will be ignored.");
-    }
-  } elsif ($codon_adjustment) {
-    $adjustment = $codon_adjustment;
-    $seq_start = 1;
-    
-    foreach my $edit (@$edits) {
-      $$edit[1] -= $adjustment;
-      $$edit[2] -= $adjustment;
-    }
-    $$edits[0][1] += $adjustment;
-  }
-  
-  return ($adjustment, $seq_start);
-}
-
-sub adjust_three_prime_edit {
-  my ($self, $record, $edits) = @_;
-  my $adjustment = 0;
-  
-  # The e! core code cannot deal with sequence added to the 3' end
-  # that includes UTR; so remove the UTR, so that we at least get
-  # the protein-coding bit right.
-  my ($cds_start, $cds_end) = $record =~ /^\s+CDS\D+(\d+)\D+(\d+)\s*$/m;
-  
-  # We assume that we will never have a two chunks of sequence
-  # added via transcriptomic data added at the 3' end where the first
-  # is UTR only.
-  if ($cds_end < $$edits[-1][2]) {
-    if ($cds_end > $$edits[-1][1]) {
-      $adjustment = $$edits[-1][2] - $cds_end;
-      $$edits[-1][2] = $cds_end;
-    } else {
-      my ($accession) = $record =~ /^VERSION\s+(\S+)/m;
-      pop @$edits;
-      $self->warning("Transcriptomic sequence at 3' end of $accession is UTR only, edit will be ignored.");
-    }
-  }
-  
-  return $adjustment;
 }
 
 sub seq_edits_from_protein {
@@ -288,6 +237,15 @@ sub seq_edits_from_protein {
       my $db_seq   = $translation->seq;
       my $file_seq = $protein{$translation->stable_id};
       $file_seq =~ s/\*$//;
+      
+      # Do not want to consider an amino acid derived from a partial
+      # codon; but RefSeq do that, so need to lop off last amino acid
+      # in that case.
+      my $transcript_length = length($transcript->translateable_seq);
+      my $partial_codon = $transcript_length % 3;
+      if ($partial_codon && length($file_seq) == length($db_seq) + 1) {
+        $file_seq =~ s/.$//;
+      }
       
       if ($db_seq ne $file_seq) {
         my @file_seq = split(//, $file_seq);
@@ -347,6 +305,38 @@ sub add_translation_seq_edit {
   # Need to add the attribute in order to force recalculation
   # of the sequence for the benefit of any subsequent edits.
   $translation->add_Attributes($attribute);
+  
+  return $attribute;
+}
+
+sub add_translation_start {
+  my ($self, $transcript, $start) = @_;
+  
+  my $attribute = Bio::EnsEMBL::Attribute->new
+  (
+    -CODE  => '_transl_start',
+    -VALUE => $start,
+  );
+  
+  # Need to add the attribute in order to force recalculation
+  # of the sequence for the benefit of any subsequent edits.
+  $transcript->add_Attributes($attribute);
+  
+  return $attribute;
+}
+
+sub add_translation_end {
+  my ($self, $transcript, $end) = @_;
+  
+  my $attribute = Bio::EnsEMBL::Attribute->new
+  (
+    -CODE  => '_transl_end',
+    -VALUE => $end,
+  );
+  
+  # Need to add the attribute in order to force recalculation
+  # of the sequence for the benefit of any subsequent edits.
+  $transcript->add_Attributes($attribute);
   
   return $attribute;
 }

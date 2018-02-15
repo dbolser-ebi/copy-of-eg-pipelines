@@ -119,8 +119,8 @@ sub generate_vb_filename {
   
   my $dba = $self->core_dba;
   
-  $species =~ s/_/-/;		
-  $species =~ s/[A-Z]+$//;
+  $species =~ s/_/-/;
+  $species =~ s/_.+$//;
   
   my $strain  = $dba->get_MetaContainer()->single_value_by_key('species.strain');
   $strain =~ s/[\s\/]+/\-/g;

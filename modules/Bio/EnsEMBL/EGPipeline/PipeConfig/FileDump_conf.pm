@@ -440,7 +440,7 @@ sub pipeline_analyses {
                               remove_separators => 1,
                               escape_branch     => -1,
                             },
-      -rc_name           => 'normal',
+      -rc_name           => '8Gb_mem',
       -flow_into         => {
                               '-1'   => ['gff3_repeats_himem'],
                               '1->A' => ['gff3Tidy'],

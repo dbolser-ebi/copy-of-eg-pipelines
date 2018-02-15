@@ -80,7 +80,7 @@ sub add_xrefs {
 
   foreach my $id (keys %$features) {
     foreach my $hit_name (keys %{$$features{$id}}) {
-      if (! $self->xref_exists($dbea, $external_db, $id, $object_type, $hit_name, $xref_metadata)) {
+      if (! $self->xref_exists($dbea, $external_db, $hit_name, $xref_metadata)) {
         my $xref;
 
         my @features = @{$$features{$id}{$hit_name}};
@@ -134,22 +134,38 @@ sub fetch_features {
 }
 
 sub xref_exists {
-  my ($self, $dbea, $external_db, $ensembl_id, $object_type, $acc, $xref_metadata) = @_;
+  my ($self, $dbea, $external_db, $acc, $xref_metadata) = @_;
   my $logic_names = $self->param_required('preferred_analysis');
+  my %logic_names = map { $_ => 1 } @$logic_names;
   
   my $desc   = $$xref_metadata{$acc}{description} || '';
   my $exists = 0;
   
-  my $xrefs = $dbea->_fetch_by_object_type($ensembl_id, $object_type, $external_db);
-  foreach my $xref (@$xrefs) {
-    foreach my $logic_name (@$logic_names) {
-      if ($xref->analysis->logic_name eq $logic_name && $xref->primary_id eq $acc) {
-        if ($desc ne '') { 
-          $xref->description($desc);
-          $dbea->update($xref);
-        }
-        $exists = 1;
+  # There aren't API calls to do what we want, which is to get
+  # a list of object_xrefs based on the xref accession.
+  my $sql =
+    'SELECT xref_id, logic_name, COUNT(*) AS obj_count FROM '.
+    '  xref INNER JOIN '.
+    '  object_xref USING (xref_id) INNER JOIN '.
+    '  analysis USING (analysis_id) INNER JOIN '.
+    '  external_db USING (external_db_id) '.
+    'WHERE db_name = ? AND dbprimary_acc = ? '.
+    'GROUP BY xref_id, logic_name';
+  
+  my $sth = $dbea->dbc->prepare($sql) or $self->throw($dbea->dbc->db_handle->errstr);
+  $sth->execute($external_db, $acc) or $self->throw($sth->errstr);
+  
+  my $xrefs = $sth->fetchall_hashref(1) or $self->throw($sth->errstr);
+  
+  foreach my $xref_id (keys %$xrefs) {
+    my $logic_name = $$xrefs{$xref_id}{'logic_name'};
+    if (exists $logic_names{$logic_name}) {
+      if ($desc ne '') {
+        my $xref = $dbea->fetch_by_dbID($xref_id);
+        $xref->description($desc);
+        $dbea->update($xref);
       }
+      $exists = 1;
     }
   }
   
@@ -172,8 +188,8 @@ sub add_xref {
     -VERSION          => $$xref_metadata{$hit_name}{version},
     -ENSEMBL_START    => $feature->start,
     -ENSEMBL_END      => $feature->end,
-    -QUERY_START      => $feature->hstart,
-    -QUERY_END        => $feature->hend,
+    -XREF_START       => $feature->hstart,
+    -XREF_END         => $feature->hend,
     -ENSEMBL_IDENTITY => $ensembl_identity,
     -XREF_IDENTITY    => $xref_identity,
     -EVALUE           => $feature->p_value,
@@ -216,8 +232,8 @@ sub add_compound_xref {
     -VERSION          => $$xref_metadata{$hit_name}{version},
     -ENSEMBL_START    => min(@ensembl_starts),
     -ENSEMBL_END      => max(@ensembl_ends),
-    -QUERY_START      => min(@xref_starts),
-    -QUERY_END        => max(@xref_ends),
+    -XREF_START       => min(@xref_starts),
+    -XREF_END         => max(@xref_ends),
     -ENSEMBL_IDENTITY => $ensembl_identity,
     -XREF_IDENTITY    => $xref_identity,
   );

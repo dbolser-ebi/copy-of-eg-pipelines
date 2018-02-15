@@ -61,7 +61,7 @@ is($obj->param('threads'),  4,    'param_defaults method: threads');
 is($obj->param('memory'),   8000, 'param_defaults method: memory');
 is($obj->param('clean_up'), 1,    'param_defaults method: clean_up');
 
-$obj->param('samtools_dir', '/nfs/panda/ensemblgenomes/external/samtools');
+$obj->param('samtools_dir', undef);
 
 $obj->fetch_input();
 

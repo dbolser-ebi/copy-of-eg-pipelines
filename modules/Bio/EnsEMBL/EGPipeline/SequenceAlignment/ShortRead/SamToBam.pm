@@ -36,7 +36,7 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   
-  my $samtools_dir = $self->param_required('samtools_dir');
+  my $samtools_dir = $self->param('samtools_dir');
   my $threads      = $self->param_required('threads');
   my $memory       = $self->param_required('memory');
   

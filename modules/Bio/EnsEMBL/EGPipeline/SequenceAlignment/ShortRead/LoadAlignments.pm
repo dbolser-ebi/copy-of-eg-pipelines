@@ -33,7 +33,7 @@ sub param_defaults {
     'db_type'      => 'otherfeatures',
     'insdc_ids'    => 1,
     'api_load'     => 1,
-    'samtools_dir' => '/nfs/panda/ensemblgenomes/external/samtools',
+    'samtools_dir' => undef,
   };
 }
 
@@ -196,7 +196,7 @@ sub sql_load {
 sub generate_sam {
   my ($self) = @_;
   
-  my $samtools_dir = $self->param_required('samtools_dir');
+  my $samtools_dir = $self->param('samtools_dir');
   my $bam_file     = $self->param_required('merged_bam_file');
   my $genome_file  = $self->param_required('genome_file');
   
@@ -206,11 +206,16 @@ sub generate_sam {
   my $calmd_file = "$bam_file.calmd";
   my $sam_file = "$bam_file.sam";
   
+  my $samtools = 'samtools';
+  if (defined $samtools_dir) {
+    $samtools = "$samtools_dir/$samtools"
+  }
+  
   # Can assume that BAM file has already been sorted by MergeBamSet.
-  my $cmd = "$samtools_dir/samtools calmd -ue $bam_file $genome_file > $calmd_file";
+  my $cmd = "$samtools calmd -ue $bam_file $genome_file > $calmd_file";
   system($cmd) == 0 || $self->throw("Cannot execute $cmd");
 
-  $cmd = "$samtools_dir/samtools view -h $calmd_file > $sam_file";
+  $cmd = "$samtools view -h $calmd_file > $sam_file";
   system($cmd) == 0 || $self->throw("Cannot execute $cmd");
   
   return $sam_file;

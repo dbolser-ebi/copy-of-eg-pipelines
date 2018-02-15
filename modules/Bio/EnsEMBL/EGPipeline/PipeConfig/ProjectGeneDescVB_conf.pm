@@ -52,9 +52,9 @@ sub default_options {
 
     config => 
     {
-      'aedes_aegypti' =>
+      'aedes_aegypti_lvpagwg' =>
       {
-        source  => 'aedes_aegypti',
+        source  => 'aedes_aegypti_lvpagwg',
         species => [
                     'aedes_albopictus',
                    ],
@@ -120,7 +120,7 @@ sub default_options {
     # Only values of 2 or 3 will work, i.e. there's only one level of blocking.
     flow => 
     {
-      'aedes_aegypti'           => 2,
+      'aedes_aegypti_lvpagwg'   => 2,
       'anopheles_gambiae'       => 2,
       'glossina_morsitans'      => 2,
       'drosophila_melanogaster' => 3,

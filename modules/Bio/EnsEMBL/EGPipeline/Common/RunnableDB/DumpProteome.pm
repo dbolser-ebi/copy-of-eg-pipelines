@@ -64,6 +64,8 @@ sub fetch_input {
   }
   
   if (-e $proteome_file) {
+    # TODO: Could count the number of header lines here and check against the number of
+    # protein_coding transcripts to help catch cases where the file exists but is incomplete or empty.
     if ($self->param('overwrite')) {
       $self->warning("Proteome file '$proteome_file' already exists, and will be overwritten.");
     } else {

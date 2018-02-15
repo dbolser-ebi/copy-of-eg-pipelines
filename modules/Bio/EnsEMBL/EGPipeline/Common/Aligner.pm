@@ -26,6 +26,7 @@ use Bio::EnsEMBL::Utils::Exception qw(throw);
 
 use File::Spec::Functions qw(catdir);
 use IPC::Cmd qw(run);
+use Path::Tiny qw(path);
 
 sub new {
 	my ( $class, @args ) = @_;
@@ -217,6 +218,13 @@ sub generate_vcf {
   $cmd   .= " | ";
   $cmd   .= "$self->{bcftools} call -mv -o $vcf";
   $self->run_cmd($cmd, 'align');
+  
+  # Strip out comment lines with absolute paths
+  my $vcf_file = path($vcf);
+  my $vcf_data = $vcf_file->slurp;
+  $vcf_data =~ s/^##samtoolsCommand=.*\n//gm;
+  $vcf_data =~ s/^##reference=.*\n//gm;
+  $vcf_file->spew($vcf_data);
   
 	return $vcf;
 }

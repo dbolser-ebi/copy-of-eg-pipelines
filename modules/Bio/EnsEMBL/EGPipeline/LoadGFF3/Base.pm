@@ -37,6 +37,32 @@ use warnings;
 
 use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::Base');
 
+sub param_defaults {
+  my ($self) = @_;
+  return {
+    db_type => 'core',
+  };
+}
+
+sub fetch_input {
+  my $self = shift @_;
+  
+  if (defined $self->param('escape_branch') and 
+      $self->input_job->retry_count >= $self->input_job->analysis->max_retry_count) 
+  {
+    $self->dataflow_output_id($self->input_id, $self->param('escape_branch'));
+    $self->input_job->autoflow(0);
+    $self->complete_early("Failure probably due to memory limit, retrying with a higher limit.");
+  }
+  
+  # Need explicit disconnects, so that connections are freed up
+  # while the analysis is running.
+  my $db_type = $self->param('db_type');
+  my $dba = $self->get_DBAdaptor($db_type);
+  $dba->dbc && $dba->dbc->disconnect_if_idle();
+  $self->dbc && $self->dbc->disconnect_if_idle();
+}
+
 sub fetch_slices {
   my ($self, $dba) = @_;
   
@@ -60,15 +86,19 @@ sub load_fasta {
   my ($self, $fasta_file) = @_;
   my %fasta;
   
-  local $/;
   open(FASTA, $fasta_file);
-  %fasta = <FASTA> =~ />(\S+).*\n([^\>]+)/gm;
-  close(FASTA);
   
-  foreach my $id (keys %fasta) {
-    $fasta{$id} =~ s/\s//gm;
-    $fasta{$id} = uc($fasta{$id});
+  my $id;
+  while (my $row = <FASTA>) {
+    if ($row =~ /^>(\S+)/) {
+      $id = $1;
+    } else {
+      $row =~ s/\s//gm;
+      $fasta{$id} .= uc($row);
+    }
   }
+  
+  close(FASTA);
   
   return %fasta;
 }
@@ -106,14 +136,6 @@ sub set_protein_coding {
       $ga->update($gene);
     }
   }
-}
-
-sub update_translation_start {
-  my ($self, $dba, $dbid, $start) = @_;
-  
-  my $sql = 'UPDATE translation SET seq_start = ? WHERE translation_id = ?;';
-  my $sth = $dba->dbc->db_handle->prepare($sql);
-  $sth->execute($start, $dbid) or $self->throw("Failed to execute: $sql");
 }
 
 1;

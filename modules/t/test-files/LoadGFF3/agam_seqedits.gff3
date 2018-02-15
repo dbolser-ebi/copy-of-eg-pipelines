@@ -47,29 +47,67 @@
 2L	VectorBase	exon	2014582	2015127	.	+	.	Parent=test_protein_shift_start-RA
 2L	VectorBase	three_prime_UTR	2014923	2015127	.	+	.	Parent=test_protein_shift_start-RA
 ###
-2L	VectorBase	gene	2253748	2255405	.	-	.	ID=test_gbff_1
-2L	VectorBase	mRNA	2253748	2255405	.	-	.	ID=test_gbff_1-RA;Parent=test_gbff_1
-2L	VectorBase	exon	2253748	2253970	.	-	.	Parent=test_gbff_1-RA
-2L	VectorBase	CDS	2253748	2253970	.	-	0	ID=test_gbff_1-PA;Parent=test_gbff_1-RA
-2L	VectorBase	exon	2254037	2255104	.	-	.	Parent=test_gbff_1-RA
-2L	VectorBase	CDS	2254037	2255104	.	-	0	ID=test_gbff_1-PA;Parent=test_gbff_1-RA
-2L	VectorBase	CDS	2255383	2255405	.	-	1	ID=test_gbff_1-PA;Parent=test_gbff_1-RA
-2L	VectorBase	exon	2255383	2255405	.	-	.	Parent=test_gbff_1-RA
+2L	VectorBase	gene	2775211	2796487	.	+	.	ID=test_gbff_pos_ins
+2L	VectorBase	mRNA	2775211	2796487	.	+	.	ID=test_gbff_pos_ins-RA;Parent=test_gbff_pos_ins
+2L	VectorBase	exon	2775211	2775371	.	+	.	Parent=test_gbff_pos_ins-RA
+2L	VectorBase	CDS	2775211	2775371	.	+	0	ID=test_gbff_pos_ins-PA;Parent=test_gbff_pos_ins-RA
+2L	VectorBase	exon	2794636	2794749	.	+	.	Parent=test_gbff_pos_ins-RA
+2L	VectorBase	CDS	2794636	2794749	.	+	1	ID=test_gbff_pos_ins-PA;Parent=test_gbff_pos_ins-RA
+2L	VectorBase	exon	2794886	2796487	.	+	.	Parent=test_gbff_pos_ins-RA
+2L	VectorBase	CDS	2794886	2796487	.	+	0	ID=test_gbff_pos_ins-PA;Parent=test_gbff_pos_ins-RA
 ###
-2L	VectorBase	gene	2775211	2796487	.	+	.	ID=test_gbff_2
-2L	VectorBase	mRNA	2775211	2796487	.	+	.	ID=test_gbff_2-RA;Parent=test_gbff_2
-2L	VectorBase	exon	2775211	2775371	.	+	.	Parent=test_gbff_2-RA
-2L	VectorBase	CDS	2775211	2775371	.	+	0	ID=test_gbff_2-PA;Parent=test_gbff_2-RA
-2L	VectorBase	exon	2794636	2794749	.	+	.	Parent=test_gbff_2-RA
-2L	VectorBase	CDS	2794636	2794749	.	+	1	ID=test_gbff_2-PA;Parent=test_gbff_2-RA
-2L	VectorBase	exon	2794886	2796487	.	+	.	Parent=test_gbff_2-RA
-2L	VectorBase	CDS	2794886	2796487	.	+	1	ID=test_gbff_2-PA;Parent=test_gbff_2-RA
+2L	VectorBase	gene	2775211	2775388	.	+	.	ID=test_gbff_pos_del
+2L	VectorBase	mRNA	2775211	2775388	.	+	.	ID=test_gbff_pos_del-RA;Parent=test_gbff_pos_del
+2L	VectorBase	exon	2775211	2775371	.	+	.	Parent=test_gbff_pos_del-RA
+2L	VectorBase	CDS	2775211	2775371	.	+	0	ID=test_gbff_pos_del-PA;Parent=test_gbff_pos_del-RA
+2L	VectorBase	exon	2775373	2775388	.	+	.	Parent=test_gbff_pos_del-RA
+2L	VectorBase	CDS	2775373	2775388	.	+	1	ID=test_gbff_pos_del-PA;Parent=test_gbff_pos_del-RA
 ###
-2L	VectorBase	gene	2775211	2796487	.	+	.	ID=test_gbff_3
-2L	VectorBase	mRNA	2775211	2796487	.	+	.	ID=test_gbff_3-RA;Parent=test_gbff_3
-2L	VectorBase	exon	2775211	2775371	.	+	.	Parent=test_gbff_3-RA
-2L	VectorBase	CDS	2775211	2775371	.	+	0	ID=test_gbff_3-PA;Parent=test_gbff_3-RA
-2L	VectorBase	exon	2794634	2794749	.	+	.	Parent=test_gbff_3-RA
-2L	VectorBase	CDS	2794634	2794749	.	+	1	ID=test_gbff_3-PA;Parent=test_gbff_3-RA
-2L	VectorBase	exon	2794886	2796487	.	+	.	Parent=test_gbff_3-RA
-2L	VectorBase	CDS	2794886	2796487	.	+	1	ID=test_gbff_3-PA;Parent=test_gbff_3-RA
+2L	VectorBase	gene	2253748	2255405	.	-	.	ID=test_gbff_neg_ins
+2L	VectorBase	mRNA	2253748	2255405	.	-	.	ID=test_gbff_neg_ins-RA;Parent=test_gbff_neg_ins
+2L	VectorBase	exon	2253748	2253970	.	-	.	Parent=test_gbff_neg_ins-RA
+2L	VectorBase	CDS	2253748	2253970	.	-	0	ID=test_gbff_neg_ins-PA;Parent=test_gbff_neg_ins-RA
+2L	VectorBase	exon	2254037	2255104	.	-	.	Parent=test_gbff_neg_ins-RA
+2L	VectorBase	CDS	2254037	2255104	.	-	0	ID=test_gbff_neg_ins-PA;Parent=test_gbff_neg_ins-RA
+2L	VectorBase	CDS	2255383	2255405	.	-	1	ID=test_gbff_neg_ins-PA;Parent=test_gbff_neg_ins-RA
+2L	VectorBase	exon	2255383	2255405	.	-	.	Parent=test_gbff_neg_ins-RA
+###
+2L	VectorBase	gene	2775211	2775221	.	+	.	ID=test_gbff_pos_ins_ins
+2L	VectorBase	mRNA	2775211	2775221	.	+	.	ID=test_gbff_pos_ins_ins-RA;Parent=test_gbff_pos_ins_ins
+2L	VectorBase	exon	2775211	2775221	.	+	.	Parent=test_gbff_pos_ins_ins-RA
+2L	VectorBase	CDS	2775211	2775219	.	+	0	ID=test_gbff_pos_ins_ins-PA;Parent=test_gbff_pos_ins_ins-RA
+###
+2L	VectorBase	gene	2775211	2775221	.	+	.	ID=test_gbff_pos_del_del
+2L	VectorBase	mRNA	2775211	2775221	.	+	.	ID=test_gbff_pos_del_del-RA;Parent=test_gbff_pos_del_del
+2L	VectorBase	exon	2775211	2775221	.	+	.	Parent=test_gbff_pos_del_del-RA
+2L	VectorBase	CDS	2775211	2775221	.	+	0	ID=test_gbff_pos_del_del-PA;Parent=test_gbff_pos_del_del-RA
+###
+2L	VectorBase	gene	2775211	2775221	.	+	.	ID=test_gbff_pos_ins_del
+2L	VectorBase	mRNA	2775211	2775221	.	+	.	ID=test_gbff_pos_ins_del-RA;Parent=test_gbff_pos_ins_del
+2L	VectorBase	exon	2775211	2775221	.	+	.	Parent=test_gbff_pos_ins_del-RA
+2L	VectorBase	CDS	2775211	2775219	.	+	0	ID=test_gbff_pos_ins_del-PA;Parent=test_gbff_pos_ins_del-RA
+###
+2L	VectorBase	gene	2775211	2775221	.	+	.	ID=test_gbff_pos_del_ins
+2L	VectorBase	mRNA	2775211	2775221	.	+	.	ID=test_gbff_pos_del_ins-RA;Parent=test_gbff_pos_del_ins
+2L	VectorBase	exon	2775211	2775221	.	+	.	Parent=test_gbff_pos_del_ins-RA
+2L	VectorBase	CDS	2775211	2775220	.	+	0	ID=test_gbff_pos_del_ins-PA;Parent=test_gbff_pos_del_ins-RA
+###
+2L	VectorBase	gene	2255394	2255405	.	-	.	ID=test_gbff_neg_ins_ins
+2L	VectorBase	mRNA	2255394	2255405	.	-	.	ID=test_gbff_neg_ins_ins-RA;Parent=test_gbff_neg_ins_ins
+2L	VectorBase	CDS	2255394	2255405	.	-	0	ID=test_gbff_neg_ins_ins-PA;Parent=test_gbff_neg_ins_ins-RA
+2L	VectorBase	exon	2255394	2255405	.	-	.	Parent=test_gbff_neg_ins_ins-RA
+###
+2L	VectorBase	gene	2255394	2255405	.	-	.	ID=test_gbff_neg_del_del
+2L	VectorBase	mRNA	2255394	2255405	.	-	.	ID=test_gbff_neg_del_del-RA;Parent=test_gbff_neg_del_del
+2L	VectorBase	CDS	2255394	2255405	.	-	0	ID=test_gbff_neg_del_del-PA;Parent=test_gbff_neg_del_del-RA
+2L	VectorBase	exon	2255394	2255405	.	-	.	Parent=test_gbff_neg_del_del-RA
+###
+2L	VectorBase	gene	2255394	2255405	.	-	.	ID=test_gbff_neg_ins_del
+2L	VectorBase	mRNA	2255394	2255405	.	-	.	ID=test_gbff_neg_ins_del-RA;Parent=test_gbff_neg_ins_del
+2L	VectorBase	CDS	2255394	2255405	.	-	0	ID=test_gbff_neg_ins_del-PA;Parent=test_gbff_neg_ins_del-RA
+2L	VectorBase	exon	2255394	2255405	.	-	.	Parent=test_gbff_neg_ins_del-RA
+###
+2L	VectorBase	gene	2255394	2255405	.	-	.	ID=test_gbff_neg_del_ins
+2L	VectorBase	mRNA	2255394	2255405	.	-	.	ID=test_gbff_neg_del_ins-RA;Parent=test_gbff_neg_del_ins
+2L	VectorBase	CDS	2255394	2255403	.	-	0	ID=test_gbff_neg_del_ins-PA;Parent=test_gbff_neg_del_ins-RA
+2L	VectorBase	exon	2255394	2255405	.	-	.	Parent=test_gbff_neg_del_ins-RA

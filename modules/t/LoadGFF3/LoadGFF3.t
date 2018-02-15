@@ -43,7 +43,7 @@ my $fasta_file       = $FindBin::Bin.'/../test-files/LoadGFF3/agam.fa';
 
 
 my $gene_types   = ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene', 'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ];
-my $mrna_types   = ['mRNA', 'transcript', 'pseudogenic_transcript', 'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'];
+my $mrna_types   = ['mRNA', 'transcript', 'pseudogenic_transcript', 'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA', 'RNase_MRP_RNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'];
 my $exon_types   = ['exon', 'pseudogenic_exon'];
 my $cds_types    = ['CDS'];
 my $utr_types    = ['five_prime_UTR', 'three_prime_UTR'];
@@ -55,9 +55,9 @@ my $module_name    = 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3';
 my @hive_methods   = qw(param_defaults fetch_input run write_output);
 my @module_methods = qw(
   add_exons add_predicted_transcript add_pseudogenic_transcript add_transcript 
-  add_transcripts add_translation check_db check_seq_ids correct_exon_overlaps 
-  get_cds get_cds_id get_polypeptide get_utr infer_exons infer_transcript 
-  infer_translation load_db load_genes new_exon new_gene new_predicted_exon 
+  add_transcripts add_translation check_db check_seq_ids get_cds get_cds_id 
+  get_polypeptide get_utr infer_exons infer_transcript infer_translation 
+  load_db load_genes merge_exons new_exon new_gene new_predicted_exon 
   new_predicted_transcript new_transcript new_translation set_exon_phase 
   set_nontranslating_gene set_nontranslating_transcript translation_coordinates 
 );
@@ -683,6 +683,7 @@ note('##########################################################################
 $lg_obj->param('gff3_file', $transl_gff3_file);
 $lg_obj->param('ignore_types', ['region', 'chromosome', 'polypeptide', 'protein']);
 $lg_obj->param('polypeptides', 1);
+$lg_obj->param('min_intron_size', 3);
 
 $testdb->hide($dbtype, 
   qw(exon exon_transcript gene meta_coord transcript translation));
@@ -690,7 +691,7 @@ $testdb->hide($dbtype,
 $lg_obj->run();
 
 my $test_genes = $ga->fetch_all_by_logic_name($logic_name);
-is(scalar(@{$test_genes}), 11, 'run method: eleven genes stored');
+is(scalar(@{$test_genes}), 12, 'run method: twelve genes stored');
 
 foreach my $test_gene (@{$test_genes}) {
   note('gene:'.$test_gene->stable_id);
@@ -796,7 +797,7 @@ foreach my $test_gene (@{$test_genes}) {
     
     my $transcript = $$transcripts[0];
     is($transcript->biotype, 'protein_coding', 'run method: transcript biotype correct for '.$transcript->stable_id);
-    is(scalar(@{$transcript->get_all_Exons()}), 3, 'run method: three exons stored');
+    is(scalar(@{$transcript->get_all_Exons()}), 2, 'run method: two exons stored');
     is($transcript->seq->seq(), $cdna, 'run method: correct cDNA sequence stored');
     is($transcript->translateable_seq(), $coding, 'run method: correct coding sequence stored');
     is($transcript->translate->seq(), $aa, 'run method: correct amino acid sequence stored');
@@ -815,7 +816,7 @@ foreach my $test_gene (@{$test_genes}) {
     my $transcript = $$transcripts[0];
     
     is($transcript->biotype, 'protein_coding', 'run method: transcript biotype correct for '.$transcript->stable_id);
-    is(scalar(@{$transcript->get_all_Exons()}), 5, 'run method: five exons stored');
+    is(scalar(@{$transcript->get_all_Exons()}), 3, 'run method: three exons stored');
     is($transcript->seq->seq(), $cdna, 'run method: correct cDNA sequence stored');
     is($transcript->translateable_seq(), $coding, 'run method: correct coding sequence stored');
     is($transcript->translate->seq(), $aa, 'run method: correct amino acid sequence stored');

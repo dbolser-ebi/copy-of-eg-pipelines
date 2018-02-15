@@ -226,7 +226,7 @@ $obj->run();
 
 $xrefs = object_xrefs();
 
-is($$xrefs{xrefuniprot}{'EMBL'}, 12,                     'run method: correct number of xrefs');
+is($$xrefs{xrefuniprot}{'EMBL'}, 8,                     'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'EntrezGene'}, 10,               'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'MEROPS'}, 17,                   'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'protein_id'}, 513,              'run method: correct number of xrefs');
@@ -240,7 +240,7 @@ is($$xrefs{xrefexonerateprotein}{'protein_id'}, 51,      'run method: correct nu
 ok(!defined($$xrefs{xrefexonerateprotein}{'STRING'}),    'run method: correct number of xrefs');
 is($$xrefs{xrefexonerateprotein}{'RefSeq_peptide'}, 157, 'run method: correct number of xrefs');
 
-is_rows(529, $dba,
+is_rows(525, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]
@@ -252,7 +252,7 @@ $obj->run();
 
 $xrefs = object_xrefs();
 
-is($$xrefs{xrefuniprot}{'EMBL'}, 5,                           'run method: correct number of xrefs');
+is($$xrefs{xrefuniprot}{'EMBL'}, 1,                           'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'EntrezGene'}, 135,                   'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'MEROPS'}, 8,                         'run method: correct number of xrefs');
 is($$xrefs{xrefuniprot}{'protein_id'}, 207,                   'run method: correct number of xrefs');
@@ -266,7 +266,7 @@ ok(!defined($$xrefs{xrefexonerateprotein}{'protein_id'}),     'run method: corre
 ok(!defined($$xrefs{xrefexonerateprotein}{'STRING'}),         'run method: correct number of xrefs');
 ok(!defined($$xrefs{xrefexonerateprotein}{'RefSeq_peptide'}), 'run method: correct number of xrefs');
 
-is_rows(529, $dba,
+is_rows(525, $dba,
   'dependent_xref INNER JOIN object_xref USING (object_xref_id)',
   'WHERE analysis_id = ?',
   [$analysis->dbID()]

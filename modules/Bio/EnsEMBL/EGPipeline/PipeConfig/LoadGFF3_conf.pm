@@ -49,18 +49,12 @@ use File::Spec::Functions qw(catdir);
 sub default_options {
   my ($self) = @_;
   return {
-    %{$self->SUPER::default_options},
+    %{$self->default_options_generic},
     
     pipeline_name => 'load_gff3_'.$self->o('species'),
     
     gff3_tidy_file => $self->o('gff3_file').'.tidied',
     fasta_file     => catdir($self->o('pipeline_dir'), $self->o('species').'.fa'),
-    
-    # Attempt to correct transcripts with invalid translations.
-    fix_models => 1,
-    
-    # Where fixes fail, apply seq-edits where possible.
-    apply_seq_edits => 1,
     
     # If loading data from NCBI, their homology- and transcriptome-based
     # gene model modifications can be loaded as sequence edits in the db.
@@ -69,6 +63,20 @@ sub default_options {
     # Sometimes selenocysteines and readthrough stop codons are only
     # indicated in the provider's protein sequences.
     protein_fasta_file => undef,
+    
+  };
+}
+
+sub default_options_generic {
+  my ($self) = @_;
+  return {
+    %{$self->SUPER::default_options},
+    
+    # Attempt to correct transcripts with invalid translations.
+    fix_models => 1,
+    
+    # Where fixes fail, apply seq-edits where possible.
+    apply_seq_edits => 1,
     
     # Can also load genes into an otherfeatures db.
     db_type => 'core',
@@ -100,13 +108,13 @@ sub default_options {
     fasta_tidy  => "perl -i -pe '".$self->o('fasta_subst')."'",
     
     # Lists of the types that we expect to see in the GFF3 file.
-    gene_types   => ['gene', 'pseudogene', 'miRNA_gene',
+    gene_types   => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
                      'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
     mrna_types   => ['mRNA', 'transcript', 'pseudogenic_transcript',
                      'pseudogenic_rRNA', 'pseudogenic_tRNA',
                      'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA',
-                     'RNAse_P_RNA', 'rRNA', 'snoRNA', 'snRNA', 'sRNA',
-                     'SRP_RNA', 'tRNA'],
+                     'RNase_MRP_RNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA',
+                     'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'],
     exon_types   => ['exon', 'pseudogenic_exon'],
     cds_types    => ['CDS'],
     utr_types    => ['five_prime_UTR', 'three_prime_UTR'],
@@ -138,6 +146,14 @@ sub default_options {
     # (rather than inferring from CDS), unless 'polypeptides' = 0. 
     polypeptides => 1,
     
+    # Some sources (I'm looking at you, RefSeq) have 1- or 2-base introns
+    # defined to deal with readthrough stop codons. But their sequence
+    # files contradict this, and include those intronic bases. The NCBI
+    # .gbff files then define a 1- or 2-base insertion of 'N's, which
+    # fixes everything up (and which this pipeline can handle).
+    # So, the pipeline can merge exons that are separated by a small intron.
+    min_intron_size => undef,
+    
     # Set the biotype for transcripts that produce invalid translations. We
     # can treat them as pseudogenes by setting 'nontranslating' => "pseudogene".
     # The default is "nontranslating_CDS", and in this case the translation
@@ -148,6 +164,10 @@ sub default_options {
     # By default, genes are loaded as full-on genes; load instead as a
     # predicted transcript by setting 'prediction' = 1.
     prediction => 0,
+    
+    # Big genomes need more memory, because we need to load all the
+    # sequence into an in-memory database.
+    big_genome_threshold => 1e9,
   };
 }
 
@@ -181,21 +201,51 @@ sub pipeline_create_commands {
 }
 
 sub pipeline_wide_parameters {
- my ($self) = @_;
- 
- return {
-   %{$self->SUPER::pipeline_wide_parameters},
-   'species'         => $self->o('species'),
-   'db_type'         => $self->o('db_type'),
-   'logic_name'      => $self->o('logic_name'),
-   'fasta_file'      => $self->o('fasta_file'),
-   'delete_existing' => $self->o('delete_existing'),
-   'fix_models'      => $self->o('fix_models'),
-   'apply_seq_edits' => $self->o('apply_seq_edits'),
- };
+  my ($self) = @_;
+  
+  return {
+    %{$self->pipeline_wide_parameters_generic},
+    'species'            => $self->o('species'),
+    'gff3_file'          => $self->o('gff3_file'),
+    'gff3_tidy_file'     => $self->o('gff3_tidy_file'),
+    'fasta_file'         => $self->o('fasta_file'),
+    'genbank_file'       => $self->o('genbank_file'),
+    'protein_fasta_file' => $self->o('protein_fasta_file'),
+  };
+}
+
+sub pipeline_wide_parameters_generic {
+  my ($self) = @_;
+  
+  return {
+    %{$self->SUPER::pipeline_wide_parameters},
+    'db_type'              => $self->o('db_type'),
+    'logic_name'           => $self->o('logic_name'),
+    'delete_existing'      => $self->o('delete_existing'),
+    'fix_models'           => $self->o('fix_models'),
+    'apply_seq_edits'      => $self->o('apply_seq_edits'),
+    'big_genome_threshold' => $self->o('big_genome_threshold'),
+  };
 }
 
 sub pipeline_analyses {
+  my ($self) = @_;
+  
+  return [
+    {
+      -logic_name      => 'RunPipeline',
+      -module          => 'Bio::EnsEMBL::Hive::RunnableDB::Dummy',
+      -max_retry_count => 0,
+      -input_ids       => [ {} ],
+      -flow_into       => ['GFF3Tidy'],
+      -meadow_type     => 'LOCAL',
+    },
+    
+    @{ $self->pipeline_analyses_generic}
+  ];
+}
+
+sub pipeline_analyses_generic {
   my ($self) = @_;
   
   return [
@@ -204,11 +254,8 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -max_retry_count   => 0,
       -parameters        => {
-                              cmd => $self->o('gff3_tidy').' '.
-                                     $self->o('gff3_file').' > '.
-                                     $self->o('gff3_tidy_file'),
+                              cmd => $self->o('gff3_tidy').' #gff3_file# > #gff3_tidy_file#',
                             },
-      -input_ids         => [ {} ],
       -rc_name           => 'normal',
       -flow_into         => ['GFF3Validate'],
     },
@@ -218,8 +265,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -max_retry_count   => 0,
       -parameters        => {
-                              cmd => $self->o('gff3_validate').' '.
-                                     $self->o('gff3_tidy_file'),
+                              cmd => $self->o('gff3_validate').' #gff3_tidy_file#',
                             },
       -rc_name           => 'normal',
       -flow_into         => {
@@ -235,8 +281,7 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::Hive::RunnableDB::SystemCmd',
       -max_retry_count   => 1,
       -parameters        => {
-                              cmd => $self->o('fasta_tidy').' '.
-                                     $self->o('fasta_file'),
+                              cmd => $self->o('fasta_tidy').' #fasta_file#',
                             },
       -rc_name           => 'normal',
       -flow_into         => ['BackupDatabase'],
@@ -245,9 +290,10 @@ sub pipeline_analyses {
     {
       -logic_name        => 'DumpGenome',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DumpGenome',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
-                              genome_file  => $self->o('fasta_file'),
+                              genome_file  => '#fasta_file#',
                               header_style => 'name',
                             },
       -rc_name           => 'normal',
@@ -257,9 +303,10 @@ sub pipeline_analyses {
     {
       -logic_name        => 'BackupDatabase',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::DatabaseDumper',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {
-                              output_file => catdir($self->o('pipeline_dir'), $self->o('species'), 'pre_gff3_bkp.sql.gz'),
+                              output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_gff3_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
       -flow_into         => {
@@ -273,6 +320,7 @@ sub pipeline_analyses {
     {
       -logic_name        => 'DeleteGenes',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::DeleteGenes',
+      -analysis_capacity => 10,
       -max_retry_count   => 1,
       -parameters        => {},
       -rc_name           => 'normal',
@@ -282,55 +330,113 @@ sub pipeline_analyses {
     {
       -logic_name        => 'AnalysisSetup',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::AnalysisSetup',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
                               db_backup_required => 1,
-                              db_backup_file     => catdir($self->o('pipeline_dir'), $self->o('species'), 'pre_gff3_bkp.sql.gz'),
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_gff3_bkp.sql.gz'),
                               module             => $self->o('analysis_module'),
                               delete_existing    => $self->o('delete_existing'),
                               production_lookup  => $self->o('production_lookup'),
                               production_db      => $self->o('production_db'),
                             },
       -meadow_type       => 'LOCAL',
-      -flow_into         => ['AddSynonyms'],
+      -flow_into         => WHEN('-s #fasta_file# < #big_genome_threshold#' =>
+                              ['AddSynonyms'],
+                            ELSE
+                              ['AddSynonyms_HighMem']),
     },
 
     {
       -logic_name        => 'AddSynonyms',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms',
+      -analysis_capacity => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              escape_branch       => -1,
+                              synonym_external_db => $self->o('synonym_external_db'),
+                            },
+      -rc_name           => 'normal',
+      -flow_into         => {
+                               '1' => ['LoadGFF3'],
+                              '-1' => ['AddSynonyms_HighMem'],
+                            },
+    },
+
+    {
+      -logic_name        => 'AddSynonyms_HighMem',
+      -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::AddSynonyms',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
                               synonym_external_db => $self->o('synonym_external_db'),
                             },
-      -rc_name           => 'normal',
-      -flow_into         => ['LoadGFF3'],
+      -rc_name           => '8Gb_mem',
+      -flow_into         => ['LoadGFF3_HighMem'],
     },
 
     {
       -logic_name        => 'LoadGFF3',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
       -parameters        => {
-                              gene_source    => $self->o('gene_source'),
-                              gff3_file      => $self->o('gff3_tidy_file'),
-                              fasta_file     => $self->o('fasta_file'),
-                              gene_types     => $self->o('gene_types'),
-                              mrna_types     => $self->o('mrna_types'),
-                              exon_types     => $self->o('exon_types'),
-                              cds_types      => $self->o('cds_types'),
-                              utr_types      => $self->o('utr_types'),
-                              ignore_types   => $self->o('ignore_types'),
-                              types_complete => $self->o('types_complete'),
-                              use_name_field => $self->o('use_name_field'),
-                              polypeptides   => $self->o('polypeptides'),
-                              nontranslating => $self->o('nontranslating'),
-                              prediction     => $self->o('prediction'),
+                              escape_branch   => -1,
+                              gene_source     => $self->o('gene_source'),
+                              gff3_file       => '#gff3_tidy_file#',
+                              gene_types      => $self->o('gene_types'),
+                              mrna_types      => $self->o('mrna_types'),
+                              exon_types      => $self->o('exon_types'),
+                              cds_types       => $self->o('cds_types'),
+                              utr_types       => $self->o('utr_types'),
+                              ignore_types    => $self->o('ignore_types'),
+                              types_complete  => $self->o('types_complete'),
+                              use_name_field  => $self->o('use_name_field'),
+                              polypeptides    => $self->o('polypeptides'),
+                              min_intron_size => $self->o('min_intron_size'),
+                              nontranslating  => $self->o('nontranslating'),
+                              prediction      => $self->o('prediction'),
                               xref_gene_external_db        => $self->o('xref_gene_external_db'),
                               xref_transcript_external_db  => $self->o('xref_transcript_external_db'),
                               xref_translation_external_db => $self->o('xref_translation_external_db'),
                               
                             },
-      -rc_name           => 'normal',
+      -rc_name           => '8Gb_mem',
+      -flow_into         => {
+                               '1' => WHEN('#fix_models#' =>
+                                        ['FixModels'],
+                                      ELSE
+                                        ['EmailReport']),
+                              '-1' => ['LoadGFF3_HighMem'],
+                            },
+    },
+
+    {
+      -logic_name        => 'LoadGFF3_HighMem',
+      -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::LoadGFF3',
+      -analysis_capacity => 10,
+      -max_retry_count   => 0,
+      -parameters        => {
+                              gene_source     => $self->o('gene_source'),
+                              gff3_file       => '#gff3_tidy_file#',
+                              gene_types      => $self->o('gene_types'),
+                              mrna_types      => $self->o('mrna_types'),
+                              exon_types      => $self->o('exon_types'),
+                              cds_types       => $self->o('cds_types'),
+                              utr_types       => $self->o('utr_types'),
+                              ignore_types    => $self->o('ignore_types'),
+                              types_complete  => $self->o('types_complete'),
+                              use_name_field  => $self->o('use_name_field'),
+                              polypeptides    => $self->o('polypeptides'),
+                              min_intron_size => $self->o('min_intron_size'),
+                              nontranslating  => $self->o('nontranslating'),
+                              prediction      => $self->o('prediction'),
+                              xref_gene_external_db        => $self->o('xref_gene_external_db'),
+                              xref_transcript_external_db  => $self->o('xref_transcript_external_db'),
+                              xref_translation_external_db => $self->o('xref_translation_external_db'),
+                              
+                            },
+      -rc_name           => '16Gb_mem',
       -flow_into         => {
                               '1' => WHEN('#fix_models#' =>
                                       ['FixModels'],
@@ -342,10 +448,9 @@ sub pipeline_analyses {
     {
       -logic_name        => 'FixModels',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::FixModels',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
-      -parameters        => {
-                              protein_fasta_file => $self->o('protein_fasta_file'),
-                            },
+      -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => {
                               '1' => WHEN('#apply_seq_edits#' =>
@@ -358,11 +463,9 @@ sub pipeline_analyses {
     {
       -logic_name        => 'ApplySeqEdits',
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::ApplySeqEdits',
+      -analysis_capacity => 10,
       -max_retry_count   => 0,
-      -parameters        => {
-                              genbank_file       => $self->o('genbank_file'),
-                              protein_fasta_file => $self->o('protein_fasta_file'),
-                            },
+      -parameters        => {},
       -rc_name           => 'normal',
       -flow_into         => ['EmailReport'],
     },
@@ -372,9 +475,8 @@ sub pipeline_analyses {
       -module            => 'Bio::EnsEMBL::EGPipeline::LoadGFF3::EmailReport',
       -max_retry_count   => 1,
       -parameters        => {
-                              email              => $self->o('email'),
-                              subject            => 'GFF3 Loading pipeline has completed for #species#',
-                              protein_fasta_file => $self->o('protein_fasta_file'),
+                              email   => $self->o('email'),
+                              subject => 'GFF3 Loading pipeline has completed for #species#',
                             },
       -rc_name           => 'normal',
     },

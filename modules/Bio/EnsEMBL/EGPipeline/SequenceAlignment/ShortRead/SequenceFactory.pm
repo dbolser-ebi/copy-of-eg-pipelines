@@ -32,7 +32,7 @@ sub param_defaults {
   return {
     'reformat_header' => 1,
     'trim_est'        => 1,
-    'trimest_exe'     => '/nfs/panda/ensemblgenomes/external/EMBOSS/bin/trimest',
+    'trimest_exe'     => 'trimest',
     'tax_id_restrict' => 1,
   };
 }
@@ -45,11 +45,13 @@ sub write_output {
   my $file_pairs  = $self->param('seq_file_pair');
   my $run_ids     = $self->param('run');
   my $study_ids   = $self->param('study');
-  my $merge_level = $self->param_required('merge_level');
+  my $merge_level = $self->param('merge_level');
   my $merge_id    = $self->param('merge_id');
+  my $merge_group = $self->param('merge_group');
   
   $self->param('merge_ids', {});
   
+  # From single files
   my @file_output = $self->files($files, $merge_level, $merge_id);
   foreach my $file_output (@file_output) {
     if ($data_type eq 'est') {
@@ -59,19 +61,27 @@ sub write_output {
     }
   }
   
+  # From pairs of files
   my @paired_file_output = $self->file_pairs($file_pairs, $merge_level, $merge_id);
   foreach my $paired_file_output (@paired_file_output) {
     $self->dataflow_output_id($paired_file_output, 3);
   }
   
+  # From SRA run accessions
   my @run_output = $self->sra_files($run_ids, $study_ids, $merge_level);
   foreach my $run_output (@run_output) {
     $self->dataflow_output_id($run_output, 4);
   }
   
+  # From merge groups
+  my @merge_group_output = $self->merged_sra_files($merge_group);
+  foreach my $merge_group_output (@merge_group_output) {
+    $self->dataflow_output_id($merge_group_output, 4);
+  }
+  
+  # Prepare list of tracks to be merged
   my %merge_ids = %{$self->param('merge_ids')};
   $self->throw("No run to align. Abort.") if keys %merge_ids == 0;
-  
   my @output;
   foreach my $merge_id (keys %merge_ids) {
     push @output,
@@ -218,6 +228,51 @@ sub sra_files {
         'run_id'   => $run_id,
         'merge_id' => $merge_id,
       };
+  }
+  
+  return @output;
+}
+
+sub merged_sra_files {
+  my ($self, $merge_groups) = @_;
+  
+  my $tax_id_restrict = $self->param_required('tax_id_restrict');
+  my $run_adaptor = get_adaptor('Run');
+  my @output = ();
+  
+  foreach my $merge_id (keys %$merge_groups) {
+      my @run_ids = split/,/, $merge_groups->{$merge_id};
+      my @runs;
+      
+      # Get run object from SRA accession
+      foreach my $run_id (@run_ids) {
+          foreach my $run (@{$run_adaptor->get_by_accession($run_id)}) {
+              push @runs, $run;
+          }
+      }
+      
+      # Add each run to the group
+      foreach my $run (@runs) {
+          if ($tax_id_restrict) {
+              next if not $self->tax_id_match($run);
+          }
+          next if not $self->is_transcriptomic($run);
+          
+          my $run_id = $run->accession;
+          my $merge_label = $merge_id;
+
+          $self->param('merge_ids')->{$merge_id}{'label'} = $merge_label;
+          
+          # Store the list of runs for this merge_id (for the MergeFactory)
+          push @{$self->param('merge_ids')->{$merge_id}{'run_ids'}}, $run_id;
+            
+          # And add this run to be processed
+          push @output,
+          {
+              'run_id'   => $run_id,
+              'merge_id' => $merge_id,
+          };
+      }
   }
   
   return @output;
