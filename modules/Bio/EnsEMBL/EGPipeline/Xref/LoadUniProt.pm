@@ -248,7 +248,7 @@ sub get_uniprot_for_upi {
 
       if (defined $gene_name) {
         if (!exists $synonyms{$gene_name}) {
-          if ($gene_name_type eq 'Name') {
+          if ($gene_name_type eq 'Name' && $gene_name !~ /^\d+$/) {
             $uniprots{$ac}{gene_name} = $gene_name;
           } else {
             push @{$uniprots{$ac}{synonyms}}, $gene_name;

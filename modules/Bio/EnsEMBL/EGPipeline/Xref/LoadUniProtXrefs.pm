@@ -105,24 +105,26 @@ sub add_xrefs {
       my $uniprot_xrefs = $dbea->fetch_all_by_Translation($translation, $$uniprot_external_dbs{$status});
 
       foreach my $uniprot_xref (@$uniprot_xrefs) {
-        my $transitive_xrefs = $self->get_xrefs_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
+        if ($uniprot_xref->info_type eq 'DEPENDENT') {
+          my $transitive_xrefs = $self->get_xrefs_for_uniprot($uniprot_dba, $uniprot_xref->primary_id);
 
-        foreach my $transitive_xref (@$transitive_xrefs) {
-          my $xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
-          if (defined $xref) {
-            if ($xref->dbname eq 'EntrezGene' || $xref->dbname eq 'UniGene') {
-              $dbea->store($xref, $translation->transcript->get_Gene->dbID(), 'Gene', 0, $uniprot_xref);
-            } else {
-       	      $dbea->store($xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
-              if (exists($$secondary_external_dbs{$xref->dbname})) {
-                if ($$transitive_xref[2] && $$transitive_xref[2] ne '-') {
-                  $$transitive_xref[0] = $$secondary_external_dbs{$xref->dbname};
-                  $$transitive_xref[1] = $$transitive_xref[2];
-                  my $sec_xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
-                  if ($sec_xref->dbname eq 'RefSeq_dna') {
-                    $dbea->store($sec_xref, $translation->transcript->dbID(), 'Transcript', 0, $uniprot_xref);
-                  } else {
-             	      $dbea->store($sec_xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+          foreach my $transitive_xref (@$transitive_xrefs) {
+            my $xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
+            if (defined $xref) {
+              if ($xref->dbname eq 'EntrezGene' || $xref->dbname eq 'UniGene') {
+                $dbea->store($xref, $translation->transcript->get_Gene->dbID(), 'Gene', 0, $uniprot_xref);
+              } else {
+         	      $dbea->store($xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+                if (exists($$secondary_external_dbs{$xref->dbname})) {
+                  if ($$transitive_xref[2] && $$transitive_xref[2] ne '-') {
+                    $$transitive_xref[0] = $$secondary_external_dbs{$xref->dbname};
+                    $$transitive_xref[1] = $$transitive_xref[2];
+                    my $sec_xref = $self->add_xref($transitive_xref, $analysis, $external_dbs);
+                    if ($sec_xref->dbname eq 'RefSeq_dna') {
+                      $dbea->store($sec_xref, $translation->transcript->dbID(), 'Transcript', 0, $uniprot_xref);
+                    } else {
+               	      $dbea->store($sec_xref, $translation->dbID(), 'Translation', 0, $uniprot_xref);
+                    }
                   }
                 }
               }

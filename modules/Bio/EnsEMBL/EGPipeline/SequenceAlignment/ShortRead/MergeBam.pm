@@ -31,8 +31,8 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    'samtools_dir' => '/nfs/panda/ensemblgenomes/external/samtools',
-    'bcftools_dir' => '/nfs/panda/ensemblgenomes/external/bcftools-1.2/bin',
+    'samtools_dir' => undef,
+    'bcftools_dir' => undef,
     'threads'      => 1,
     'clean_up'     => 1,
     'use_csi'      => 0,
@@ -79,8 +79,8 @@ sub write_output {
 sub merge_bam {
   my ($self, $bam_files, $merged_bam_file) = @_;
   
-  my $samtools_dir = $self->param_required('samtools_dir');
-  my $bcftools_dir = $self->param_required('bcftools_dir');
+  my $samtools_dir = $self->param('samtools_dir');
+  my $bcftools_dir = $self->param('bcftools_dir');
   my $threads      = $self->param_required("threads");
   my $clean_up     = $self->param_required('clean_up');
   my $use_csi      = $self->param_required("use_csi");

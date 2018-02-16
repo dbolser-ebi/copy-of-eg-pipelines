@@ -186,7 +186,7 @@ sub protein_seq_report {
         $translations{$tn_id} = 1;
         
         my $file_seq = $protein{$tn_id};
-        $file_seq =~ s/\*$//;
+        $file_seq =~ s/(\*|\-)$//;
         
         if ($db_seq ne $file_seq) {
           my $length = length($db_seq);

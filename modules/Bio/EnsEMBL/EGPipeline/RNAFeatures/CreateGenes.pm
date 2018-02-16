@@ -80,6 +80,11 @@ sub run {
       $rna_gene_count, $thresholds_count,
       $update_count, $create_count) = (0, 0, 0, 0, 0, 0, 0);
   
+  # Collate genes, so that we can either push all of them or
+  # none of them (in the event of an error that causes the module to fail).
+  my @new_genes = ();
+  my @updated_genes = ();
+  
   FEATURE: foreach my $feature (@features) {
     if (! defined $feature->db_name) {
       my $dbid = $feature->dbID;
@@ -110,19 +115,27 @@ sub run {
     if ($self->check_thresholds($feature)) {
       my ($overlap, $within, $rna_transcript) =
         $self->rna_gene_overlap($ta, $feature, $gene_overlap_sources);
-      
+   
       if ($overlap) {
         $rna_gene_count++;
       } elsif ($within) {
-        $self->update_gene($aa, $ga, $dbea, $tsfa, $feature, $rna_transcript);
+        push @updated_genes, [$feature, $rna_transcript];
         $update_count++;
       } else {
-        $self->create_gene($dba, $aa, $ga, $dbea, $ida, $gene_source, $feature);
+        push @new_genes, $feature;
         $create_count++;
       }
     } else {
       $thresholds_count++;
     }
+  }
+  
+  foreach my $new_gene (@new_genes) {
+    $self->create_gene($dba, $aa, $ga, $dbea, $ida, $gene_source, $new_gene);
+  }
+  
+  foreach my $updated_gene (@updated_genes) {
+    $self->update_gene($aa, $ga, $dbea, $tsfa, @$updated_gene);
   }
   
   my $msg = "$create_count $source_logic_name alignments were converted to genes, ".
@@ -230,8 +243,10 @@ sub coding_exon_overlap {
   my ($overlap, $within) = (0, 0);
   my @transcripts = @{ $ta->fetch_all_nearest_by_Feature(-FEATURE => $feature, -RANGE => 0) };
   foreach my $t (@transcripts) {
-    my $transcript = $$t[0]->transfer($feature->slice->seq_region_Slice());
-
+    # Need a fresh copy of the transcripts in order for its slice
+    # to encompass the whole transcript.
+    my $transcript = $ta->fetch_by_stable_id($$t[0]->stable_id);
+    
     foreach my $exon (@{ $transcript->get_all_Exons() }) {
       if (defined $exon->coding_region_start($transcript)) {
         my $e_start = $exon->coding_region_start($transcript);

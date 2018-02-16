@@ -106,14 +106,14 @@ sub run {
   }
   
   if ($taxonomic_level) {
-    $self->convert_to_fasta($local_file, $output_file);
+    $self->convert_to_fasta($local_file, 'swiss', $output_file);
   } else {
-    gunzip $local_file => $output_file;
+    $self->convert_to_fasta($local_file, 'fasta', $output_file);
   }
 }
 
 sub convert_to_fasta {
-  my ($self, $file, $output_file) = @_;
+  my ($self, $file, $format, $output_file) = @_;
   
   my $seq_out = Bio::SeqIO->new(
     -file   => '>'.$output_file,
@@ -124,10 +124,13 @@ sub convert_to_fasta {
   open(F, "gunzip -c $file |");
   my $seq_in = Bio::SeqIO->new(
     -fh     => \*F,
-    -format => 'swiss',
+    -format => $format,
   );
   
   while (my $inseq = $seq_in->next_seq) {
+    my (undef, $primary_id, undef) = split(/\|/, $inseq->display_id);
+    $inseq->display_id($primary_id);
+    
     $seq_out->write_seq($inseq);
   }
 }

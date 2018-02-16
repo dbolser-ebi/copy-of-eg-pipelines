@@ -27,8 +27,8 @@ sub param_defaults {
   my ($self) = @_;
   
   return {
-    'bedtools_dir'  => '/nfs/panda/ensemblgenomes/external/bedtools/bin',
-    'ucscutils_dir' => '/nfs/panda/ensemblgenomes/external/ucsc_utils',
+    'bedtools_dir'  => undef,
+    'ucscutils_dir' => undef,
     'clean_up'      => 1,
   };
 }
@@ -36,8 +36,8 @@ sub param_defaults {
 sub run {
 	my ($self) = @_;
   
-  my $bedtools_dir  = $self->param_required('bedtools_dir');
-  my $ucscutils_dir = $self->param_required('ucscutils_dir');
+  my $bedtools_dir  = $self->param('bedtools_dir');
+  my $ucscutils_dir = $self->param('ucscutils_dir');
   my $clean_up      = $self->param_required('clean_up');
   my $length_file   = $self->param_required('length_file');
   my $bam_file      = $self->param_required('merged_bam_file');
@@ -48,19 +48,28 @@ sub run {
     $bw_file = "$bam_file.bw";
   }
   
+  my $bedtools = 'bedtools';
+  if (defined $bedtools_dir) {
+    $bedtools = "$bedtools_dir/$bedtools"
+  }
+  my $ucscutils = 'wigToBigWig';
+  if (defined $ucscutils_dir) {
+    $ucscutils = "$ucscutils_dir/$ucscutils"
+  }
+  
   my $wig_cmd =
-    "$bedtools_dir/bedtools genomecov ".
+    "$bedtools genomecov ".
     " -g $length_file ".
     " -ibam $bam_file ".
     " -bg ".
     " -split ".
     " > $wig_file ";
   my $bw_cmd =
-    "$ucscutils_dir/wigToBigWig ".
+    "$ucscutils ".
     " $wig_file ".
     " $length_file ".
     " $bw_file ";
-    
+  
   # Reuse precalculated bigwig if it was finished
   if (not -s $bw_file or -s $wig_file) {
     $self->_execute($wig_cmd);

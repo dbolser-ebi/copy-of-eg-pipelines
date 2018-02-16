@@ -2,6 +2,7 @@
 508	Sequences from various databases are matched to Ensembl transcripts using <a rel="external" href="http://www.biomedcentral.com/1471-2105/6/31">Exonerate</a>. These are external references, or 'Xrefs'.	DNA match	0	\N
 509	Updates to the gene models from the Anopheles community.	Community models	0	{'label_key' => '[text_label] [display_label]','type' => 'cdna','default' => {'contigviewbottom' => 'transcript_label','contigviewtop' => 'gene_label','cytoview' => 'gene_label'}}
 510	match	Protein	0	\N
+555	Cross-reference derived transitively from a UniProt record	UniProt-derived cross-reference	0	\N
 511	Cross-reference derived transitively from a UniProt record	UniProt-derived cross-reference	0	\N
 512	UniProt cross-reference derived transitively from a UniParc identifier	UniParc-derived cross-reference	1	\N
 513	UniParc mapping based on sequence checksums	UniParc cross-reference	0	\N

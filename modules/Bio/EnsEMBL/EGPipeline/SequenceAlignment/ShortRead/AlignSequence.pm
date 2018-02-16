@@ -43,10 +43,10 @@ sub fetch_input {
   }
   
   my $aligner_class = $self->param_required('aligner_class');
-  my $aligner_dir   = $self->param_required('aligner_dir');
-  my $samtools_dir  = $self->param_required('samtools_dir');
   my $threads       = $self->param_required('threads');
   my $run_mode      = $self->param_required('run_mode');
+  my $aligner_dir   = $self->param('aligner_dir');
+  my $samtools_dir  = $self->param('samtools_dir');
   my $max_intron    = $self->param('max_intron');
   my $gtf_file      = $self->param('gtf_file');
   

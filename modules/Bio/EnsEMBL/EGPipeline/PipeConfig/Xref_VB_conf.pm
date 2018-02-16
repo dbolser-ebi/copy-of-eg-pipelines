@@ -62,7 +62,7 @@ sub default_options {
     sheet_url    => 'https://docs.google.com/spreadsheets/d',
     sheet_format => 'export?exportFormat=tsv',
     sheet_keys   => {
-      'aedes_aegypti'             => '1D6Ax2HJyWcnukIkPu2Zio7hZ_ajQiZbvzfb1DfINLwo',
+      'aedes_aegypti_lvpagwg'     => '1D6Ax2HJyWcnukIkPu2Zio7hZ_ajQiZbvzfb1DfINLwo',
       'aedes_albopictus'          => '1T8nVia4ATqIZKNi8FbMR9ikvEb9JDxGTppgkTUfLw3Q',
       'anopheles_albimanus'       => '1IkszmWkEzJ5lTHw6ugOSGFV_0soguBIoTPOh7-CE51o',
       'anopheles_arabiensis'      => '1a5OtCuDUGxbrg_0rMcbDQHUHXtwbzO_g9vTm_K896UY',

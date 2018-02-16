@@ -37,11 +37,6 @@ sub default_options {
     dump_gtf        => $ENV{WORM_CODE}."/scripts/ENSEMBL/scripts/dump_gtf_from_ensembl.pl",
     wbps_version    => $ENV{PARASITE_VERSION},
     
-
-    dump_ftp        => 1,
-    dump_blast      => 1,
-    dump_vep        => 0,
-
     pipeline_db => {
       -host   => $self->o('host'),
       -port   => $self->o('port'),
@@ -55,11 +50,11 @@ sub default_options {
     #
     # ftp dumping options
     #
+    ftp_outdir => '',
     ftp_species => [],
     # put core species in here
     ftp_antispecies => [],
 
-    ftp_outdir => "/nfs/ftp/pub/databases/wormbase/staging/parasite/releases",
     ftp_genome	             => 1,
     ftp_genome_masked	     => 1,
     ftp_genome_softmasked    => 1,
@@ -74,7 +69,7 @@ sub default_options {
     #
     # BLAST dumping options
     #
-    blast_outdir => "/nfs/nobackup/ensemblgenomes/wormbase/parasite/ftp_dumps/vep",
+    blast_outdir => '',
     blast_species => [],
     blast_antispecies => [],
 
@@ -94,6 +89,18 @@ sub beekeeper_extra_cmdline_options {
 
 sub pipeline_analyses {
   my ($self) = @_;
+
+  my $ini = [];
+  
+  if (!$self->o('ftp_outdir') && ! $self->o('blast_outdir')) {
+    die("Required options: at least one of ftp_outdir, blast_outdir. Nothing do to otherwise");
+  }
+  if ($self->o('ftp_outdir')) {
+    push @$ini, 'SpeciesFactoryFTP';
+  }
+  if ($self->o('blast_outdir')) {
+    push @$ini, 'SpeciesFactoryBlast';
+  }
 
   my $ftp_analysis = [];
 
@@ -135,14 +142,6 @@ sub pipeline_analyses {
   }
   if ($self->o('blast_protein')) {
     push @$blast_analysis, 'DumpProteinsBlast';
-  }
-
-  my $ini = [];
-  if ($self->o('dump_ftp')) {
-    push @$ini, 'SpeciesFactory';
-  }
-  if ($self->o('dump_blast')) {
-    push @$ini, 'SpeciesFactoryBlast';
   }
 
   return [
@@ -234,7 +233,7 @@ sub pipeline_analyses {
     # FTP
     #
     {
-      -logic_name        => 'SpeciesFactory',
+      -logic_name        => 'SpeciesFactoryFTP',
       -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
       -max_retry_count   => 1,
       -parameters        => {

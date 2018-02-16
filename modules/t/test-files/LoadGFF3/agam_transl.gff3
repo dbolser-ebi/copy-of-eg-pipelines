@@ -74,6 +74,18 @@
 2L	VectorBase	exon	2104330	2105337	.	-	.	Parent=test_negative_strand_overlapping_exons-RA
 2L	VectorBase	five_prime_UTR	2105114	2105337	.	-	.	Parent=test_negative_strand_overlapping_exons-RA
 ###
+2L	VectorBase	gene	2163142	2164726	.	+	.	ID=test_short_introns
+2L	VectorBase	mRNA	2163142	2164726	.	+	.	ID=test_short_introns-RA;Parent=test_short_introns
+2L	VectorBase	five_prime_UTR	2163142	2163142	.	+	.	Parent=test_short_introns-RA
+2L	VectorBase	exon	2163142	2163200	.	+	.	Parent=test_short_introns-RA
+2L	VectorBase	CDS	2163143	2163200	.	+	0	ID=test_short_introns-PA;Parent=test_short_introns-RA
+2L	VectorBase	exon	2163203	2163250	.	+	.	Parent=test_short_introns-RA
+2L	VectorBase	CDS	2163203	2163250	.	+	2	ID=test_short_introns-PA;Parent=test_short_introns-RA
+2L	VectorBase	CDS	2164277	2164366	.	+	2	ID=test_short_introns-PA;Parent=test_short_introns-RA
+2L	VectorBase	exon	2164277	2164726	.	+	.	Parent=test_short_introns-RA
+2L	VectorBase	exon	2164377	2164626	.	+	.	Parent=test_short_introns-RA
+2L	VectorBase	three_prime_UTR	2164367	2164726	.	+	.	Parent=test_short_introns-RA
+###
 2L	VectorBase	gene	2775211	2796481	.	+	.	ID=test_multiple_transcripts
 2L	VectorBase	mRNA	2775211	2796481	.	+	.	ID=test_multiple_transcripts-RA;Parent=test_multiple_transcripts
 2L	VectorBase	exon	2775211	2775371	.	+	.	Parent=test_multiple_transcripts-RA

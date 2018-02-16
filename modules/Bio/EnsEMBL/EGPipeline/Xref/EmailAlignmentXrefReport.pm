@@ -50,7 +50,7 @@ sub param_defaults {
 sub fetch_input {
   my ($self) = @_;
   my $species     = $self->param_required('species');
-  my $external_db = $self->param('$external_db');
+  my $external_db = $self->param('external_db');
   my $logic_name  = $self->param('logic_name');
 
   my $dba = $self->get_DBAdaptor($self->param('db_type'));

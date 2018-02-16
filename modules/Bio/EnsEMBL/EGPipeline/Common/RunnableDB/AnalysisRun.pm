@@ -52,9 +52,9 @@ sub param_defaults {
     'db_type'          => 'core',
     'querylocation'    => undef,
     'queryfile'        => undef,
-    'bindir'           => '/nfs/software/ensembl/RHEL7/linuxbrew/bin',
+    'bindir'           => '/nfs/software/ensembl/latest/linuxbrew/bin',
     'datadir'          => '/nfs/panda/ensemblgenomes/external/data',
-    'libdir'           => '/nfs/software/ensembl/RHEL7/linuxbrew/lib',
+    'libdir'           => '/nfs/software/ensembl/latest/linuxbrew/lib',
     'workdir'          => '/tmp',
     'parameters_hash'  => {},
     'results_index'    => 'slice',
@@ -125,6 +125,7 @@ sub fetch_input {
 
 sub run {
   my $self = shift @_;
+  my $db_type      = $self->param('db_type');
   my $parsing_only = $self->param_required('parsing_only');
   
   my $runnable = $self->fetch_runnable();
@@ -142,9 +143,12 @@ sub run {
     $self->throw("Type of object to save (e.g. 'gene', 'protein_feature') is not defined");
   }
   
-  # Recommended Hive trick for potentially long-running analyses.
+  # Need explicit disconnects, so that connections are freed up
+  # while the analysis is running.
+  my $dba = $self->get_DBAdaptor($db_type);
+  $dba->dbc && $dba->dbc->disconnect_if_idle();
   $self->dbc && $self->dbc->disconnect_if_idle();
-  $self->dbc->reconnect_when_lost(1);
+  
   if (! $parsing_only) {
     $runnable->run_analysis();
   }

@@ -1,8 +1,6 @@
 ##fileformat=VCFv4.2
 ##FILTER=<ID=PASS,Description="All filters passed">
 ##samtoolsVersion=1.1+htslib-1.1
-##samtoolsCommand=samtools mpileup -uf /nfs/gns/homes/jallen/work/eg/ensembl_genomes/eg-pipelines/modules/t/SequenceAlignment/ShortRead/../../test-files/agam_genome.fa /tmp/jallen/mergebam/test_merge_AgamP4.bam
-##reference=file:///nfs/gns/homes/jallen/work/eg/ensembl_genomes/eg-pipelines/modules/t/SequenceAlignment/ShortRead/../../test-files/agam_genome.fa
 ##contig=<ID=2L,length=49364325>
 ##contig=<ID=Mt,length=15363>
 ##ALT=<ID=X,Description="Represents allele(s) other than observed.">

@@ -249,19 +249,23 @@ sub join_align_feature {
   my $new_data;
   
   foreach my $row (@data) {
-    my ($region, $source, $start, $end, $strand, $id) = $row =~
-      /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Parent=([^;]+)/;
-    
-    if ($id) {
+    my ($region, $source, $start, $end, $strand, $name, $evalue) = $row =~
+        /^(\S+)\t(\S+)\tmatch_part\t(\d+)\t(\d+)\t\S+\t(\S+).*Name=([^;]+).*evalue=([^;]+)/;
+   
+    if ($name) {
+      my $id = join("_", $name, $region, $strand, $evalue);
+      
       $matches{$id}{'region'} = $region;
       $matches{$id}{'source'} = $source;
       $matches{$id}{'strand'} = $strand;
+      $matches{$id}{'name'}   = $name;
       if (!defined $matches{$id}{'start'} || $matches{$id}{'start'} > $start) {
         $matches{$id}{'start'} = $start;
       }
       if (!defined $matches{$id}{'end'} || $matches{$id}{'end'} < $end) {
         $matches{$id}{'end'} = $end;
       }
+      $row .= ";Parent=$id";
       push @{$matches{$id}{'parts'}}, $row;
     } else {
       $new_data .= "$row\n";
@@ -271,18 +275,19 @@ sub join_align_feature {
   foreach my $id (keys %matches) {
     my $start = $matches{$id}{'start'};
     my $end   = $matches{$id}{'end'};
-    
+    my $name  = $matches{$id}{'name'};
+
     if ($end - $start < $max_length) {
       my $match = join("\t",
-        $matches{$id}{'region'},
-        $matches{$id}{'source'},
-        'match',
-        $start,
-        $end,
-        '.',
-        $matches{$id}{'strand'},
-        '.',
-        "ID=$id"
+                       $matches{$id}{'region'},
+                       $matches{$id}{'source'},
+                       'match',
+                       $start,
+                       $end,
+                       '.',
+                       $matches{$id}{'strand'},
+                       '.',
+                       "ID=$id;Name=$name",
       );
       $new_data .= "$match\n";
       
@@ -414,7 +419,7 @@ sub Bio::EnsEMBL::BaseAlignFeature::summary_as_hash {
   $summary{'end'}                 = $self->seq_region_end;
   $summary{'strand'}              = $self->strand;
   $summary{'id'}                  = undef;
-  $summary{'Parent'}              = $self->display_id.'_'.$self->seq_region_name.'_'.$self->strand;
+  #$summary{'Parent'}              = $self->display_id.'_'.$self->seq_region_name.'_'.$self->strand.'_'.$self->p_value;
   $summary{'Name'}                = $self->display_id;
   $summary{'description'}         = $self->analysis->description;
   $summary{'score'}               = $self->score;

@@ -61,6 +61,8 @@ sub run {
   my $filter_top_x  = $self->param_required('filter_top_x');
   my $logic_name    = $self->param_required('logic_name');
   
+  $self->dbc && $self->dbc->disconnect_if_idle();
+  
   if ($filter_top_x) {
     my $dba = $self->get_DBAdaptor($db_type);
     
