@@ -16,7 +16,7 @@ limitations under the License.
 
 =cut
 
-package Bio::EnsEMBL::EGPipeline::ProteinFeatures::StoreRheaXrefs;
+package Bio::EnsEMBL::EGPipeline::EC2Rhea::StoreRheaXrefs;
 
 use strict;
 use warnings;
