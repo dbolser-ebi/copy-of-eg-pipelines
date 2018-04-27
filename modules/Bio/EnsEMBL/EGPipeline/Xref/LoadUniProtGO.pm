@@ -119,6 +119,7 @@ sub add_xref {
 		-INFO_TYPE   => 'DEPENDENT',
   );
 	$xref->analysis($analysis);
+  $xref->{version} = undef;
 
 	if ($evidence) {
 	  $xref->add_linkage_type($evidence, $uniprot_xref);
