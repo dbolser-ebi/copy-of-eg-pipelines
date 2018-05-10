@@ -56,6 +56,7 @@ sub param_defaults {
     chromosome_flow => 3,
     variation_flow  => 4,
     regulation_flow => 5,
+    compara_flow => 6,
     div_synonyms    =>
       {
         'eb'  => 'bacteria',
@@ -82,18 +83,26 @@ sub fetch_input {
 
   my $all_dbas = Bio::EnsEMBL::Registry->get_all_DBAdaptors(-GROUP => 'core');
   my %core_dbas;
+
+  my $all_compara_dbas;
+  if ($self->param('compara_flow')) {
+    $all_compara_dbas = Bio::EnsEMBL::Registry->get_all_DBAdaptors( -GROUP => 'compara' );
+  }
+  my %compara_dbas;
   
-  if (!scalar(@$all_dbas)) {
-    $self->throw("No core databases found in the registry; please check your registry parameters.");
+  if (!scalar(@$all_dbas) && !scalar(@$all_compara_dbas)) {
+    $self->throw("No core databases or compara databases found in the registry; please check your registry parameters.");
   }
   
   if ($run_all) {
     %core_dbas = map {$_->species => $_} @$all_dbas;
     $self->warning(scalar(@$all_dbas)." species loaded");
+    %compara_dbas = map { $_->dbc->dbname => $_->species } @$all_compara_dbas;
     
   } elsif (scalar(@division)) {
     foreach my $division (@division) {
       $self->process_division($all_dbas, $division, \%core_dbas);
+      $self->process_division_compara( $all_compara_dbas, $division, \%compara_dbas );
     }
     
   } elsif (scalar(@species)) {
@@ -120,6 +129,8 @@ sub fetch_input {
   }
   
   $self->param('core_dbas', \%core_dbas);
+  $self->param( 'compara_dbas', \%compara_dbas );
+
 }
 
 sub process_division {
@@ -189,6 +200,7 @@ sub run {
   my $variation_flow  = $self->param('variation_flow');
   my $core_dbas       = $self->param('core_dbas');
   my $regulation_flow    = $self->param('regulation_flow');
+
   my ($chromosome_dbas, $variation_dbas, $regulation_dbas);
   
   if ($chromosome_flow || $variation_flow || $regulation_flow) {
@@ -250,6 +262,22 @@ sub has_regulation {
   return $dbva ? 1 : 0;
 }
 
+sub process_division_compara {
+  my ( $self, $all_compara_dbas, $division, $compara_dbs ) = @_;
+
+  foreach my $dba (@$all_compara_dbas) {
+    my $compara_div = $dba->species();
+    if ( $compara_div eq 'multi' ) {
+      $compara_div = 'ensembl';
+    }
+    if ( $compara_div eq $division ) {
+      $$compara_dbs{$dba->dbc->dbname} = $compara_div;
+      $self->warning("Added compara for $division");
+    }
+  }
+}
+
+
 sub write_output {
   my ($self) = @_;
   my $core_dbas       = $self->param('core_dbas');
@@ -257,6 +285,7 @@ sub write_output {
   my $variation_dbas  = $self->param('variation_dbas');
   my $regulation_dbas = $self->param('regulation_dbas');
   my $species_varname = $self->param_required('species_varname');
+  my $compara_dbas  = $self->param('compara_dbas');
   
   foreach my $species (sort keys %$core_dbas) {
     $self->dataflow_output_id({$species_varname => $species}, $self->param('core_flow'));
@@ -273,6 +302,11 @@ sub write_output {
   foreach my $species (sort keys %$regulation_dbas) {
     $self->dataflow_output_id({$species_varname => $species}, $self->param('regulation_flow'));
   }
+
+  foreach my $species (sort keys %$compara_dbas) {
+    $self->dataflow_output_id({$species_varname => $$compara_dbas{$species}}, $self->param('compara_flow'));
+  }
+
 
 }
 
