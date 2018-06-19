@@ -100,7 +100,7 @@ my $cli_helper = Bio::EnsEMBL::Utils::CliHelper->new();
 
 #### get the basic options for connecting to a database server
 
-my $optsd = [ @{ $cli_helper->get_dba_opts() }, @{ $cli_helper->get_dba_opts('tax') } ,"uniprot_file:s", "verbose", "results_file:s", "database_list_file:s" , "former_results_file:s"];
+my $optsd = [ @{ $cli_helper->get_dba_opts() }, @{ $cli_helper->get_dba_opts('tax') } ,"division:s", "uniprot_file:s", "verbose", "results_file:s", "database_list_file:s" , "former_results_file:s"];
 
 my $opts = $cli_helper->process_args( $optsd, \&pod2usage );
 
