@@ -23,7 +23,7 @@ use Log::Log4perl qw(:easy);
 use Bio::EnsEMBL::Registry;
 use Bio::EnsEMBL::DBEntry;
 use Bio::EnsEMBL::EGPipeline::Xref::BlastSearch;
-use Bio::EnsEMBL::EGPipeline::Xref::Needle;
+#use Bio::EnsEMBL::EGPipeline::Xref::Needle;
 use Bio::EnsEMBL::DBSQL::DBAdaptor;
 use Bio::EnsEMBL::LookUp::LocalLookUp;
 use Bio::EnsEMBL::DBSQL::TaxonomyNodeAdaptor;
@@ -74,7 +74,7 @@ sub find_translation {
 } ## end sub find_translation
 
 my $search = Bio::EnsEMBL::EGPipeline::Xref::BlastSearch->new();
-my $needle = Bio::EnsEMBL::EGPipeline::Xref::Needle->new();
+#my $needle = Bio::EnsEMBL::EGPipeline::Xref::Needle->new();
 
 sub get_uniprot_seq {
     my ($acc) = @_;
