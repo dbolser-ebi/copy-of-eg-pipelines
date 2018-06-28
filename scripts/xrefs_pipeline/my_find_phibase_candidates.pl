@@ -31,8 +31,6 @@ use Bio::Seq;
 
 #### Functions definition ###
 
-#sub trim { my $s = shift; $s =~ s/^_+|_+$//g; return $s };
-
 sub find_translation { # REVERTING THe ORDER OF THE SEARCHES DID'T SHOWED SIGNIFICANT TIME IMPROVEMENT
   my ( $dba, $acc, $locus, $gene_name ) = @_;
   my $translation;
@@ -202,7 +200,7 @@ foreach my $annotation ( @phibase_data ) {
   # Get all available genomes for a given taxon id
 
   print "\nProcessing $annotn_phi_entry :\n";
-  
+
   if ( $annotn_tax_id eq '' || ${$annotation}[0] < 0) {
     print "\tTax id is empty";
     next;
@@ -260,7 +258,6 @@ foreach my $annotation ( @phibase_data ) {
 
           print "\t\tGot uniprot/uniparc accession: \n";
           print Dumper($uniprots->{$annotn_acc});
-          my @translations;
 
           if ($uniprots->{$annotn_acc}->{seq} ne '') {
             print "Proceeding with BLAST search \n";
@@ -332,11 +329,3 @@ close $output;
 print "\n";
 print "Total number of annotations with no species equivalent in Ensembl: " . $count_phi_zero_dbs . "\n";
 print "Total number of annotations with too many species equivalent in Ensembl: " . $count_phi_many_dbs . "\n";
-
-print "Execution time: $duration s\n";
-
-
-
-
-
-
