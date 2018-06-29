@@ -32,15 +32,15 @@ use Bio::Seq;
 #### Functions definition ###
 
 sub find_translation { # REVERTING THe ORDER OF THE SEARCHES DID'T SHOWED SIGNIFICANT TIME IMPROVEMENT
-  my ( $dba, $acc, $locus, $gene_name ) = @_;
+  my ( $dba, $uniprot_acc, $locus_tag, $gene_name ) = @_;
   my $translation;
   my $identifier_type;
   my $dbentry_adaptor = $dba->get_adaptor("DBEntry");
-  my @transcripts_ids = $dbentry_adaptor->list_transcript_ids_by_extids($acc);
-  my @gene_ids = $dbentry_adaptor->list_gene_ids_by_extids($acc);
+  my @transcripts_ids = $dbentry_adaptor->list_transcript_ids_by_extids($uniprot_acc);
+  my @gene_ids = $dbentry_adaptor->list_gene_ids_by_extids($uniprot_acc);
 
   if ( scalar(@gene_ids) == 0 ) {
-    @gene_ids = $dbentry_adaptor->list_gene_ids_by_extids($locus);
+    @gene_ids = $dbentry_adaptor->list_gene_ids_by_extids($locus_tag);
     $identifier_type = 'locus';
   }
   if ( scalar(@gene_ids) == 0 ) {
@@ -188,13 +188,13 @@ foreach my $annotation ( @phibase_data ) {
   my $annotn_tax_id = ${$annotation}[6];
   my $annotn_phi_entry = ${$annotation}[1];#PHI-base entry
   my $annotn_pathogene_specie = ${$annotation}[8];
-  my $annotn_acc = ${$annotation}[2];#Uniprot protein id
+  my $annotn_uniprot_acc = ${$annotation}[2];#Uniprot protein id
   my $annotn_gene_name = ${$annotation}[3];#gene name
   my $annotn_locus = ${$annotation}[4];#gene_id
 
   my $result_line = join(',', @{$annotation});
 
-  # print "\nANNOTATION:\n" . $annotn_phi_entry . "\nuniprot accession:" . $annotn_acc . "\nphi_base _gene_name:" . $annotn_gene_name .  "\ngene_locus_id:"
+  # print "\nANNOTATION:\n" . $annotn_phi_entry . "\nuniprot accession:" . $annotn_uniprot_acc . "\nphi_base _gene_name:" . $annotn_gene_name .  "\ngene_locus_id:"
   #  . $annotn_locus . "\npathogen_species_taxon_id:" . $annotn_tax_id . "\npathogen_taxon_name_ncbi:" . $annotn_pathogene_specie . "\n******\n";
 
   # Get all available genomes for a given taxon id
@@ -230,7 +230,7 @@ foreach my $annotation ( @phibase_data ) {
 
       if ( $division eq $opts->{division} ) {
         print "\tFound genome for species " . $branch_species . " in " . $brch_db->dbc()->dbname() . "/" . $brch_db->species_id ."\n";
-        ( my $translation , my $id_type ) = find_translation( $brch_db, $annotn_acc, $annotn_locus, $annotn_gene_name );
+        ( my $translation , my $id_type ) = find_translation( $brch_db, $annotn_uniprot_acc, $annotn_locus, $annotn_gene_name );
 
         if ($translation) {
           print "\t\tFound gene on ensembl: \n";
@@ -245,23 +245,22 @@ foreach my $annotation ( @phibase_data ) {
         } else {
           print "\t\tDidn't find direct match on Ensembl \n";
           eval {
-            my $up = get_uniprot_seq($annotn_acc);
-            $uniprots->{$annotn_acc} = $up;
+            my $up = get_uniprot_seq($annotn_uniprot_acc);
+            $uniprots->{$annotn_uniprot_acc} = $up;
             $id_type = 'uniprot';
           };
-          if($@ || $uniprots->{$annotn_acc}->{seq} eq '') {
-            print "Could not find entry : " . $annotn_acc;
-            my $up = get_uniparc_seq($annotn_acc);
-            $uniprots->{$annotn_acc} = $up;
+          if($@ || $uniprots->{$annotn_uniprot_acc}->{seq} eq '') {
+            print "Could not find entry : " . $annotn_uniprot_acc;
+            my $up = get_uniparc_seq($annotn_uniprot_acc);
+            $uniprots->{$annotn_uniprot_acc} = $up;
             $id_type = 'uniparc';
           }
 
           print "\t\tGot uniprot/uniparc accession: \n";
-          print Dumper($uniprots->{$annotn_acc});
+          print Dumper($uniprots->{$annotn_uniprot_acc});
 
-          if ($uniprots->{$annotn_acc}->{seq} ne '') {
+          if ($uniprots->{$annotn_uniprot_acc}->{seq} ne '') {
             print "Proceeding with BLAST search \n";
-            my $branch_species = $mc->single_value_by_key('species.production_name');
             my $blast_db_dir = $opts->{blast_db_dir};
 
             # Create BLAST DB for this specie
@@ -293,9 +292,9 @@ foreach my $annotation ( @phibase_data ) {
 
             print "BLAST database created for branch_species in $blast_database\n";
 
-            my $query   = Bio::Seq->new( -display_id => $annotn_acc, -seq =>  $uniprots->{$annotn_acc}->{seq} );
+            my $query   = Bio::Seq->new( -display_id => $annotn_uniprot_acc, -seq =>  $uniprots->{$annotn_uniprot_acc}->{seq} );
             my $results = $fac->blastp( -query => $query, -method_args => [ -num_alignments => 1 ]);               
-            my $query_length = length($uniprots->{$annotn_acc}->{seq});
+            my $query_length = length($uniprots->{$annotn_uniprot_acc}->{seq});
             my $hit = $results->next_hit();
             my $hit_length = $hit->length();
             my $translation_stable_id = $hit->name();
