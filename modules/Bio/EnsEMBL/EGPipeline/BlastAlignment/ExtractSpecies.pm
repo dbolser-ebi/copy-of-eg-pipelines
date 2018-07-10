@@ -53,7 +53,7 @@ sub fetch_input {
   my $fasta_file     = $self->param_required('fasta_file');
   my $species        = $self->param('species');
   my $source_species = $self->param('source_species');
-
+ 
   if (! defined $source_species) {
     if (! defined $species) {
       $self->throw('-species or -source_species parameter is required');
@@ -66,18 +66,20 @@ sub fetch_input {
   (my $output_file = $fasta_file) =~ s/(\.\w+)$/_$source_species$1/;
   
 
-  my $trinomial_rex = qr/[A-Z]{1}[a-z]+\s[a-z]+\s[a-z]+/;
+  my $trinomial_rex = qr/[A-Z]{1}[a-z]+\s[a-z]+\s[a-z0-9]+/;
   my $binomial_rex  = qr/[A-Z]{1}[a-z]+\s[a-z]+/;
 
   my $trinomial_name;
   my $binomial_name;
-  if($source_species=~m/([a-z]+_[a-z]+)_[a-z]+/){
+  if($source_species=~m/^([a-z]+_[a-z]+)_[a-z0-9]+$/){
 	$trinomial_name = $source_species;
 	$binomial_name  = $1;
 	$trinomial_name=~s/_/ /g;
 	$trinomial_name = ucfirst($trinomial_name);
-  }elsif($source_species=~m/([a-z]+_[a-z]+)/){
+  }elsif($source_species=~m/^([a-z]+_[a-z]+)$/){
 	$binomial_name  = $1;
+  }else{
+  	  $self->throw("Naming pattern was not recognised, you must specify a new pattern for the code to work.");
   }
 
   $binomial_name=~s/_/ /g;
@@ -159,9 +161,9 @@ sub parse_uniprot {
 	  }
   }elsif($full_desc=~/OS=$trinomial_rex\sOX/){
   	  if($full_desc=~m/OS=$binomial_name/){
-  	  	  #my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
-  	  	  #$inseq->desc(join('|', map { $_ || '' } ($inseq->display_id(), $desc, $version)));
-  	  	  #$seq_out->write_seq($inseq);
+  	  	  #IF you wish descriptions with trinomial names in the heading, 
+  	  	  #to be added to species with binomial name, please add code below.
+  	  	  
 	  }
   }elsif($full_desc=~m/OS=$binomial_rex\sOX/){
   	  if($full_desc=~m/OS=$binomial_name\sOX/){
