@@ -28,12 +28,14 @@ sub param_defaults {
     'repeatmasker'   => 1,
     'trf'            => 1,
     'max_seq_length' => 1000000,
+    'species_list'   => [],
   };
 }
 
 sub run {
   my ($self) = @_;
-  my $species = $self->param_required('species');
+  my $species = $self->param('species');
+  my $species_list = $self->param_required('species_list');
   my $dna_analyses = $self->param_required('dna_analyses');
   my $always_use_repbase = $self->param_required('always_use_repbase');
   my $rm_library = $self->param_required('rm_library');
@@ -42,8 +44,12 @@ sub run {
   my $pipeline_dir = $self->param_required('pipeline_dir');
   my $db_backup_file = $self->param('db_backup_file');
   
-  # RepeatMasker requires a species name with a space.
-  (my $species_rm = ucfirst($species)) =~ s/_/ /;
+  # More than one species implies a collection db, and we cannot 
+  # do anything species-specific.
+  my $species_specific = 1;
+  if (scalar(@$species_list) > 1 || ! defined $species) {
+    $species_specific = 0;
+  }
   
   my $filtered_analyses = [];
   foreach my $analysis (@{$dna_analyses}) {
@@ -56,24 +62,36 @@ sub run {
       if ($self->param('repeatmasker')) {
         # This is analysis with the repbase library. If the sensitivity is
         # given then use that setting, otherwise the default is 'medium'.
+        my $sensitivity = 'automatic';
         
-        if ($always_use_repbase || (! exists $$rm_library{$species} && ! exists $$rm_library{'all'})) {
-          if ($self->check_repeatmasker($analysis, $species_rm, $pipeline_dir)) {
-            $$analysis{'parameters'} .= " -species \"$species_rm\" ";
-          }
+        if ($species_specific) {
+          # RepeatMasker requires a species name with a space.
+          (my $species_rm = ucfirst($species)) =~ s/_/ /;
+        
+          if ($always_use_repbase || (! exists $$rm_library{$species} && ! exists $$rm_library{'all'})) {
+            if ($self->check_repeatmasker($analysis, $species_rm, $pipeline_dir)) {
+              $$analysis{'parameters'} .= " -species \"$species_rm\" ";
+            }
           
-          my $sensitivity = 'automatic';
-          if (exists $$rm_sensitivity{$species} || exists $$rm_sensitivity{'all'}) {
-            $sensitivity = $$rm_sensitivity{$species} || $$rm_sensitivity{'all'};
+            if (exists $$rm_sensitivity{$species} || exists $$rm_sensitivity{'all'}) {
+              $sensitivity = $$rm_sensitivity{$species} || $$rm_sensitivity{'all'};
+            }
           }
-          if ($sensitivity =~ /^automatic$/i) {
-            $sensitivity = 'medium';
+        } else {
+          if ($always_use_repbase || (! exists $$rm_library{'all'})) {
+            if (exists $$rm_sensitivity{'all'}) {
+              $sensitivity = $$rm_sensitivity{'all'};
+            }
           }
-          $self->warning("Sensitivity for $species set to $sensitivity for RepBase library");
-          $$analysis{'parameters'} .= $self->rm_engine_params($sensitivity);
-          
-          push @$filtered_analyses, $analysis;
         }
+        
+        if ($sensitivity =~ /^automatic$/i) {
+          $sensitivity = 'medium';
+        }
+        $self->warning("Sensitivity set to $sensitivity for RepBase library");
+        $$analysis{'parameters'} .= $self->rm_engine_params($sensitivity);
+          
+        push @$filtered_analyses, $analysis;
       }
       
     } elsif ($logic_name eq 'repeatmask_customlib') {
@@ -131,6 +149,14 @@ sub write_output {
   my ($self) = @_;
   
   $self->dataflow_output_id($self->param('filtered_analyses'), 2);
+  
+}
+
+sub repeatmasker_species {
+  
+}
+
+sub repeatmasker_generic {
   
 }
 

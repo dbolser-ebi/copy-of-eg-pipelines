@@ -42,22 +42,33 @@ use base ('Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EmailReport');
 
 sub fetch_input {
   my ($self) = @_;
-  my $species = $self->param_required('species');
+  my $species = $self->param('species');
+  my $species_list = $self->param_required('species_list');
   
-  my $dbh = $self->core_dbh();
-  
-  my $seq_region_length_sql = '
-    SELECT sum(length) FROM
-      seq_region INNER JOIN
-      seq_region_attrib USING (seq_region_id) INNER JOIN
-      attrib_type USING (attrib_type_id)
-    WHERE code = "toplevel"
-  ;';
-  my ($seq_region_length) = $dbh->selectrow_array($seq_region_length_sql);
-  
-  my $reports = $self->text_summary($dbh, $seq_region_length);
-  $reports .= $self->report_one($dbh, $seq_region_length);
-  $reports .= $self->report_two($dbh, $seq_region_length);
+  my $species_specific = 1;
+  if (scalar(@$species_list) > 1 || ! defined $species) {
+    $species_specific = 0;
+  }
+
+  my $reports = '';
+  if ($species_specific) {
+    my $dbh = $self->core_dbh();
+    
+    my $seq_region_length_sql = '
+      SELECT sum(length) FROM
+        seq_region INNER JOIN
+        seq_region_attrib USING (seq_region_id) INNER JOIN
+        attrib_type USING (attrib_type_id)
+      WHERE code = "toplevel"
+    ;';
+    my ($seq_region_length) = $dbh->selectrow_array($seq_region_length_sql);
+    
+    $reports .= $self->text_summary($dbh, $seq_region_length);
+    $reports .= $self->report_one($dbh, $seq_region_length);
+    $reports .= $self->report_two($dbh, $seq_region_length);
+  } else {
+    $reports .= "(Reports not calculated for collection databases)"
+  }
   
   $self->param('text', $reports);
 }

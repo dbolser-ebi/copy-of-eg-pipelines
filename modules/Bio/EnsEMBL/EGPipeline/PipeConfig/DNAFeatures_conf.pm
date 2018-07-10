@@ -52,10 +52,12 @@ sub default_options {
 
     pipeline_name => 'dna_features_'.$self->o('ensembl_release'),
 
-    species => [],
-    antispecies => [],
-    division => [],
-    run_all => 0,
+    species      => [],
+    antispecies  => [],
+    taxons       => [],
+    antitaxons   => [],
+    division     => [],
+    run_all      => 0,
     meta_filters => {},
 
     # Parameters for dumping and splitting Fasta DNA files.
@@ -227,18 +229,17 @@ sub pipeline_analyses {
 
   return [
     {
-      -logic_name        => 'SpeciesFactory',
-      -module            => 'Bio::EnsEMBL::EGPipeline::Common::RunnableDB::EGSpeciesFactory',
+      -logic_name        => 'DBFactory',
+      -module            => 'Bio::EnsEMBL::Production::Pipeline::Common::DbFactory',
       -max_retry_count   => 1,
       -parameters        => {
                               species         => $self->o('species'),
                               antispecies     => $self->o('antispecies'),
+                              taxons          => $self->o('taxons'),
+                              antitaxons      => $self->o('antitaxons'),
                               division        => $self->o('division'),
                               run_all         => $self->o('run_all'),
                               meta_filters    => $self->o('meta_filters'),
-                              chromosome_flow => 0,
-                              regulation_flow => 0,
-                              variation_flow  => 0,
                             },
       -input_ids         => [ {} ],
       -flow_into         => {
@@ -254,12 +255,12 @@ sub pipeline_analyses {
       -analysis_capacity => 5,
       -max_retry_count   => 1,
       -parameters        => {
-                              output_file => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              output_file => catdir($self->o('pipeline_dir'), '#dbname#_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
       -flow_into         => {
                               '1->A' => ['DNAAnalysisFactory'],
-                              'A->1' => ['DumpGenome'],
+                              'A->1' => ['DbAwareSpeciesFactory'],
                             },
     },
 
@@ -280,7 +281,7 @@ sub pipeline_analyses {
                               rm_sensitivity     => $self->o('repeatmasker_sensitivity'),
                               rm_logic_name      => $self->o('repeatmasker_logic_name'),
                               pipeline_dir       => $self->o('pipeline_dir'),
-                              db_backup_file     => catdir($self->o('pipeline_dir'), '#species#', 'pre_pipeline_bkp.sql.gz'),
+                              db_backup_file     => catdir($self->o('pipeline_dir'), '#dbname#_bkp.sql.gz'),
                             },
       -rc_name           => 'normal',
       -flow_into         => {
@@ -319,6 +320,17 @@ sub pipeline_analyses {
                               ]
                             },
       -meadow_type       => 'LOCAL',
+    },
+
+    {
+      -logic_name        => 'DbAwareSpeciesFactory',
+      -module            => 'Bio::EnsEMBL::Production::Pipeline::Common::DbAwareSpeciesFactory',
+      -max_retry_count   => 1,
+      -parameters        => {},
+      -rc_name           => 'normal',
+      -flow_into         => {
+                              '2' => ['DumpGenome'],
+                            },
     },
 
     {
@@ -444,7 +456,7 @@ sub pipeline_analyses {
       -analysis_capacity => 10,
       -parameters        => {
                               email   => $self->o('email'),
-                              subject => 'DNA features pipeline: Repeat report for #species#',
+                              subject => 'DNA features pipeline: Repeat report for #dbname#',
                             },
       -rc_name           => 'normal',
     }
