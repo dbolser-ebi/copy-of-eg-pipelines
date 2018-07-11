@@ -77,6 +77,8 @@ sub qc {
   $self->run_test_set($self->dump_dir) if $has_var && $type ne 'refseq';
 
   rmtree($qc_dir);
+  my @report_files = ();
+  return \@report_files;
 }
 
 1;
