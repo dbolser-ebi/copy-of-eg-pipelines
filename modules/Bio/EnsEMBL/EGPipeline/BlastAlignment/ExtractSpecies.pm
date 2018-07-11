@@ -53,7 +53,7 @@ sub fetch_input {
   my $fasta_file     = $self->param_required('fasta_file');
   my $species        = $self->param('species');
   my $source_species = $self->param('source_species');
-
+ 
   if (! defined $source_species) {
     if (! defined $species) {
       $self->throw('-species or -source_species parameter is required');
@@ -65,10 +65,30 @@ sub fetch_input {
 
   (my $output_file = $fasta_file) =~ s/(\.\w+)$/_$source_species$1/;
   
-  $source_species =~ s/_/ /g;
-  $source_species =~ s/[A-Z]//g;
-  $source_species = ucfirst($source_species);
-  $self->param('formatted_species', $source_species);
+
+  my $trinomial_rex = qr/[A-Z]{1}[a-z]+\s[a-z]+\s[a-z0-9]+/;
+  my $binomial_rex  = qr/[A-Z]{1}[a-z]+\s[a-z]+/;
+
+  my $trinomial_name;
+  my $binomial_name;
+  if($source_species=~m/^([a-z]+_[a-z]+)_[a-z0-9]+$/){
+	$trinomial_name = $source_species;
+	$binomial_name  = $1;
+	$trinomial_name=~s/_/ /g;
+	$trinomial_name = ucfirst($trinomial_name);
+  }elsif($source_species=~m/^([a-z]+_[a-z]+)$/){
+	$binomial_name  = $1;
+  }else{
+  	  $self->throw("Naming pattern was not recognised, you must specify a new pattern for the code to work.");
+  }
+
+  $binomial_name=~s/_/ /g;
+  $binomial_name  = ucfirst($binomial_name);
+  
+  $self->param('trinomial_rex', $trinomial_rex);
+  $self->param('binomial_rex', $binomial_rex);
+  $self->param('trinomial_name', $trinomial_name);
+  $self->param('binomial_name', $binomial_name);
 
   $self->param('output_file', $output_file);
 }
@@ -77,7 +97,6 @@ sub run {
   my ($self) = @_;
   my $fasta_file        = $self->param_required('fasta_file');
   my $output_file       = $self->param_required('output_file');
-  my $formatted_species = $self->param_required('formatted_species');
   my $data_source       = $self->param_required('data_source');
   my $data_type         = $self->param_required('data_type');
   
@@ -94,9 +113,9 @@ sub run {
 
   while (my $inseq = $seq_in->next_seq) {
     if ($data_source eq 'uniprot') {
-      $self->parse_uniprot($formatted_species, $seq_out, $inseq);
+      $self->parse_uniprot($seq_out, $inseq);
     } elsif ($data_source eq 'refseq') {
-      $self->parse_refseq($formatted_species, $data_type, $seq_out, $inseq);
+      $self->parse_refseq($data_type, $seq_out, $inseq);
     }
   }
 }
@@ -115,7 +134,13 @@ sub write_output {
 }
 
 sub parse_uniprot {
-  my ($self, $species, $seq_out, $inseq) = @_;
+  my ($self, $seq_out, $inseq) = @_;
+  my $trinomial_rex  = $self->param('trinomial_rex');
+  my $binomial_rex   = $self->param('binomial_rex');
+  my $trinomial_name = $self->param('trinomial_name');
+  my $binomial_name  = $self->param('binomial_name');
+  
+  #warn "$trinomial_name:$binomial_name";
   my $full_desc = $inseq->desc;
   
   # Some 'descriptions' have "OS=<species>" embedded within them,
@@ -128,18 +153,31 @@ sub parse_uniprot {
     $self->throw("More than two 'OS=' sections in description: $full_desc");
   }
   
-  if ($full_desc =~ /OS=$species/) {
-    my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
-    $inseq->desc(join('|', map { $_ || '' } ($inseq->display_id(), $desc, $version)));
-
-    $seq_out->write_seq($inseq);
+  if($full_desc=~m/OS=$trinomial_rex\sOX/ and $trinomial_name){
+  	  if($full_desc=~m/OS=$trinomial_name\sOX/){
+  	  	  my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
+  	  	  $inseq->desc(join('|', map { $_ || '' } ($inseq->display_id(), $desc, $version)));
+  	  	  $seq_out->write_seq($inseq);
+	  }
+  }elsif($full_desc=~/OS=$trinomial_rex\sOX/){
+  	  if($full_desc=~m/OS=$binomial_name/){
+  	  	  #IF you wish descriptions with trinomial names in the heading, 
+  	  	  #to be added to species with binomial name, please add code below.
+  	  	  
+	  }
+  }elsif($full_desc=~m/OS=$binomial_rex\sOX/){
+  	  if($full_desc=~m/OS=$binomial_name\sOX/){
+  	  	  my ($desc, $version) = $full_desc =~ /^(.*)\s+OS=.*SV=(\d+)/;
+  	  	  $inseq->desc(join('|', map { $_ || '' } ($inseq->display_id(), $desc, $version)));
+  	  	  $seq_out->write_seq($inseq);
+	  }
   }
 }
 
 sub parse_refseq {
-  my ($self, $species, $data_type, $seq_out, $inseq) = @_;
+  my ($self, $data_type, $seq_out, $inseq) = @_;
   
-  if ($self->species_match($inseq->desc, $species, $data_type)) {
+  if ($self->species_match($inseq->desc, $data_type)) {
     my ($primary_id, $version) = $inseq->display_id =~ /(\w+)\.(\d+)|[^\|]+$/;
     $inseq->display_id("$primary_id.$version");
     
@@ -152,12 +190,41 @@ sub parse_refseq {
 }
 
 sub species_match {
-  my ($self, $desc, $species, $data_type) = @_;
+  my ($self, $desc, $data_type) = @_;
 
+  my $trinomial_rex  = $self->param('trinomial_rex');
+  my $binomial_rex   = $self->param('binomial_rex');
+  my $trinomial_name = $self->param('trinomial_name');
+  my $binomial_name  = $self->param('binomial_name');
+  
   if ($data_type eq 'pep') {
-    return $desc =~ /\[$species\]/;
+	  if($desc=~m/\[$trinomial_rex\]/ and $trinomial_name){
+		  if($desc=~m/\[$trinomial_name\]/){
+			return 1; 
+		  }
+	  }elsif($desc=~/\[$trinomial_rex\]/){
+		  if($desc=~m/\[$binomial_name\]/){
+			return 0; 
+		  }
+	  }elsif($desc=~m/\[$binomial_rex\]/){
+		  if($desc=~m/\[$binomial_name\]/){
+			 return 1; 
+		  }
+	  }
   } else {
-    return $desc =~ /^$species/;
+    	  if($desc=~m/^$trinomial_rex/ and $trinomial_name){
+		  if($desc=~m/^$trinomial_name/){
+			return 1; 
+		  }
+	  }elsif($desc=~/^$trinomial_rex/){
+		  if($desc=~m/^$binomial_name/){
+			return 0; 
+		  }
+	  }elsif($desc=~m/^$binomial_rex/){
+		  if($desc=~m/^$binomial_name/){
+			 return 1; 
+		  }
+	  }
   }
 }
 
