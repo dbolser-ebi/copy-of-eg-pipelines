@@ -110,22 +110,27 @@ sub default_options_generic {
     # Lists of the types that we expect to see in the GFF3 file.
     gene_types   => ['gene', 'pseudogene', 'miRNA_gene', 'ncRNA_gene',
                      'rRNA_gene', 'snoRNA_gene', 'snRNA_gene', 'tRNA_gene' ],
+
     mrna_types   => ['mRNA', 'transcript', 'pseudogenic_transcript',
-                     'pseudogenic_rRNA', 'pseudogenic_tRNA',
-                     'ncRNA', 'lincRNA', 'lncRNA', 'miRNA', 'pre_miRNA',
-                     'RNase_MRP_RNA', 'RNAse_P_RNA', 'rRNA', 'snoRNA',
-                     'snRNA', 'sRNA', 'SRP_RNA', 'tRNA'],
+                     'pseudogenic_rRNA', 'pseudogenic_tRNA', 'ncRNA',
+                     'lincRNA', 'lncRNA', 'lnc_rna', 'miRNA',
+                     'pre_miRNA', 'RNase_MRP_RNA', 'RNAse_P_RNA',
+                     'rRNA', 'snoRNA', 'snRNA', 'sRNA', 'SRP_RNA',
+                     'tRNA'],
+
     exon_types   => ['exon', 'pseudogenic_exon'],
+
     cds_types    => ['CDS'],
+
     utr_types    => ['five_prime_UTR', 'three_prime_UTR'],
-    ignore_types => ['misc_RNA', 'RNA',
-                     'match', 'match_part',
-                     'cDNA_match', 'nucleotide_match', 'protein_match',
-                     'polypeptide', 'protein',
-                     'chromosome', 'supercontig', 'contig',
-                     'region', 'biological_region',
-                     'regulatory_region', 'repeat_region'],
-    
+
+    ignore_types => ['misc_RNA', 'RNA', 'match', 'match_part',
+                     'cDNA_match', 'nucleotide_match',
+                     'protein_match', 'polypeptide', 'protein',
+                     'chromosome', 'supercontig', 'contig', 'region',
+                     'biological_region', 'regulatory_region',
+                     'repeat_region', 'intron', 'sequence_feature'],
+
     # By default, it is assumed that the above type lists are exhaustive.
     # If there is a type in the GFF3 that is not listed, an error will be
     # thrown, unless 'types_complete' = 0.
